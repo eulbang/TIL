@@ -29,14 +29,34 @@
     - 해당 폴더 삭제 시 git 내역 삭제
 2. git add : 변경사항이 있는 파일을 staging area에 추가
     - git add 파일의경로 : git의 root 부터 경로(00_startCamp/01_git/markdown.md)
+    - 잘못 추가했을 경우 git restore --staged filename
+    - **git add . : 현재 위치 기준으로 전체 내용 등록 가능**
 3. git commit : staging area에 있는 파일들을 Repository에 기록
     - git commit -m "message" : 기록과 함께 메모
 4. git config --global user.email "chl984@naver.com"
     - git config --global user.name "Name"
     - 현재 사용자가 누구인지 전역에 설정
+        - 필요 시 global 대신 local 가능
     - code ~/.gitconfig 경로에 저장됨
 5. git log : commit 과정을 보여줌
     - Author, Date, message
-- 저장연습
+6. git remote add origin https~ : 원격 저장소를 origin 으로 부를 수 있도록 추가함
+    - gir remote -v : 추가가 정상적으로 됐는지 확인
+7. git push -u origin master : 로컬의 브랜치를 origin 에 master 가 작업한 것을 넣는다
+    - 이후부턴 git push 만으로 작동 가능하다
+    - **git push origin master 추천**
+## Remote Repository
+- 원격 저장소
+    - 코드와 버전 관리 이력을 온라인 상의 특정 위치에 저장하여 여러 개발자가 협업하고 코드를 공유할 수 있는 저장 공간
+1. **GitLab**
+    - private 한 공간
+    - 수업용
+2. GitHub
+    - public 한 공간
+    - 포폴용
+## TIL
+- Today I Learned
+- GitHub로 관리
+
 ---
 - 죄측 Sourse Control 에서 시각적으로 확인 가능
