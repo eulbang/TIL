@@ -1,0 +1,48 @@
+# Python
+#### Python을 배우는 이유
+- 쉽고 간결한 문법
+- 파이썬 커뮤니티의 지원
+- 광범위한 응용 분야
+- 3.11 버전의 경우 인공지능 등 여러 오픈소스에서 사용 중
+#### Python의 데이터 분석 활용
+- 풍부한 라이브러리
+    - pandas, numpy, matplotlib  등 데이터 분석에 최적화된 라이브러리를 제공
+- 데이터 처리 및 시각화
+- 머신러닝 및 인공지능
+    - scikit-learn, tensorfolw, keras 등의 라이브러리를 통해 머신러닝과 딥러닝 무델을 구현할 수 있음
+#### 알고리즘 구현에 유리한 Python
+- 직관적인 문법
+- 강력한 표준 라이브러리
+- 빠른 프로토타이핑
+## Data types
+- Data types
+- Numeric Types
+- Sequence Types
+- Non-Sequence Types
+- Other Types
+- 복사
+- Type Conversion
+## Operator
+- 기본 연산자
+- 단축평가
+- 멤버십 연산자
+- 시퀀스형 연산자
+## Control of flow
+- 제어문
+- 조건문
+- 반복문
+- List Comprehension
+## Functions
+- 함수
+- 매개변수와 인자
+- Packing $ Unpacking
+- 내장 함수
+- 람다 표현식
+### 참고
+- Style Guide
+- Python Tutor
+- Collection
+- 불변과 가변
+- enumerate
+- 함수와 scope
+- global 키워드
