@@ -16,6 +16,11 @@
     }
 
     .book-container {
+      display: inline-block;  /* 한 줄에 여러개의 카드 */
+      box-sizing: border-box;  /* padding 포함하여 카드 너비 유지 */
+      width: 300px;  /* 카드의 너비 300px */
+      padding: 20px;  /* 테두리를 기준으로 20px 여백 공간 */
+      margin: 10px;  /* 카드 간 상하좌우 10px 여백 공간*/
       background-color: #fff;
       border-radius: 5px;
       box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
