@@ -1,0 +1,41 @@
+<!--
+문제
+JavaScript 기초 문법을 연습하기 위해 코드를 작성하였으나, 정상적으로 console 창에 출력되지 않는다. 요구 사항을 만족하도록 코드를 수정하시오.
+요구사항
+변수 name 의 값에 새로운 값을 재 할당 할 수 있도록 변수 선언 방식을 변경하시오.
+조건문이 name이 '김철수', age가 30일때 작동 하도록 비교 연산자와 일치 연산자를 수정하시오.
+if 문이 정상 작동 할 수 있도록 수정하시오.
+if문의 조건이 true라면, string interpolation을 활용하여 김철수의 나이는 30살 입니다.가 출력되도록 수정하시오.
+
+if문 안에서 작성한 new_age 변수를 찾을 수 없다.
+변수 선언과 값 할당 방식은 유지하되, 적절한 위치에 올 수 있도록 수정하시오.
+변수 선언 위치를 바꾸거나, console.log 호출 위치를 바꾸거나 자유롭게 구성
+
+실행 결과는 첨부된 result 폴더의 이미지를 참고한다.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+    let name = '홍길동'
+    const age = 30
+    name = '김철수'
+    let new_age = age
+
+    console.log(name)
+
+    if (name === '김철수' && age === 30) {
+      console.log(`${name}의 나이는 ${age}살 입니다.`)
+			new_age = age 
+      new_age += 1
+    }
+    console.log(`1년이 지나 이제 ${name}는/은 ${new_age}살이 되었습니다.`)
+  </script>
+</body>
+</html>

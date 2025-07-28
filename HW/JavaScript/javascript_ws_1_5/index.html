@@ -1,0 +1,57 @@
+<!--
+문제
+주어진 코드를 활용하여, 각 도시의 정보를 출력하시오. 
+요구사항
+각 도시의 정보를 담은 배열 citiesInfo가 주어진다.
+배열 citiesInfo를 순회하여 각 도시 정보 city를 얻는다.
+각 도시 정보를 담은 객체 city를 순회하여 모든 키와 밸류를 출력한다.
+키값이 city 인 경우, 수도 로 변경하여 출력한다.
+키 값으로 얻은 값의 타입 배열인 경우, 배열의 마지막 요소만 출력한다. (배열의 길이는 모두 동일하다.)
+출력 결과를 구분지을 수 있도록 각 도시별 순회가 종료되는 시점에 빈 문자열을 출력한다.
+
+실행 결과는 첨부된 result 폴더의 이미지를 참고한다.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+    const citiesInfo = [
+      {
+        city: '서울',
+        utcOffset: ['한국 표준시', 'KST', 'UTC+9'],
+        latitude: 37,
+        longitude: 126
+      },
+      {
+        city: '도쿄',
+        utcOffset: ['일본 표준시', 'JST', 'UTC+9'],
+        latitude: 35,
+        longitude: 139
+      },
+      {
+        city: '상하이',
+        utcOffset: ['중국 표준시', 'CST', 'UTC+8'],
+        latitude: 31,
+        longitude: 121
+      }
+    ]
+    for (const i of citiesInfo) {
+      for (const j in i) {
+        if(j==='city') {
+          console.log(`수도 : ${i[j]}`)
+        } else if (Array.isArray(i[j])) {
+          console.log(`${j} : ${i[j][i[j].length-1]}`)
+        } else {
+          console.log(`${j} : ${i[j]}`)
+        }
+      }
+    }
+  </script>
+</body>
+</html>

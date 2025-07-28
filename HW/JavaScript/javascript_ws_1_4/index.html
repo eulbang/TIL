@@ -1,0 +1,56 @@
+<!--
+문제
+JavaScript의 제어문을 연습하고자 한다. 요구사항을 만족하는 코드를 작성하시오.
+요구사항
+길이가 동일한 두 배열 roles와 names가 주어진다.
+
+주어진 배열 roles 혹은 names의 길이를 length 변수에 담기위해 for .. of 문을 사용하는 코드를 작성한다.
+
+전체 길이를 담은 length를 활용하여 배열을 index 순으로 순회하는 코드를 작성한다.
+
+주어진 역할 (role)에 따라 각각 다른 내용을 출력하도록 한다.
+주어진 역할이 '주연배우'인 경우,
+같은 인덱스의 이름을 아래와 같이 출력한다.
+출력 예) 주연배우 : 홍길동 님 반갑습니다!
+
+주어진 역할이 '조연배우'인 경우,
+같은 인덱스의 이름을 아래와 같이 출력한다.
+출력 예) 이춘향 님 환영합니다!
+
+주어진 역할이 '우정출연'인 경우,
+같은 인덱스의 이름을 아래와 같이 출력한다.
+출력 예) 장보고 님 와 주셔서 감사합니다!
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+<body>
+  <script>
+    const roles = ['주연배우', '조연배우', '주연배우', '우정출연', '우정출연', '조연배우']
+    const names = ['홍길동', '이춘향', '금나래', '장보고', '임꺽정', '강감찬']
+
+    let length = 0
+    for (const element of roles) {
+      length++
+    }
+
+    let count = 0
+    while (count<length) {
+      if(roles[count]==='주연배우') {
+        console.log(`${names[count]} 님 반갑습니다!`)
+      } else if (roles[count]==='조연배우') {
+        console.log(`${names[count]} 님 환영합니다!`)
+      } else {
+        console.log(`${names[count]} 님 와 주셔서 감사합니다!`)
+      }
+      count++
+    }
+
+  </script>
+</body>
+</html>
