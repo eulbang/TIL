@@ -1,0 +1,40 @@
+<!--
+문제
+JavaScript의 반복문과 제어문을 연습하고자 한다. 요구 사항을 만족하는 코드를 작성하시오.
+요구사항
+주어진 배열 studentNames만을 순회하여 실행결과 이미지와 일치하도록 출력하시오.
+객체 studentAges에서 속성의 값이 50 이상인 경우만 출력하시오.
+객체 studentAges를 순회하지 않도록 주의하시오.
+for ... of 문을 사용한다.
+혹은 for ... 문을 사용할 수도 있다.
+
+실행 결과는 첨부된 result 폴더의 이미지를 참고한다.
+-->
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+</head>
+
+<body>
+  <script>
+    const studentNames = ['John', 'Alice', 'Bob']
+    const studentAges = {
+      John: 50,
+      Alice: 100,
+      Bob: 25
+    }
+    // 아래에 코드 작성
+    for (let student of studentNames) {
+      if (studentAges[student]>=50) {
+        console.log(`${student}: ${studentAges[student]}`)
+      }
+    }
+  </script>
+</body>
+
+</html>
