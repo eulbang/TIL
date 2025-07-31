@@ -10,12 +10,12 @@ def fibonacci_for_loop(n):
     else:
         # 내 이전의 두 항의 값이 무엇인지 알 수 있어야 함.
         # 이 else문에 올 수 있는 가장 적은 수 2를 기준으로 생각해보자
-        first, second = 0, 1    # f(i-1), f(i-2)의 역할을 해 줄 것
+        first, second = 0, 1    # f(i-1), f(i-2)의 역할을 해 줄것
         # 2부터 n까지도 위의 규칙과 동일한 규칙이 실행 되어야 한다.
         # 2부터 n까지 모두 순회 할건데....
             # 피보나치의 규칙상, 사실 그렇게 순회해서 얻어내는
-            # 2, 3, 4... n 까지 있는 수는 필요 없다.
-        # 그러므로, 임시변수는 _ 로 처리 : 사용되지 않을 변수
+            # 2, 3, 4, ... n 까지 있는 수는 필요 없다.
+        # 그러므로, 임시변수는 _ 로 처리
         for _ in range(2, n+1):
             # 다음 피보나치 수는 이전 두 항의 합을 사용한다.
             next_fib = first + second
@@ -28,6 +28,5 @@ def fibonacci_for_loop(n):
         # 만약 위의 순회에서, 더 이상 다음연산을 할 작업이 없다면
         # next_fib == second 이다.
         return second
-
 # 사용 예시
 print(fibonacci_for_loop(10)) # 55
