@@ -1,4 +1,4 @@
-stack = []
+stack = []  # list를 사용하여 자료구조 stack을 구현한다.
 
 stack.append(1)
 stack.append(2)
