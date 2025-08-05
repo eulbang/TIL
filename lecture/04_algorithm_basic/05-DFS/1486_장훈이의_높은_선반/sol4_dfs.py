@@ -4,7 +4,7 @@ sys.stdin = open("input.txt")
 def dfs(idx, total):
     global min_height
     # 내 최종 결과가 min_height가 작아지길 바라는 건데
-    # 이미 지금까지 더해 나간 총합이 mon_height보다 크면
+    # 이미 지금까지 더해 나간 총합이 min_height보다 크면
     # 아직 점원이 남았어도 점원의 키를 더해볼 필요가 있을까?
     # 돌아가
     if total >= min_height:
