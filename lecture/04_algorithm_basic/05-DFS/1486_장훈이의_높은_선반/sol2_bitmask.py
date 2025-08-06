@@ -22,6 +22,5 @@ for tc in range(1, T + 1):
                 h_sum += arr[j]
         if h_sum >= B:
             min_height = min(min_height, h_sum)
-
     # 목표 높이 B를 빼서 실제로 초과된 부분만 출력
     print(f"#{tc} {min_height - B}")
