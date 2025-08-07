@@ -12,7 +12,7 @@ def get_road_move_time(road, N, M):
     # x, y, cnt
     queue.append((0, 0, 0))
     # 물론, 후보군에 cnt 넣는거랑 별개로 visited는 필요함
-    visited = [0 * M for _ in range(N)]
+    visited = [[0] * M for _ in range(N)]
     visited[0][0] = 1   # 시작정점 방문 처리
 
     while queue:
