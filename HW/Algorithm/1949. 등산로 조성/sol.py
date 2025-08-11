@@ -3,9 +3,6 @@ sys.stdin = open('sample_input.txt')
 
 dxy = [(0, -1), (0, 1), (-1, 0), (1, 0)]    # 상 하 좌 우
 
-# 방문처리 visited 배열 만들어서 처리
-# K 만큼 무조건 깎는 것이 아닌 필요한 만큼만 깎을 것
-
 def dfs(x, y, count, K):
     global max_road
     max_road = max(max_road, count)
@@ -16,12 +13,14 @@ def dfs(x, y, count, K):
             mount[x][y] += 25
             dfs(nx, ny, count+1, K)
             mount[x][y] -= 25
-        elif 0 <= nx < N and 0 <= ny < N and mount[nx][ny] - K < mount[x][y]:
-            mount[nx][ny] -= K
-            mount[x][y] += 25
-            dfs(nx, ny, count+1, 0)
-            mount[nx][ny] += K
-            mount[x][y] -= 25
+        elif 0 <= nx < N and 0 <= ny < N and K > 0:
+            for cut in range(1, K + 1):
+                if mount[nx][ny] - cut < mount[x][y]:
+                    mount[nx][ny] -= cut
+                    mount[x][y] += 25
+                    dfs(nx, ny, count + 1, 0)
+                    mount[nx][ny] += cut
+                    mount[x][y] -= 25
 
 T = int(input())
 for test_case in range(1, T + 1):
