@@ -31,21 +31,26 @@ def start_parking(n, costs, weights, entry_order):
             car_number = entry_car - 1
             
             if free_spaces:  # 주차 공간이 있는 경우
-                space_index = heapq.heappop(free_spaces)
-                car_positions[car_number] = space_index
+                space_index = heapq.heappop(free_spaces)    # 가장 작은 인덱스의 주차 공간 할당
+                car_positions[car_number] = space_index     # 주차 공간 기록
+                #   주차 요금 계산
                 total_income += costs[space_index] * weights[car_number]
             else:  # 주차 공간이 꽉 찬 경우
-                waiting_queue.append(car_number)
+                waiting_queue.append(car_number)    # 대기 큐에 추가
                 
         else:  # 출차
-            car_number = (-entry_car) - 1
-            space_index = car_positions[car_number]
-            heapq.heappush(free_spaces, space_index)
+            '''
+            출차 차량 번호는 음수로 주어지므로, 양수로 변환하여 인덱스 계산
+            예: -1은 첫 번째 차량, -2는 두 번째 차량 등
+            '''
+            car_number = (-entry_car) - 1   
+            space_index = car_positions[car_number]           # 차량의 주차 공간 인덱스 찾기
+            heapq.heappush(free_spaces, space_index)          # 해당 공간을 다시 사용 가능하게 만듦
             
             # 대기 중인 차량이 있으면 바로 주차
             if waiting_queue:
-                waiting_car = waiting_queue.popleft()
-                space_index = heapq.heappop(free_spaces)
+                waiting_car = waiting_queue.popleft()         # 대기 중인 차량을 꺼냄
+                space_index = heapq.heappop(free_spaces)      # 가장 작은 인덱스의 주차 공간 할당
                 car_positions[waiting_car] = space_index
                 total_income += costs[space_index] * weights[waiting_car]
 
