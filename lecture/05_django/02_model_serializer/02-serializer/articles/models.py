@@ -8,5 +8,5 @@ class Article(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        # PRINT 했을 때 사람이 보기 좋게 꾸밀 때 쓴다.
+        # PRINT 했을때 사람이 보기 좋게 꾸밀때 쓴다.
         return self.title

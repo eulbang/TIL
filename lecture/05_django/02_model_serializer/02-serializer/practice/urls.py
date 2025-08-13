@@ -19,6 +19,6 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # articles/로 요청이 왔을 때
-    path('articles/', include('articles.urls'))
+    # articles/로 요청이 왔을때
+    path('articles/', include('articles.urls')),
 ]
