@@ -5,16 +5,18 @@ dxy = [(1, 1), (1, -1), (-1, -1), (-1, 1)]
 
 def dfs(x, y, dir, count, dessert, start):
     global max_count
-    # print(f'dir:{dir}, (x,y):{(x,y)}, dessert:{dessert}, count:{count}')
+    print(f'x:{x}, y:{y}, dir:{dir}, cnt:{count}, start:{start}')
 
     if dir > 3:
         return
 
     if (x, y) == start:
+        print(f'x:{x}, y:{y}, max:{max_count}, cnt:{count}')
         max_count = max(max_count, count)
         return
 
     if (x, y) != start and cafe[x][y] in dessert:
+        print(f'x:{x}, y:{y}, dir:{dir}, cnt:{count}, start:{start}, max:{max_count}')
         return
 
     next_dessert = dessert + [cafe[x][y]]
@@ -33,12 +35,14 @@ def dfs(x, y, dir, count, dessert, start):
 
 
 T = int(input())
-# T -= 9
+T -= 8
 for test_case in range(1, T + 1):
     N = int(input())
     cafe = [list(map(int, input().split())) for _ in range(N)]
 
     max_count = -1
+
+    if test_case == 1: continue
 
     for x in range(N):
         for y in range(N):
