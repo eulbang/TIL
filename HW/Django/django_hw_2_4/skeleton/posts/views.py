@@ -26,7 +26,7 @@ def post_detail(request, post_pk):
         return Response(serializer.data)
     elif request.method == 'DELETE':
         post.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+        return Response({"message": "Post deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
     elif request.method == 'PUT':
         serializer = PostSerializer(post, data=request.data)
         if serializer.is_valid(raise_exception=True):
@@ -37,3 +37,4 @@ def post_detail(request, post_pk):
         if serializer.is_valid(raise_exception=True):
             serializer.save(raise_exception=True)
             return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

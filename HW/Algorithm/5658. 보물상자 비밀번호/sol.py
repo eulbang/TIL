@@ -6,7 +6,14 @@ for test_case in range(1, T + 1):
     N, K = map(int, input().split())
     num = input()
 
-    print(num)
-    print(num[-1:]+num[:2])
+    pwd = set()
+    side = N//4
+    for i in range(N):
+        if i < N-side:
+            pwd.add(int(num[i:i+side], 16))
+        else:
+            pwd.add(int(num[i:]+num[:side-N+i], 16))
 
-    # print(f"#{test_case} {}")
+    sorted_pwd = sorted(pwd, reverse=True)
+
+    print(f"#{test_case} {sorted_pwd[K-1]}")
