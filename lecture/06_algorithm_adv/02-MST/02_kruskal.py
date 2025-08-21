@@ -26,19 +26,35 @@ class DisjointSet:
                 self.rank[px] += 1  # x의 랭크를 1 증가
 
 def mst_kruskal(vertices, edges):
-    mst = []
+    '''
+        1. 가중치를 오름차순 정렬 한다.
+        2. 그 순서대로 간선들을 선택하는데
+        3. 2에서 선택한 간선의 시작, 종료 노드가 같은 대표자가 아니어야한다.
+        4. 2와3을 선택된 간선이 n-1개가 될 때까지 반복한다. 
+    '''
+    mst = []    # 최소 신장 트리를 구성하는 간선 정보를 담을 리스트
+    # 가중치를 기준으로 오름차순 정렬 한다.
+    # 간선 정보의 구성 [[시작노드, 종료노드, 가중치], ]
     edges.sort(key=lambda x: x[2])
-    ds = DisjointSet(vertices)
+    print(edges)
+    ds = DisjointSet(vertices)  # disjointset 생성하기
     for i in range(len(vertices) + 1):
         ds.make_set(i)
-
+    print(ds.p)
     for edge in edges:
-        s, e, w = edge
-
+        print(edge, mst)
+        s, e, w = edge  # 시작노드, 끝노드, 가중치
+        '''
+            가중치에 대한 정보는 처음 오름차순 과정에서 역할을 다했고
+            이제 우리가 할 일은
+            s와 e가 같은 집합에 속해있는지 판별 하고,
+            만약 같은 집합에 속해있지 않은 노드들이라면
+            합칠 수 있음!
+        '''
+        # 두 노드가 다른 집합에 속한경우, union
         if ds.find_set(s) != ds.find_set(e):
             ds.union(s, e)
             mst.append(edge)
-
     return mst
 
 '''
@@ -80,4 +96,4 @@ edges = [
 vertices = list(range(7))  # 정점 집합
 
 result = mst_kruskal(vertices, edges)
-print(result) # [(3, 5, 18), (1, 2, 21), (2, 6, 25), (0, 2, 31), (3, 4, 34), (2, 4, 46)]
+# print(result) # [(3, 5, 18), (1, 2, 21), (2, 6, 25), (0, 2, 31), (3, 4, 34), (2, 4, 46)]
