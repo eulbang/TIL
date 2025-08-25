@@ -16,7 +16,17 @@ edges = [
 ]
 
 # 인접 리스트
-'''
+adj_list = {vertices[idx]: {} for idx in range(len(vertices))}
+print(adj_list)
+for start, end, weight in edges:
+    # print(start, end, weight)
+    # print(vertices[start], vertices[end], weight)
+    # adj_list[vertices[start]] >>> {}
+    # start_node_value = vertices[start]
+    # end_node_value = vertices[end]
+    adj_list[vertices[start]][vertices[end]] = weight
+print(adj_list)
+''' 
 {
     'a': {'b': 3, 'c': 5},
     'b': {'c': 2},
@@ -27,7 +37,16 @@ edges = [
 }
 '''
 
+
 # 인접 행렬
+adj_matrix = [[float('inf')] * len(vertices) for _ in range(len(vertices))]
+# 자기 자신은 도달하지 못하므로 0으로 초기화 해주면 좋겠다.
+for i in range(len(vertices)):
+    adj_matrix[i][i] = 0
+for start, end, weight in edges:
+    adj_matrix[start][end] = weight
+for m in adj_matrix:
+    print(m)
 '''
 [
     [0, 3, 5, inf, inf, inf],

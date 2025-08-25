@@ -2,22 +2,29 @@ import heapq, math
 
 
 def dijkstra(graph, start):
-    distances = {v: math.ing for v in graph}
-    distances[start] = 0
-    heap = []
-    heapq.heappush(heap, [0, start])
+    distances = {v: math.inf for v in graph}
+    distances[start] = 0 # 시작 정점까지 도달하는 거리 0 초기화
+    # 내 다음 조사 후보군들을 삽입할 배열
+    heap = []   # 최소 힙
+    heapq.heappush(heap, [0, start])    # [도달한 거리, 시작정점]
     visited = set()
-    visited.add(start)
+    # visited.add(start)            <---- 이거 지워야 합니당. 시작 노드 방문 처리는 while 안에서 처리할 것
 
     while heap:
+        # print(heap)
+        # print(distances)
         dist, current = heapq.heappop(heap)
-        if current not in visited and distances[current] < dist: continue
+        # 기존 거리보다, 갱신된 거리가 더 크고, 이미 방문한적 있으면 패스
+        if current in visited or distances[current] < dist: continue
+        visited.add(current)
 
+        # 현재 노드 기준 인접한 모든 노드에 대해서, 갱신하거나, 우선순위큐에 삽입
         for next, weight in graph[current].items():
-            next_distance = dist + weight
-            if next not in visited and next_distance < distances[next]:
+            next_distance = dist + weight   # 현재까지 걸린 가중치 + 다음 위치까지의 가중치
+            # 아직 방문하지 않았고, 정점까지 도달하는 거리가 충분히 작을때
+            if next_distance < distances[next]:
                 distances[next] = next_distance
-                heapq.heappush(heap, [next_distance, next]),
+                heapq.heappush(heap, [next_distance, next])
     return distances
 
 graph = {
