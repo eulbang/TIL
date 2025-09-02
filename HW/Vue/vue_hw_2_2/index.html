@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>Vue3 조건문 연습</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+</head>
+<body>
+  <div id="app">
+    <h1>조건문 연습하기</h1>
+    <button @click="isLogin = !isLogin">Login/Logout</button>
+    <ul v-if="isLogin">
+      <li>유저네임 : {{ user.userName }}</li>
+      <li>관리자여부 : {{ user.isAdmin }}</li>
+      <li>비밀번호 : {{ user.passWord }}</li>
+    </ul>
+  </div>
+
+  <script>
+    Vue.createApp({
+      data() {
+        return {
+          isLogin: false,
+          user: { userName: 'admin', isAdmin: true, passWord: '1q2w3e4r' }
+        }
+      }
+    }).mount('#app')
+  </script>
+</body>
+</html>
