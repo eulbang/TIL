@@ -16,10 +16,16 @@
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
   <script>
     const { createApp, ref } = Vue
+    // const obj = {
+    //   setup: function () {
 
+    //   }
+    // }
+    // createApp(obj)
     const app = createApp({
       setup() {
         const message = ref('Hello vue!')
+        console.log(message.value)
         return {
           message
         }
