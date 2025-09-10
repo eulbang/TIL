@@ -1,7 +1,7 @@
 -- Built-in Function
 -- 문자형 함수
 -- CONCAT
-SELECT CONCAT('FirstName', '_', 'LastName');
+SELECT CONCAT(Name, ': ', Code) AS 'Name: Code' FROM country;
 
 -- TRIM
 SELECT TRIM('   PHONE   ');

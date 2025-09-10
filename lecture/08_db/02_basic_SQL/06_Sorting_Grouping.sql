@@ -138,6 +138,8 @@ SELECT
   COUNT(Region) AS count_reg
 FROM
   country
+WHERE
+  Name = 'korea'
 GROUP BY
   Region
 HAVING

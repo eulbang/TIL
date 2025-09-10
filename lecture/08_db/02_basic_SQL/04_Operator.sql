@@ -24,9 +24,8 @@ SELECT
 FROM
   country
 WHERE
-  Continent IN ('North America', 'Asia');
--- WHERE
---   Continent = 'North America' OR Continent = 'Asia';
+  -- Continent IN ('North America', 'Asia');
+  Continent = 'North America' OR Continent = 'Asia';
 
 
 -- Like Operator example 1
@@ -81,7 +80,7 @@ SELECT
 FROM 
   country
 WHERE
-  IndepYear = 1901 OR IndepYear = 1981 
+  (IndepYear = 1901 OR IndepYear = 1981)
   AND LifeExpectancy <= 75;
 
 -- Ver. Wrong 2

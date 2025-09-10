@@ -1,3 +1,4 @@
+-- Active: 1721343837433@@127.0.0.1@3306@world
 USE world;
 
 -- SELECT 활용 1
