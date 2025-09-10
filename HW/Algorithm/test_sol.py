@@ -1,27 +1,12 @@
-from collections import deque
+n = int(input())
+tri = [list(map(int, input().split())) for _ in range(n)]
 
-dxy = ((1, 2), (2, 1), (2, -1), (1, -2), (-1, -2), (-2, -1), (-2, 1), (-1, 2))
-
-T = int(input())
-for _ in range(T):
-    I = int(input())
-    sx, sy = map(int, input().split())
-    gx, gy = map(int, input().split())
-
-    field = [[0]*I for _ in range(I)]
-
-    q = deque([(sx, sy)])
-
-    cnt = 0
-    while q:
-        x, y = q.popleft()
-        for cx, cy in dxy:
-            nx, ny = x+cx, y+cy
-            if 0 <= nx < I and 0 <= ny < I and field[ny][nx] == 0:
-                field[ny][nx] = 1
-                if (nx, ny) == (gx, gy):
-                    break
-                q.append((nx, ny))
-            cnt += 1
-
-    print(cnt)
+for i in range(1, n):
+    for j in range(i+1):
+        if j == 0:
+            tri[i][j] += tri[i-1][j]
+        elif j == i and i != 0:
+            tri[i][j] += tri[i-1][j-1]
+        else:
+            tri[i][j] = max(tri[i][j]+tri[i-1][j], tri[i][j]+tri[i-1][j-1])
+print(max(tri[n-1]))
