@@ -1,12 +1,35 @@
-n = int(input())
-tri = [list(map(int, input().split())) for _ in range(n)]
+from collections import deque
 
-for i in range(1, n):
-    for j in range(i+1):
-        if j == 0:
-            tri[i][j] += tri[i-1][j]
-        elif j == i and i != 0:
-            tri[i][j] += tri[i-1][j-1]
+gears = [deque(map(int, input().strip())) for _ in range(4)]
+
+K = int(input())
+commands = [tuple(map(int, input().split())) for _ in range(K)]
+
+for start, direction in commands:
+    s = start - 1
+    note = [0] * 4
+    note[s] = direction
+
+    for i in range(s, 3):
+        if gears[i][2] != gears[i + 1][6]:
+            note[i + 1] = -note[i]
         else:
-            tri[i][j] = max(tri[i][j]+tri[i-1][j], tri[i][j]+tri[i-1][j-1])
-print(max(tri[n-1]))
+            break
+
+    for i in range(s, 0, -1):
+        if gears[i][6] != gears[i - 1][2]:
+            note[i - 1] = -note[i]
+        else:
+            break
+
+    for i in range(4):
+        if note[i] != 0:
+            gears[i].rotate(note[i])
+
+score = 0
+weights = [1, 2, 4, 8]
+for i in range(4):
+    if gears[i][0] == 1:
+        score += weights[i]
+
+print(score)
