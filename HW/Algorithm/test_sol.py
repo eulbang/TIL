@@ -1,35 +1,26 @@
-from collections import deque
+import sys
+input = sys.stdin.readline
 
-gears = [deque(map(int, input().strip())) for _ in range(4)]
+N, M = map(int, input().split())
+N_list = list(map(int, input().split()))
+N_list.sort()
 
-K = int(input())
-commands = [tuple(map(int, input().split())) for _ in range(K)]
+result = []
+answers = set()
 
-for start, direction in commands:
-    s = start - 1
-    note = [0] * 4
-    note[s] = direction
+def func(now, cnt):
+    if cnt == M:
+        answers.add(tuple(N_list[p] for p in result))  # ← 문자열 대신 튜플
+        return
+    for idx in range(now, len(N_list)):  # 순열: 매 단계 전체 탐색
+        if idx in result:           # 같은 인덱스 재사용 금지(간단 버전)
+            continue
+        result.append(idx)
+        func(idx, cnt + 1)          # now는 사실상 의미 없음 (최소수정 유지)
+        result.pop()
 
-    for i in range(s, 3):
-        if gears[i][2] != gears[i + 1][6]:
-            note[i + 1] = -note[i]
-        else:
-            break
+func(0, 0)
 
-    for i in range(s, 0, -1):
-        if gears[i][6] != gears[i - 1][2]:
-            note[i - 1] = -note[i]
-        else:
-            break
-
-    for i in range(4):
-        if note[i] != 0:
-            gears[i].rotate(note[i])
-
-score = 0
-weights = [1, 2, 4, 8]
-for i in range(4):
-    if gears[i][0] == 1:
-        score += weights[i]
-
-print(score)
+# 튜플은 숫자 기준 사전순으로 정렬됨
+for seq in sorted(answers):
+    print(' '.join(map(str, seq)))
