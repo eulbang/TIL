@@ -1,18 +1,23 @@
-N = int(input())
+from collections import deque
 
-if N == 1:
-    print(9)
-else:
-    prev = [0]*10
-    for d in range(1, 10):
-        prev[d] = 1
+n, w, L = map(int, input().split())
+truck = deque(list(map(int, input().split())))
+bridge_t = deque()
+bridge_w = deque()
 
-    for _ in range(2, N+1):
-        cur = [0]*10
-        cur[0] = prev[1] % 1000000000
-        cur[9] = prev[8] % 1000000000
-        for d in range(1, 9):
-            cur[d] = (prev[d-1] + prev[d+1]) % 1000000000
-        prev = cur
+bridge_t.append(w)
+bridge_w.append(truck.popleft())
 
-    print(sum(prev) % 1000000000)
+time = 1
+while bridge_t:
+    time += 1
+    for i in range(len(bridge_t)):
+        bridge_t[i] -= 1
+    if bridge_t[0] == 0:
+        bridge_t.popleft()
+        bridge_w.popleft()
+    if truck and sum(bridge_w)+truck[0] <= L:
+        bridge_t.append(w)
+        bridge_w.append(truck.popleft())
+
+print(time)
