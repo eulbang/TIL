@@ -1,72 +1,39 @@
 import sys
 input = sys.stdin.readline
 
-def lower_bound(arr, x):
-    lo, hi = 0, len(arr)
-    while lo < hi:
-        mid = (lo + hi) // 2
-        if arr[mid] < x:
-            lo = mid + 1
-        else:
-            hi = mid
-    return lo
+N = int(input())
+nums = [int(input()) for _ in range(N)]
+nums.sort()
 
-def upper_bound(arr, x):
-    lo, hi = 0, len(arr)
-    while lo < hi:
-        mid = (lo + hi) // 2
-        if arr[mid] <= x:
-            lo = mid + 1
-        else:
-            hi = mid
-    return lo
+res = 0
+i = 0
+j = N - 1
 
-def ceil_div(a, b):
-    return -((-a) // b)
-
-def count_leq(x, A, B):
-    m = len(B)
-    cnt = 0
-    for a in A:
-        if a > 0:
-            t = x // a
-            cnt += upper_bound(B, t)
-        elif a == 0:
-            if x >= 0:
-                cnt += m
-        else:
-            t = ceil_div(x, a)
-            idx = lower_bound(B, t)
-            cnt += m - idx
-    return cnt
-
-first = list(map(int, input().split()))
-if len(first) == 3:
-    n, m, k = first
-else:
-    n, k = first
-    m = n
-
-A = []
-while len(A) < n:
-    A += list(map(int, input().split()))
-B = []
-while len(B) < m:
-    B += list(map(int, input().split()))
-
-A.sort()
-B.sort()
-
-a_min, a_max = A[0], A[-1]
-b_min, b_max = B[0], B[-1]
-cands = [a_min*b_min, a_min*b_max, a_max*b_min, a_max*b_max]
-lo, hi = min(cands), max(cands)
-
-while lo < hi:
-    mid = (lo + hi) // 2
-    if count_leq(mid, A, B) >= k:
-        hi = mid
+while i + 1 <= j and nums[i] < 1:
+    if nums[i] < 0 and nums[i+1] < 0:
+        res += nums[i] * nums[i+1]
+        i += 2
+    elif nums[i] < 0 and nums[i+1] == 0:
+        i += 2
     else:
-        lo = mid + 1
+        break
 
-print(lo)
+if i <= j and nums[i] < 0:
+    res += nums[i]
+    i += 1
+
+while i <= j and nums[i] == 0:
+    i += 1
+
+while i <= j and nums[i] == 1:
+    res += 1
+    i += 1
+
+while i + 1 <= j:
+    res += nums[j] * nums[j-1]
+    j -= 2
+
+if i == j:
+    res += nums[i]
+
+print(res)
