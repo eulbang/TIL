@@ -1,115 +1,103 @@
-# 📊 Pandas & 시각화 치트시트 (항목별 표)
+- 생성형 AI의 문제점
+  - 오래된 정보 (Outdated information)
+  - 도메인 특화 능력 부족
+  - 거짓말을 잘한다 (Hallucination)
+  - 지식 매개변수화(parameterizing knowledge) 효율성이 낮음
 
----
+- 실제 우리의 요구사항
+  - 도메인별 정확한 답변
+  - 빈번한 데이터 업데이트
+  - 생성된 콘텐츠의 추적성 및 설명성
+  - 데이터의 개인정보 보호
 
-## 🗂 데이터 로드·저장·기본 확인
-| 문법/함수 | 설명 | 예제 |
-|---|---|---|
-| **`pd.read_csv(path)`** | CSV 불러오기 | `df = pd.read_csv("data.csv")` |
-| `df.to_csv(path, index=False)` | CSV 저장 | `df.to_csv("out.csv", index=False)` |
-| **`df.info()`** | 컬럼/타입/결측치 요약 | `df.info()` |
-| **`df.describe()`** | 숫자형 요약 통계 | `df.describe()` |
-| `df.describe(include="object")` | 범주형 요약 통계 | `df.describe(include="object")` |
-| `df.head(n)` | 상위 n행 미리보기 | `df.head(5)` |
-| `df.shape` / `df.shape[0]` | (행,열) / 행 수 | `rows = df.shape[0]` |
+- RAG 이해를 위한 이론  
+  - RAG의 장점  
+    - 환각 현상 (Hallucination) 감소  
+    - 도메인 적용성 개선  
+    - Open domain QA 성능 향상  
+    - 참고한 Knowledge base가 적절한지 판단 가능  
+    - 정보 검색에 강함  
 
----
+- RAG 이해를 위한 이론  
+  - 정보 검색(Retrieval)  
+    - 필요한 정보를 검색하는 작업  
+    - 데이터베이스, 인터넷, 또는 다른 정보 저장소에서 관련 정보를 찾아내는 과정  
+    - 사용자의 쿼리에 가장 잘 맞는 데이터를 식별하고 추출하는 기술과 알고리즘  
+    - 웹 검색 엔진, 디지털 도서관, 온라인 데이터베이스, 정보 검색 시스템 등 다양한 분야에서 중요한 역할 수행  
 
-## ❓ 결측치·이상치 처리
-| 문법/함수 | 설명 | 예제 |
-|---|---|---|
-| **`df.isna().sum()`** | 결측치 개수 | `df.isna().sum()` |
-| `df.dropna()` | 결측치 있는 행 제거 | `df = df.dropna()` |
-| **`fillna()`** | 결측치 대체 | `df["Age"] = df["Age"].fillna(df["Age"].median())` |
-| `quantile(p)` | 분위수(Q1,Q3 등) | `Q1 = s.quantile(0.25)` |
-| IQR 경계 | 이상치 범위 | `low=Q1-1.5*IQR; up=Q3+1.5*IQR` |
-| `loc[조건,"col"]=값` | 이상치 값 치환 | `df.loc[df["Age"]>up,"Age"]=df["Age"].mean()` |
+- RAG 이해를 위한 이론  
+  - 역색인(Inverted Index)  
+    - 색인: 1 -> 1페이지 호출, 100 -> 100페이지 호출  
+    - 각 데이터에 빠르게 접근할 수 있도록 도움  
+    - 역색인: "학교" -> 3, 49, 100 페이지  
+    - 각 단어로 색인 정보를 연결 시켜 놓음으로 단어 기반 검색이 가능하게 함  
 
----
+- RAG 이해를 위한 이론  
+  - BM25  
+    - TF-IDF의 정보검색에서의 단점을 보완  
+    - Q: 사용자가 입력한 쿼리  
+    - D: 대조해보려는 문서  
+    - 대부분의 텍스트 기반 검색을 진행할 때 가장 자주 쓰이는 방식  
 
-## 🔎 선택·필터링·값 치환
-| 문법/함수 | 설명 | 예제 |
-|---|---|---|
-| `df["col"]`, `df[["A","B"]]` | 컬럼 선택 | `df[["Name","Age"]]` |
-| **`df[조건]`** | 불리언 필터링 | `df[df["Survived"]==1]` |
-| **괄호+`&`/`\|`** | 다중 조건(괄호 필수) | `df[(df["Age"]>=20) & (df["Sex"]=="female")]` |
-| **`isin([...])`** | 집합 포함 필터 | `df[df["Pclass"].isin([2,3])]` |
-| `loc[조건,"col"]=값` | 조건부 값 변경 | `df.loc[df["Age"]<=10,"Group"]="Child"` |
-| **`replace({old:new})`** | 값 치환 | `df["Gender"]=df["Gender"].replace({0:"Female",1:"Male"})` |
-| **`map({})`** | 값 매핑(Series) | `df["G"] = df["G"].map({0:"F",1:"M"})` |
-| **`value_counts()`** | 빈도/비율/결측 포함 | `s.value_counts(); s.value_counts(normalize=True); s.value_counts(dropna=False)` |
-| `mode()[0]` | 최빈값 | `df["Embarked"].mode()[0]` |
+- RAG (Retrieval-Augmented Generation)
+  - Retrieval (검색): 외부 데이터 및 소스를 검색하여 정보 획득
+  - Augmented (증강): 사용자의 질문을 보강하여 보다 정확한 문맥 제공
+  - Generation (생성): 향상된 정보를 기반으로 더 좋은 답변 생성
+  - 답변할 때 확실한 출처를 기반으로 생성하게 됨
 
----
+- RAG 이해를 위한 이론
+  - RAG
+    - RAG(Retreival-Augmented-Generation)
+    - 정보 검색(retrieval)과 응답 생성(generation)을 결합한 모델
+    - 사용자의 질문이 주어지면, Retriever는 관련된 정보나 문서를 데이터베이스에서 검색
+    - 검색된 정보로 질문에 대한 답변 생성
+    - 보다 풍부하고 정확한 정보를 제공 가능
 
-## 📊 그룹·집계·정렬·형변환
-| 문법/함수 | 설명 | 예제 |
-|---|---|---|
-| **`groupby("key")["val"].mean()`** | 그룹 평균 | `df.groupby("Pclass")["Fare"].mean()` |
-| `sum()/count()/agg([...])` | 합/개수/다중집계 | `df.groupby("G")["X"].agg(["mean","std"])` |
-| **`reset_index()`** | groupby 결과 DF화 | `... .reset_index()` |
-| **`sort_values(by=, ascending=)`** | 정렬(오/내림) | `df.sort_values(by="Fare", ascending=False)` |
-| **`astype(dtype)`** | 형변환 | `monthly["YearMonth"]=monthly["YearMonth"].astype(str)` |
-| **`idxmax()`** | 최대값 행 인덱스 | `best = df.loc[df["Rating"].idxmax()]` |
-| **`rename(columns={})`** | 컬럼명 변경 | `df.rename(columns={"Fare":"TicketPrice"}, inplace=True)` |
-| **`pd.merge(df1, df2, on=, how=)`** | 병합(inner/left/...) | `pd.merge(df1, df2, on="ID", how="inner")` |
+- LangChain이란?
+  - ChatGPT 프로그램 안에서 벗어나 LLM의 기능을 나만의 코드(Javascript/Python)으로 가져와서 이를 자유자재로 사용할 수 있게 해주는 강력한 "프레임워크"
+  - LLM으로 하는 모든 것을 LangChain을 통해서 할 수 있음을 의미
+    - 프롬프트 엔지니어링
+    - RAG(Retrieval Augmented Generation)
+    - Agent
+    - 외부 LLM API 사용 및 Local LLM 구동
+    - Moderation
+    - ...
 
----
+- LLM : 초거대 언어모델로, 생성 모델의 엔진과 같은 역할을 하는 핵심 구성 요소
+  - 예시: GPT-4, PALM, LLAMA, Deepseek ...
 
-## ⏱ 시계열·변동률
-| 문법/함수 | 설명 | 예제 |
-|---|---|---|
-| **`pd.to_datetime(col, format=)`** | 문자열→날짜 | `df["Date"]=pd.to_datetime(df["Date"], format="%Y-%m")` |
-| **`.dt.to_period("M")`** | 연-월 추출 | `df["YM"]=df["Date"].dt.to_period("M")` |
-| **`rolling(window).mean()`** | 이동평균 | `df["MA20"]=df["Close"].rolling(20).mean()` |
-| **`pct_change()*100`** | 변동률(%) | `df["chg"]=df["Close"].pct_change()*100` |
-| 교차점 탐지 | MA 교차(골든/데드) | `df["X"]=df["MA5"]-df["MA20"]; df[(X>0)&(X.shift(1)<0)]` |
+- Prompts : 초거대 언어모델에게 지시하는 명령문
+  - 예시: Prompt Templates, Chat Prompt Template, Example Selectors, Output Parsers
 
----
+- Index : LLM이 문서를 쉽게 탐색할 수 있도록 구조화 하는 모듈
+  - 예시: Document Loaders, Text Splitters, Vectostores, Retrievers
 
-## 🎨 시각화(Matplotlib/Seaborn) — 그래프 생성
-| 문법/함수 | 설명 | 예제 |
-|---|---|---|
-| **`plt.figure(figsize=(w,h))`** | 도화지 생성 | `plt.figure(figsize=(12,6))` |
-| **`sns.countplot(x=, data=)`** | 범주 개수 | `sns.countplot(x="Category", data=df)` |
-| **`sns.barplot(x=, y=, data=, estimator=)`** | 막대(평균/합계) | `sns.barplot(x="Category", y="Value", data=df, estimator=sum)` |
-| **`sns.histplot(s, bins, kde=True)`** | 히스토그램+KDE | `sns.histplot(df["Age"], bins=30, kde=True)` |
-| **`sns.boxplot(x=, y=, data=)`** | 박스플롯 | `sns.boxplot(x="Group", y="Score", data=df)` |
-| **`sns.violinplot(x=, y=, data=)`** | 바이올린 | `sns.violinplot(x="Gender", y="Height", data=df)` |
-| **`sns.scatterplot(x=, y=, hue=, data=)`** | 산점도 | `sns.scatterplot(x="A", y="B", hue="G", data=df, alpha=0.7)` |
-| **`sns.lineplot(x=, y=, hue=, data=, marker="o")`** | 선 그래프 | `sns.lineplot(x="Year", y="GDP", hue="Country", data=df, marker="o")` |
-| **`sns.heatmap(df.corr(), annot=True)`** | 상관 히트맵 | `sns.heatmap(df.corr(), annot=True, cmap="coolwarm")` |
-| `Series.plot(kind="barh"/"line")` | 시리즈 빠른 플롯 | `weekday_agg.plot(kind="barh")` |
+- Memory : 채팅 이력을 기억하도록 하여 이를 기반으로 대화가 가능하도록 하는 모듈
+  - 예시: ConversationBufferMemory, Entity Memory, Conversation Knowledge Graph Memory
 
----
+- Chain : LLM 사슬을 형성하여 연속적인 LLM 호출이 가능하도록 하는 핵심 구성 요소
+  - 예시: LLM Chain, Question Answering, Summarization, Retrival Question/Answering
 
-## 🛠 시각화(Matplotlib/Seaborn) — 라벨·격자·스케일
-| 문법/함수 | 설명 | 예제 |
-|---|---|---|
-| **`plt.title(txt, fontsize=)`** | 제목 | `plt.title("월별 매출", fontsize=14)` |
-| **`plt.xlabel(txt)` / `plt.ylabel(txt)`** | 축 레이블 | `plt.xlabel("연-월"); plt.ylabel("매출")` |
-| **`plt.xticks(rotation=deg)`** | 눈금 라벨 회전 | `plt.xticks(rotation=45)` |
-| **`plt.legend(title=, bbox_to_anchor=, loc=)`** | 범례/위치 | `plt.legend(title="Country", bbox_to_anchor=(1.05,1), loc="upper left")` |
-| **`plt.grid(True, linestyle="--", alpha=0.6)`** | 격자 | `plt.grid(True, linestyle="--", alpha=0.6)` |
-| **`plt.xscale("log")` / `plt.yscale("log")`** | 로그 축 | `plt.xscale("log"); plt.yscale("log")` |
-| **`plt.show()`** | 그래프 렌더링 | `plt.show()` |
+- Agents : LLM이 기존 Prompt Template으로 수행할 수 없는 작업을 가능케 하는 모듈
+  - 예시: Custom Agent, Custom MultiAction Agent, Conversation Agent
 
----
+- LLM 추상화(Abstraction) 제공
+  - 추상화(Abstraction)란 사용자에게 불필요한 세부 사항을 숨겨 복잡성을 처리하는 것
+  - 사용자는 숨겨진 복잡성을 모두 이해하거나 생각하지 않고 제공된 추상화에서 나만의 로직 구현 가능
+  - Language Model + Chain = LangChain
+    - 언어모델(Language Model)을 연결(Chain)하여 애플리케이션 구축 가능
+    - 모든 LLM 모델을 자세히 공부하지 않고도 간단히 접속을 위한 API 키를 통해 사용 가능
 
-## 🧭 Plotly (대화형 3D·애니메이션)
-| 문법/함수 | 설명 | 예제 |
-|---|---|---|
-| **`px.scatter_3d(df, x=, y=, z=, color=, size=, hover_name=)`** | 3D 산점도 | `fig = px.scatter_3d(data, x="Population", y="GDP", z="LifeExpectancy", color="Country", size="Population", hover_name="Country")` |
-| **`fig.update_traces(marker=dict(size=..), selector=...)`** | 트레이스 속성 업데이트 | `fig.update_traces(marker=dict(size=5), selector=dict(mode="markers"))` |
-| **`fig.show()`** | Plotly 그래프 표시 | `fig.show()` |
-| `animation_frame=` / `animation_group=` | 프레임/그룹 지정 | `px.scatter_3d(..., animation_frame="Year", animation_group="Country")` |
+- AI Agent에 대하여
+  - AI Agent란?
+    - ChatGPT는 AI Agent의 하위 개념 또는 구성 요소로 볼 수 있으며, 단순히 텍스트를 생성하는 언어모델
+    - AI Agent는 ChatGPT 같은 LLM을 코어 엔진으로 활용되며, 추가적으로 툴 사용, 계획, 자율적 실행 기능이 결합된 시스템
 
----
-
-## 🔤 기타 유틸·출력
-| 문법/함수 | 설명 | 예제 |
-|---|---|---|
-| **`astype(str/int/float)`** | 자료형 변환 | `monthly["YM"] = monthly["YM"].astype(str)` |
-| **`f-string`** | 포맷 출력 | `print(f"평균: {avg:.2f}")` |
-| **`input(prompt)`** | 사용자 입력 받기 | `name = input("이름: ")` |
-| `min()/max()/len()` | 최솟값/최댓값/길이 | `len(outliers)` |
+  - AI agent vs. ChatGPT
+    - AI agent
+      - 자율성과 상호작용 능력
+      - 사용자가 요구한 작업의 완료를 위해 활용 가능한 여러 도구와의 상호작용을 연쇄적으로,
+        자율적으로 수행할 수 있는 기술
+    - ChatGPT
+      - 주로 단일 플러그인을 사용하여 질문에 답변
+      - 기본 ChatGPT는 툴과 직접 상호작용하지 않음

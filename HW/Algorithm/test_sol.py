@@ -1,48 +1,26 @@
 from collections import deque
+import sys
+input = sys.stdin.readline
 
-DR = [0, 1, 0, -1]
-DC = [1, 0, -1, 0]
+def dfs(area, cnt):
+    global N, M
 
-N = int(input())
-area = [[False]*N for _ in range(N)]
-K = int(input())
-for _ in range(K):
-    r, c = map(int, input().split())
-    area[r-1][c-1] = True
+    if cnt >= 3:
+        for i in range(N):
+            for j in range(M):
+                if area[i][j] == 2:
+                    pass
+        return
 
-L = int(input())
-turns = {}
-for _ in range(L):
-    t, d = input().split()
-    turns[int(t)] = d
+    for y in range(N):
+        for x in range(M):
+            if area[y][x] == 0:
+                n_area = [area[i][:] for i in range(N)]
+                n_area[y][x] = 1
+                dfs(n_area, cnt+1)
 
-snake = deque([(0, 0)])
-occupied = {(0, 0)}
-dir = 0
-time = 0
-r, c = 0, 0
 
-while True:
-    time += 1
-    nr, nc = r + DR[dir], c + DC[dir]
+N, M = map(int, input().split())
+area = [list(map(int, input().split())) for _ in range(N)]
 
-    if not (0 <= nr < N and 0 <= nc < N) or (nr, nc) in occupied:
-        print(time)
-        break
-
-    snake.appendleft((nr, nc))
-    occupied.add((nr, nc))
-
-    if area[nr][nc]:
-        area[nr][nc] = False
-    else:
-        tr, tc = snake.pop()
-        occupied.remove((tr, tc))
-
-    if time in turns:
-        if turns[time] == 'L':
-            dir = (dir + 3) % 4
-        else:
-            dir = (dir + 1) % 4
-
-    r, c = nr, nc
+dfs(area, 0)
