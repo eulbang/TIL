@@ -1,54 +1,43 @@
 from collections import deque
-from itertools import combinations
-import sys
-input = sys.stdin.readline
 
-DY = (-1, 1, 0, 0)
-DX = (0, 0, -1, 1)
+dx = [0, 0, 1, -1]
+dy = [1, -1, 0, 0]
 
-N, M = map(int, input().split())
-board = [list(map(int, input().split())) for _ in range(N)]
 
-empties = []
-viruses = []
-for y in range(N):
-    row = board[y]
-    for x in range(M):
-        v = row[x]
-        if v == 0:
-            empties.append((y, x))
-        elif v == 2:
-            viruses.append((y, x))
+def is_range(x, y):
+    if 0 <= x < n and 0 <= y < m:
+        return True
+    return False
 
-E = len(empties)
-initial_safe = E
-best = 0
 
-for walls in combinations(empties, 3):
-    temp = [row[:] for row in board]
-
-    for (wy, wx) in walls:
-        temp[wy][wx] = 1
-
-    q = deque(viruses)
-    infected = 0
-
-    limit = initial_safe - 3
+def solve(data):
+    q = deque([(0, 0, 0)])
+    visit = set()
+    visit.add((0, 0))
+    distances[0][0] = 0
 
     while q:
-        y, x = q.popleft()
-        for k in range(4):
-            ny, nx = y + DY[k], x + DX[k]
-            if 0 <= ny < N and 0 <= nx < M and temp[ny][nx] == 0:
-                temp[ny][nx] = 2
-                infected += 1
-                if limit - infected <= best:
-                    q.clear()
-                    break
-                q.append((ny, nx))
+        cx, cy, dist = q.popleft()
+        if (cx, cy) == (n - 1, m - 1):
+            return distances[cx][cy]
 
-    safe = limit - infected
-    if safe > best:
-        best = safe
+        for dr in range(4):
+            nx, ny = cx + dx[dr], cy + dy[dr]
+            if is_range(nx, ny) and data[nx][ny] and (nx, ny) not in visit:
+                visit.add((nx, ny))
+                if dist > distances[nx][ny]:
+                    distances[nx][ny] = dist + 1
+                    q.append((nx, ny, dist + 1))
 
-print(best)
+    return -1
+
+    # if not ans:
+    #     return -1
+    # return ans
+
+
+n, m = map(int, input().split())
+a = [list(map(int, input().split())) for _ in range(n)]
+distances = [[0] * m for _ in range(n)]
+result = solve(a)
+print(result)
