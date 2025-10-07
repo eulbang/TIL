@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="50aa7db1-edbb-411d-af60-f905c6471698" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/../Algorithm/test_sol.py" beforeDir="false" afterPath="$PROJECT_DIR$/../Algorithm/test_sol.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_analysis_ws_1_1/skeleton/skeleton.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/data_analysis_ws_1_1/skeleton/skeleton.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_analysis_ws_1_2/skeleton/skeleton.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/data_analysis_ws_1_2/skeleton/skeleton.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_analysis_ws_1_3/skeleton/skeleton.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/data_analysis_ws_1_3/skeleton/skeleton.ipynb" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
+  </component>
+  <component name="ProjectId" id="33jBuyeWddHBRTk1JWnsLVl0DTA" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="50aa7db1-edbb-411d-af60-f905c6471698" name="Default Changelist" comment="" />
+      <created>1759820828599</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1759820828599</updated>
+    </task>
+    <servers />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>
