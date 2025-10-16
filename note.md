@@ -1,777 +1,1258 @@
-data_analysis_ws_2_1
-``` py
-import pandas as pd
-
-# ===================== 1. 데이터 로드 =====================
-# CSV 파일을 읽어와 데이터프레임 생성
-file_path = '../data/customer_data.csv'  # 파일 경로 지정
-customer_data = pd.read_csv(file_path)  # CSV 파일 로드
-# ===================== 3. 결측치 처리 =====================
-# dropna(): 결측치(NaN)가 있는 행을 제거하여 데이터 정제
-customer_data = customer_data.dropna()
-
-# 결측치 제거 후 데이터 크기 출력
-print(f"결측치 제거 후 데이터셋 크기: {customer_data.shape}")  
-# shape: (행, 열) 형태의 데이터 크기 출력
-
-# ===================== 4. 이상치 탐지 및 처리 =====================
-# 이상치를 탐지하기 위해 IQR(Interquartile Range, 사분위 범위) 방법 사용
-for column in ['Age', 'AnnualIncome']:  # 이상치를 탐지할 컬럼 선택
-    Q1 = customer_data[column].quantile(0.25)  # 1사분위(Q1, 25% 지점)
-    Q3 = customer_data[column].quantile(0.75)  # 3사분위(Q3, 75% 지점)
-    IQR = Q3 - Q1  # 사분위 범위 (IQR = Q3 - Q1)
-
-    # 이상치 경계값 설정
-    lower_bound = Q1 - 1.5 * IQR  # 하한값: Q1 - 1.5 * IQR
-    upper_bound = Q3 + 1.5 * IQR  # 상한값: Q3 + 1.5 * IQR
-
-    # 기존 데이터 크기 저장
-    initial_shape = customer_data.shape  
-
-    # 이상치를 제거한 데이터프레임 생성 (lower_bound보다 크거나 upper_bound보다 작은 데이터만 남김)
-    customer_data = customer_data[(customer_data[column] >= lower_bound) & (customer_data[column] <= upper_bound)]
-
-    # 이상치 처리 전후 데이터 크기 출력
-    print(f"{column} 이상치 처리 전후 데이터셋 크기: {initial_shape} -> {customer_data.shape}")
-```
-
-data_analysis_ws_2_2
-``` py
-# 필요한 라이브러리 불러오기
-import pandas as pd
-
-# ===================== 1. 데이터 로드 =====================
-# 캠페인 데이터 파일 경로 설정
-campaign_file_path = "../data/campaign_data.csv"
-
-# CSV 파일을 데이터프레임으로 로드
-df_campaign = pd.read_csv(campaign_file_path)
-# ===================== 2. 데이터 확인 =====================
-# 데이터프레임 기본 정보 출력
-print("=== 캠페인 데이터 정보 ===")
-print(df_campaign.info())  # 데이터프레임의 구조 및 컬럼 정보 확인
-
-# 데이터의 상위 5개 행 출력
-print("\n=== 캠페인 데이터 샘플 ===")
-print(df_campaign.head())  # 데이터의 상위 5개 행을 출력하여 확인
-
-# ===================== 3. 결측치 처리 =====================
-# 각 컬럼별 결측치 개수 확인
-print("\n=== 결측치 개수 확인 ===")
-print(df_campaign.isna().sum())  # 모든 컬럼의 결측치 개수 출력
-
-# 결측치가 있는 경우 제거 (현재 데이터에는 결측치 없음)
-df_campaign = df_campaign.dropna()
-
-# ===================== 4. 캠페인 참여율 분석 =====================
-# 전체 캠페인 고객 수 계산
-total_customers = df_campaign.shape[0]  # 전체 고객 수
-
-# 캠페인 참여 고객 수 계산
-participating_customers = df_campaign[df_campaign["Participation"]==1].shape[0]  # 캠페인 참여 고객 수
-
-# 캠페인 참여율 계산
-participation_rate = (participating_customers / total_customers) * 100  # 백분율 변환
-
-# 캠페인 참여율 출력
-print("\n=== 캠페인 참여율 분석 ===")
-print(f"전체 고객 수: {total_customers}명")
-print(f"캠페인 참여 고객 수: {participating_customers}명")
-print(f"캠페인 참여율: {participation_rate:.2f}%")
-
-# ===================== 5. 캠페인 참여 여부에 따른 매출 비교 =====================
-# 캠페인 참여 고객과 비참여 고객의 평균 매출 계산
-avg_revenue_participation = df_campaign[df_campaign["Participation"] == 1]["Revenue"].mean()  # 참여 고객 평균 매출
-avg_revenue_non_participation = df_campaign[df_campaign["Participation"] == 0]["Revenue"].mean()  # 비참여 고객 평균 매출
-
-# 평균 매출 비교 출력
-print("\n=== 캠페인 참여 여부에 따른 평균 매출 비교 ===")
-print(f"캠페인 참여 고객 평균 매출: {avg_revenue_participation:.2f}")
-print(f"캠페인 비참여 고객 평균 매출: {avg_revenue_non_participation:.2f}")
-
-# ===================== 6. 캠페인별 평균 매출 분석 =====================
-# 각 캠페인별 평균 매출 계산
-df_campaign_revenue = df_campaign.groupby("CampaignID")["Revenue"].mean().reset_index()
-
-# 컬럼명 변경 (캠페인별 평균 매출)
-df_campaign_revenue.rename(columns={"Revenue": "AvgRevenue"}, inplace=True)
-
-# 캠페인별 평균 매출 출력
-print("\n=== 캠페인별 평균 매출 분석 ===")
-df_campaign_revenue
-
-# ===================== 7. 캠페인별 클릭 수 및 매출 비교 =====================
-# 각 캠페인별 평균 클릭 수 및 평균 매출 계산
-df_campaign_clicks_revenue = df_campaign.groupby("CampaignID")[["Clicks", "Revenue"]].mean().reset_index()
-
-# 컬럼명 변경 (캠페인별 평균 클릭 수 및 매출)
-df_campaign_clicks_revenue.rename(columns={"Clicks": "AvgClicks", "Revenue": "AvgRevenue"}, inplace=True)
-
-# 캠페인별 평균 클릭 수 및 매출 출력
-print("\n=== 캠페인별 평균 클릭 수 및 매출 분석 ===")
-df_campaign_clicks_revenue
-```
-
-data_analysis_ws_2_3
-``` py
-# 필요한 라이브러리 불러오기
-import pandas as pd
-
-# ===================== 1. 데이터 로드 =====================
-# 판매 데이터 파일 경로 설정
-sales_file_path = "../data/sales_data.csv"
-
-# CSV 파일을 데이터프레임으로 로드
-df_sales = pd.read_csv(sales_file_path)
-
-# ===================== 2. 데이터 확인 =====================
-# 데이터프레임 기본 정보 출력
-print("=== 판매 데이터 정보 ===")
-df_sales.info()  # 컬럼 정보 및 데이터 타입 확인
-
-# 데이터의 상위 5개 행 출력
-print("\n=== 판매 데이터 샘플 ===")
-df_sales.head()
-
-# ===================== 3. 결측치 처리 =====================
-# 각 컬럼별 결측치 개수 확인
-print("\n=== 결측치 개수 확인 ===")
-print(df_sales.isna().sum())  # 각 컬럼의 결측치 개수 확인
-
-# 결측치가 있는 경우 제거 (현재 데이터에는 결측치 없음)
-df_sales = df_sales.dropna()
-
-# ===================== 4. 총 매출(Total Sales) 컬럼 생성 =====================
-# 총 매출(TotalSales) = 가격(Price) * 판매량(Quantity)
-df_sales["TotalSales"] = df_sales["Price"] * df_sales["Quantity"]
-
-# 총 매출 컬럼이 추가된 데이터 확인
-print("\n=== 총 매출(TotalSales) 컬럼 추가 후 데이터 확인 ===")
-print(df_sales.head())
-
-# ===================== 5. 제품별 가격과 판매량 분석 =====================
-# 제품별 평균 가격 계산
-df_avg_price = df_sales.groupby("Product")["Price"].mean().reset_index()
-
-# 제품별 평균 판매량 계산
-df_avg_quantity = df_sales.groupby("Product")["Quantity"].mean().reset_index()
-
-# 제품별 평균 가격과 평균 판매량 데이터 병합
-df_product_analysis = pd.merge(df_avg_price, df_avg_quantity, on="Product")
-
-# 제품별 평균 가격과 평균 판매량 출력
-print("\n=== 제품별 평균 가격과 평균 판매량 분석 ===")
-print(df_product_analysis)
-
-# ===================== 6. 가격과 판매량 간의 상관관계 계산 =====================
-# --------------------------------------------------------------
-# [상관관계란?]
-# - 두 변수 간의 관계가 얼마나 밀접한지를 나타내는 통계적 지표
-# - 상관계수(correlation coefficient)는 -1 ~ 1 사이의 값을 가짐
-# 
-# 
-# 상관계수 해석:
-#   -  1.0  : 완전한 양의 상관관계 (가격이 오르면 판매량도 반드시 오름)
-#   -  0.0  : 상관관계 없음 (가격과 판매량은 무관함)
-#   - -1.0 : 완전한 음의 상관관계 (가격이 오르면 판매량은 반드시 떨어짐)
-# 
-# 
-# 예시:
-#   - 상관계수 -0.85: 가격이 오를수록 판매량이 확실히 줄어드는 패턴
-#   - 상관계수 +0.60: 가격이 오르면 판매량도 어느 정도 함께 오르는 경향
-
-# 주의할 점:
-#   - 이 상관계수는 선형 관계(linear relationship)만 측정합니다.
-#   - 만약 두 변수 사이가 곡선(비선형) 관계라면, 상관계수가 0 근처라도 실제로는 관련이 있을 수 있습니다.
-#   - 따라서 상관계수만 보고 관계 유무를 단정하면 안 되고, 시각화(산점도) 등을 함께 보는 것이 좋습니다.
-# --------------------------------------------------------------
-
-
-# 전체 데이터에서 가격과 판매량 간의 상관계수 계산
-correlation = df_sales[["Price", "Quantity"]].corr()
-
-# 상관계수 출력
-print("\n=== 가격과 판매량 간의 상관관계 분석 ===")
-print(correlation)
-
-# ===================== 7. 제품별 상관관계 분석 =====================
-# 제품별 가격과 판매량의 상관계수 계산
-df_product_corr = df_sales.groupby("Product")[["Price", "Quantity"]].corr()
-
-# 데이터 변환 과정 설명:
-# 1. groupby("Product")로 제품별 데이터를 그룹화한 후 Price와 Quantity 간의 상관관계를 계산함
-# 2. corr() 함수는 기본적으로 두 변수 간의 상관계수를 포함하는 **멀티 인덱스(multi-index) 형태**의 DataFrame을 반환함
-# 3. unstack()을 사용하면 멀티 인덱스 형태에서 **행을 확장(flatten)하여 단순한 형태의 데이터프레임으로 변환** 가능
-# 4. unstack() 후, 필요한 상관계수 값을 가져오기 위해 `iloc[:, 1]`을 사용하여 Price와 Quantity 간의 상관계수를 추출
-
-df_product_corr = df_product_corr.unstack().iloc[:, 1]  # Price와 Quantity 간의 상관계수만 추출
-
-# 제품별 가격과 판매량의 상관계수 출력
-print("\n=== 제품별 가격과 판매량 간의 상관관계 분석 ===")
-print(df_product_corr)
-```
-
-data_analysis_ws_2_4
-``` py
-# 필요한 라이브러리 불러오기
-import pandas as pd
-
-# ===================== 1. 데이터 로드 =====================
-# 각 데이터 파일 경로 설정
-purchase_file_path = "../data/purchase_history.csv"
-survey_file_path = "../data/satisfaction_survey.csv"
-
-# CSV 파일을 데이터프레임으로 로드
-df_purchase = pd.read_csv(purchase_file_path)
-df_survey = pd.read_csv(survey_file_path)
-
-# ===================== 2. 데이터 확인 =====================
-# 데이터프레임 기본 정보 출력
-print("=== 구매 이력 데이터 정보 ===")
-print(df_purchase.dtypes)  # 컬럼 정보 및 데이터 타입 확인
-
-print("\n=== 고객 만족도 설문 데이터 정보 ===")
-print(df_survey.dtypes)  # 컬럼 정보 및 데이터 타입 확인
-
-# 데이터의 상위 5개 행 출력
-print("\n=== 구매 이력 데이터 샘플 ===")
-print(df_purchase.head())
-
-print("\n=== 고객 만족도 설문 데이터 샘플 ===")
-print(df_survey.head())
-
-# ===================== 3. 데이터 병합 =====================
-# 두 데이터셋을 CustomerID를 기준으로 병합
-df_merged = pd.merge(df_purchase, df_survey, on="CustomerID")
-
-# 병합된 데이터 확인
-print("\n=== 병합된 데이터 확인 ===")
-print(df_merged.info())
-
-# ===================== 4. 결측치 처리 =====================
-# 각 컬럼별 결측치 개수 확인
-print("\n=== 결측치 개수 확인 ===")
-print(df_merged.isna().sum())  # 결측치 개수 출력
-
-# 결측치가 없는 경우 그대로 사용, 결측치가 있다면 제거 또는 적절한 값으로 대체
-df_merged = df_merged.fillna(df_merged.median(numeric_only=True))
-
-# 결측치 처리 후 데이터 확인
-print("\n=== 결측치 처리 후 데이터 크기 ===")
-print(df_merged.shape)  # 데이터 크기 확인
-
-# ===================== 5. 고객 세분화 (구매 이력 기반) =====================
-# 구매 횟수(PurchaseHistory)를 기준으로 고객을 세 그룹으로 나누기
-# 구매 횟수가 10 이하: 'Low'
-# 구매 횟수가 11~30: 'Medium'
-# 구매 횟수가 31 이상: 'High'
-def categorize_purchase_history(purchase_count):
-    if purchase_count <= 10:
-        return 'Low'
-    elif purchase_count <= 30:
-        return 'Medium'
-    else:
-        return 'High'
-
-df_merged["PurchaseCategory"] = df_merged["PurchaseHistory"].apply(categorize_purchase_history)
-
-# 고객 세분화 결과 확인
-print("\n=== 구매 횟수 기반 고객 세분화 결과 ===")
-print(df_merged["PurchaseCategory"].value_counts())  # 각 그룹별 고객 수 확인
-
-# ===================== 6. 고객 만족도 기반 세분화 =====================
-# 만족도 점수(Satisfaction)를 기준으로 고객을 세 그룹으로 나누기
-# 만족도 1~3: 'Low'
-# 만족도 4~7: 'Medium'
-# 만족도 8~10: 'High'
-def categorize_satisfaction(satisfaction_score):
-    if satisfaction_score <= 3:
-        return 'Low'
-    elif satisfaction_score <= 7:
-        return 'Medium'
-    else:
-        return 'High'
-
-df_merged["SatisfactionCategory"] = df_merged["Satisfaction"].apply(categorize_satisfaction)
-
-# 고객 만족도 세분화 결과 확인
-print("\n=== 고객 만족도 기반 세분화 결과 ===")
-print(df_merged["SatisfactionCategory"].value_counts())  # 각 그룹별 고객 수 확인
-
-# ===================== 7. 각 그룹별 평균 구매 금액 분석 =====================
-# 구매 카테고리별 평균 총 지출 금액 분석
-df_purchase_analysis = df_merged.groupby("PurchaseCategory")["TotalSpent"].mean().reset_index()
-df_purchase_analysis.rename(columns={"TotalSpent": "AvgSpent"}, inplace=True)
-
-# 구매 카테고리별 평균 지출 금액 출력
-print("\n=== 구매 카테고리별 평균 지출 금액 분석 ===")
-print(df_purchase_analysis)
-
-# 만족도 카테고리별 평균 총 지출 금액 분석
-df_satisfaction_analysis = df_merged.groupby("SatisfactionCategory")["TotalSpent"].mean().reset_index()
-df_satisfaction_analysis.rename(columns={"TotalSpent": "AvgSpent"}, inplace=True)
-
-# 만족도 카테고리별 평균 지출 금액 출력
-print("\n=== 만족도 카테고리별 평균 지출 금액 분석 ===")
-print(df_satisfaction_analysis)
-
-# ===================== 8. 구매 카테고리와 만족도 카테고리 간의 관계 분석 =====================
-# 구매 카테고리별 고객 만족도 분포 확인
-df_category_relation = df_merged.groupby(["PurchaseCategory", "SatisfactionCategory"])["CustomerID"].count().reset_index()
-df_category_relation.rename(columns={"CustomerID": "CustomerCount"}, inplace=True)
-
-# 관계 분석 결과 출력
-print("\n=== 구매 카테고리와 만족도 카테고리 간의 관계 분석 ===")
-print(df_category_relation)
-
-# ===================== 9. 데이터 저장 =====================
-# 분석된 데이터를 CSV 파일로 저장
-df_merged.to_csv("../data/segmented_customer_data.csv", index=False)
-df_purchase_analysis.to_csv("../data/purchase_category_analysis.csv", index=False)
-df_satisfaction_analysis.to_csv("../data/satisfaction_category_analysis.csv", index=False)
-df_category_relation.to_csv("../data/category_relation_analysis.csv", index=False)
-
-print("\n=== 분석된 데이터 저장 완료 ===")
-```
-
-data_analysis_ws_2_5
-``` py
-# 필요한 라이브러리 불러오기
-import pandas as pd
-
-# ===================== 1. 데이터 로드 =====================
-# 각 데이터 파일 경로 설정
-purchase_file_path = "../data/purchase_history.csv"
-survey_file_path = "../data/satisfaction_survey.csv"
-
-# CSV 파일을 데이터프레임으로 로드
-df_purchase = pd.read_csv(purchase_file_path)
-df_survey = pd.read_csv(survey_file_path)
-
-# ===================== 2. 데이터 확인 =====================
-# 데이터프레임 기본 정보 출력
-print("=== 구매 이력 데이터 정보 ===")
-print(df_purchase.dtypes)  # 컬럼 정보 및 데이터 타입 확인
-
-print("\n=== 고객 만족도 설문 데이터 정보 ===")
-print(df_survey.dtypes)  # 컬럼 정보 및 데이터 타입 확인
-
-# 데이터의 상위 5개 행 출력
-print("\n=== 구매 이력 데이터 샘플 ===")
-print(df_purchase.head())
-
-print("\n=== 고객 만족도 설문 데이터 샘플 ===")
-print(df_survey.head())
-
-# ===================== 3. 데이터 병합 =====================
-# 두 데이터셋을 CustomerID를 기준으로 병합
-df_merged = pd.merge(df_purchase, df_survey, on="CustomerID")
-
-# 병합된 데이터 확인
-print("\n=== 병합된 데이터 확인 ===")
-print(df_merged.info())
-
-# ===================== 4. 결측치 처리 =====================
-# 각 컬럼별 결측치 개수 확인
-print("\n=== 결측치 개수 확인 ===")
-print(df_merged.isna().sum())  # 결측치 개수 출력
-
-# 결측치가 없는 경우 그대로 사용, 결측치가 있다면 제거 또는 적절한 값으로 대체
-df_merged = df_merged.fillna(df_merged.median(numeric_only=True))
-
-# 결측치 처리 후 데이터 확인
-print("\n=== 결측치 처리 후 데이터 크기 ===")
-print(df_merged.shape)  # 데이터 크기 확인
-
-# ===================== 5. 고객 세분화 (구매 이력 기반) =====================
-# 구매 횟수(PurchaseHistory)를 기준으로 고객을 세 그룹으로 나누기
-# 구매 횟수가 10 이하: 'Low'
-# 구매 횟수가 11~30: 'Medium'
-# 구매 횟수가 31 이상: 'High'
-def categorize_purchase_history(purchase_count):
-    if purchase_count <= 10:
-        return 'Low'
-    elif purchase_count <= 30:
-        return 'Medium'
-    else:
-        return 'High'
-
-df_merged["PurchaseCategory"] = df_merged["PurchaseHistory"].apply(categorize_purchase_history)
-
-# 고객 세분화 결과 확인
-print("\n=== 구매 횟수 기반 고객 세분화 결과 ===")
-print(df_merged["PurchaseCategory"].value_counts())  # 각 그룹별 고객 수 확인
-
-# ===================== 6. 고객 만족도 기반 세분화 =====================
-# 만족도 점수(Satisfaction)를 기준으로 고객을 세 그룹으로 나누기
-# 만족도 1~3: 'Low'
-# 만족도 4~7: 'Medium'
-# 만족도 8~10: 'High'
-def categorize_satisfaction(satisfaction_score):
-    if satisfaction_score <= 3:
-        return 'Low'
-    elif satisfaction_score <= 7:
-        return 'Medium'
-    else:
-        return 'High'
-
-df_merged["SatisfactionCategory"] = df_merged["Satisfaction"].apply(categorize_satisfaction)
-
-# 고객 만족도 세분화 결과 확인
-print("\n=== 고객 만족도 기반 세분화 결과 ===")
-print(df_merged["SatisfactionCategory"].value_counts())  # 각 그룹별 고객 수 확인
-
-# ===================== 7. 각 그룹별 평균 구매 금액 분석 =====================
-# 구매 카테고리별 평균 총 지출 금액 분석
-df_purchase_analysis = df_merged.groupby("PurchaseCategory")["TotalSpent"].mean().reset_index()
-df_purchase_analysis.rename(columns={"TotalSpent": "AvgSpent"}, inplace=True)
-
-# 구매 카테고리별 평균 지출 금액 출력
-print("\n=== 구매 카테고리별 평균 지출 금액 분석 ===")
-print(df_purchase_analysis)
-
-# 만족도 카테고리별 평균 총 지출 금액 분석
-df_satisfaction_analysis = df_merged.groupby("SatisfactionCategory")["TotalSpent"].mean().reset_index()
-df_satisfaction_analysis.rename(columns={"TotalSpent": "AvgSpent"}, inplace=True)
-
-# 만족도 카테고리별 평균 지출 금액 출력
-print("\n=== 만족도 카테고리별 평균 지출 금액 분석 ===")
-print(df_satisfaction_analysis)
-
-# ===================== 8. 구매 카테고리와 만족도 카테고리 간의 관계 분석 =====================
-# 구매 카테고리별 고객 만족도 분포 확인
-df_category_relation = df_merged.groupby(["PurchaseCategory", "SatisfactionCategory"])["CustomerID"].count().reset_index()
-df_category_relation.rename(columns={"CustomerID": "CustomerCount"}, inplace=True)
-
-# 관계 분석 결과 출력
-print("\n=== 구매 카테고리와 만족도 카테고리 간의 관계 분석 ===")
-print(df_category_relation)
-
-# ===================== 9. 데이터 저장 =====================
-# 분석된 데이터를 CSV 파일로 저장
-df_merged.to_csv("../data/segmented_customer_data.csv", index=False)
-df_purchase_analysis.to_csv("../data/purchase_category_analysis.csv", index=False)
-df_satisfaction_analysis.to_csv("../data/satisfaction_category_analysis.csv", index=False)
-df_category_relation.to_csv("../data/category_relation_analysis.csv", index=False)
-
-print("\n=== 분석된 데이터 저장 완료 ===")
-```
-
-data_science1_ws_4_1
-``` py
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-plt.rcParams['font.family'] = 'Malgun Gothic'
-
-# 1. 데이터 불러오기 및 기본 탐색
-# 주어진 영화 데이터 파일을 불러온다.
-file_path = "../data/movie_data.csv"  # 실제 데이터 파일 경로
-df = pd.read_csv(file_path)  # 데이터를 불러오는 코드 작성
-
-# 데이터의 첫 5행 출력 (EDA의 첫 단계)
-print("데이터 미리보기")
-df.head()  # 데이터의 처음 몇 개의 행을 출력하는 코드 작성
-
-# 데이터의 기본 정보 확인 (컬럼명, 데이터 타입, 결측값 확인)
-print("\n데이터 정보")
-df.info()  # 데이터프레임의 정보를 출력하는 코드 작성
-
-# 2. 필요한 컬럼 선택 및 데이터 변환
-# 'Director' (감독) 컬럼과 'Rating' (평점) 컬럼이 존재한다고 가정하고, 필요한 컬럼만 선택
-df = df[['Director', 'Rating']].dropna()  # 감독과 평점 데이터가 없는 경우 제거
-
-# 3. 특정 감독의 영화 데이터 필터링
-# 특정 감독의 이름을 설정 (예: 크리스토퍼 놀란)
-target_director = "Christopher Nolan"
-
-# 감독명이 target_director인 영화만 필터링
-director_movies = df[df['Director'] == target_director]
-
-# 4. 데이터 시각화: 특정 감독의 영화 평점 분포
-plt.figure(figsize=(10, 6))  # 그래프 크기 설정
-
-# 특정 감독의 영화 평점 데이터를 히스토그램으로 표현하는 코드 작성
-sns.histplot(df["Rating"], bins=10, kde=True, color='blue', alpha=0.7)
-
-# 그래프 제목 및 라벨 설정
-plt.title(f'{target_director} 영화의 평점 분포')
-plt.xlabel('평점')
-plt.ylabel('영화 개수')
-plt.grid(True)  # 격자 추가
-
-# 그래프 출력
-plt.show()
-
-# 5. 결과 해석
-# 특정 감독(예: 크리스토퍼 놀란)의 영화 평점 분포를 분석한다.
-# 그래프를 통해 해당 감독의 영화가 높은 평점을 많이 받았는지, 평점이 고르게 분포하는지 확인할 수 있다.
-# KDE(Kernel Density Estimate) 곡선을 통해 평점 분포의 밀도를 확인할 수 있다.
-# 특정 평점대(예: 8.0 이상)에 집중되어 있다면, 해당 감독이 대체로 좋은 평가를 받는다고 해석할 수 있다.
-# 반대로 평점이 다양하게 분포되어 있다면, 감독의 영화 스타일이 작품마다 평가가 다를 가능성이 있다.
-```
-
-data_science1_ws_4_2
-``` py
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-plt.rcParams['font.family'] = 'Malgun Gothic'
-
-# 1. 데이터 불러오기 및 기본 탐색
-# 주어진 지하철 데이터 파일을 불러온다.
-file_path = "../data/subway_data.csv"  # 실제 데이터 파일 경로
-df = pd.read_csv(file_path)
-
-# 데이터의 첫 5행 출력 (EDA의 첫 단계)
-print("데이터 미리보기")
-df.head()
-
-# 데이터의 기본 정보 확인 (컬럼명, 데이터 타입, 결측값 확인)
-print("\n데이터 정보")
-df.info()
-
-# 2. 필요한 컬럼 선택 및 데이터 변환
-# 'Date' (날짜), 'Station' (지하철역), 'Passengers' (승객 수) 컬럼이 존재한다고 가정하고, 필요한 컬럼만 선택
-df = df[["Date", "Station", "Passengers"]].dropna()  # 날짜, 역, 승객 수 데이터가 없는 경우 제거
-
-# 'Date' 컬럼을 날짜 형식으로 변환하여 요일 정보 추출
-df['Date'] = pd.to_datetime(df["Date"])  # 날짜 데이터를 datetime 형식으로 변환
-df['Weekday'] = df['Date'].dt.day_name()  # 요일(월요일~일요일) 정보 추가
-
-# 3. 요일별 평균 승객 수 분석
-# 요일별 평균 승객 수를 계산하여 새로운 데이터프레임 생성
-# 'Weekday'를 기준으로 'Passengers'의 평균을 계산하는 코드 작성
-weekday_avg_passengers = df.groupby("Weekday")['Passengers'].mean().reset_index()
-
-# 요일별 데이터를 정렬 (월요일~일요일 순서)
-weekday_order = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-weekday_avg_passengers['Weekday'] = pd.Categorical(weekday_avg_passengers['Weekday'], categories=weekday_order, ordered=True)
-weekday_avg_passengers = weekday_avg_passengers.sort_values('Weekday') # 요일 기준으로 정렬하는 코드 작성
-
-# 4. 가장 승객 수가 많은 요일 찾기
-# 가장 평균 승객 수가 많은 요일을 찾는 코드 작성
-busiest_day = weekday_avg_passengers.loc[weekday_avg_passengers["Passengers"].idxmax()]
-
-print("\n가장 평균 승객 수가 많은 요일:")
-busiest_day
-
-# 5. 데이터 시각화 (요일별 평균 승객 수 비교)
-plt.figure(figsize=(10, 6))
-sns.barplot(data=weekday_avg_passengers, x='Weekday', y='Passengers', palette='viridis')
-# Seaborn의 barplot을 사용하여 요일별 평균 승객 수를 시각화하는 코드 작성
-
-# 그래프 제목 및 라벨 설정
-plt.title('요일별 평균 승객 수')
-plt.xlabel('요일')
-plt.ylabel('평균 승객 수')
-plt.xticks(rotation=45)
-plt.grid(axis='y', linestyle='--', alpha=0.7)
-
-# 그래프 출력
-plt.show()
-
-# 6. 결과 해석
-## 1. 특정 요일별로 평균 승객 수를 분석하여 가장 붐비는 요일을 찾았다.
-## 2. 전체적으로 주중(월요일~금요일)이 주말보다 승객 수가 많을 가능성이 높음.
-## 3. 가장 승객 수가 많은 요일이 금요일이라면, 이는 출퇴근 및 여가 활동이 겹치는 영향을 받을 가능성이 있음.
-## 4. 주말의 경우(토요일, 일요일)는 상대적으로 승객 수가 감소할 수 있으며, 특정 관광지가 포함된 역은 예외일 수 있음.
-## 5. 가장 붐비는 요일의 역별 승객 수를 추가적으로 분석하여, 특정 역이 평균을 끌어올리는지 확인할 필요가 있음.
-```
-
-data_science1_ws_4_3
-``` py
-import pandas as pd
-import matplotlib.pyplot as plt
-plt.rcParams['font.family'] = 'Malgun Gothic'
-
-# 1. 데이터 불러오기 및 기본 탐색
-# 주어진 주식 데이터 파일을 불러온다.
-file_path = "../data/stock_data.csv"  # 실제 데이터 파일 경로
-df = pd.read_csv(file_path)
-
-# 데이터의 첫 5행 출력 (EDA의 첫 단계)
-print("데이터 미리보기")
-df.head()
-
-# 데이터의 기본 정보 확인 (컬럼명, 데이터 타입, 결측값 확인)
-print("\n데이터 정보")
-df.info()
-
-# 2. 필요한 컬럼 선택 및 데이터 변환
-# 'Date' (날짜), 'Close' (종가) 컬럼을 선택
-df = df[["Date", "Close"]].dropna()  # 날짜 및 종가 데이터가 없는 경우 제거
-
-# 'Date' 컬럼을 날짜 형식으로 변환
-df['Date'] = pd.to_datetime(df["Date"])  # 날짜 데이터를 datetime 형식으로 변환
-
-# 날짜 기준으로 정렬
-df = df.sort_values(by='Date')
-
-# 3. 이동 평균선 계산 (새로운 컬럼 만들기)
-# 단기 이동 평균선 (5일)
-df['MA5'] = df['Close'].rolling(window=5).mean()  # 5일 이동 평균선 계산
-
-# 중기 이동 평균선 (20일)
-df['MA20'] = df['Close'].rolling(window=20).mean()  #20일 이동 평균선 계산
-
-# 장기 이동 평균선 (60일)
-df['MA60'] = df['Close'].rolling(window=60).mean()  # 60일 이동 평균선 계산
-
-# 4. 특정 구간 강조 (이동 평균선이 교차하는 구간)
-# 이동 평균선이 교차하는 특정 구간을 찾기 위해, MA5와 MA20의 차이를 계산
-df['Crossover'] = df['MA5'] - df['MA20'] # 이동 평균선 차이를 계산하는 코드 작성
-
-# 교차점: MA5가 MA20을 상향 돌파하는 경우 (골든크로스)
-golden_cross = df[(df['Crossover'] > 0) & (df['Crossover'].shift(1) < 0)]
-
-# 교차점: MA5가 MA20을 하향 돌파하는 경우 (데드크로스)
-death_cross = df[(df['Crossover'] < 0) & (df['Crossover'].shift(1) > 0)]
-
-# 5. 데이터 시각화 (이동 평균선 및 특정 구간 강조)
-plt.figure(figsize=(12, 6))
-
-# 종가 그래프
-plt.plot(df['Date'], df['Close'], label='종가', color='black', linewidth=1, alpha=0.7)
-
-# 이동 평균선 그래프
-plt.plot(df['Date'], df['MA5'], label='5일 이동 평균선', color='blue', linewidth=1)
-plt.plot(df['Date'], df['MA20'], label='20일 이동 평균선', color='orange', linewidth=1)
-plt.plot(df['Date'], df['MA60'], label='60일 이동 평균선', color='green', linewidth=1)
-
-# 골든크로스 지점 강조
-plt.scatter(golden_cross['Date'], golden_cross['Close'], color='red', label='골든크로스', marker='^', s=100)
-
-# 데드크로스 지점 강조
-plt.scatter(death_cross['Date'], death_cross['Close'], color='purple', label='데드크로스', marker='v', s=100)
-
-# 그래프 제목 및 라벨 설정
-plt.title('주식 데이터의 이동 평균선 분석 및 특정 구간 강조')
-plt.xlabel('날짜')
-plt.ylabel('주가')
-plt.legend()
-plt.grid(True)
-
-# 그래프 출력
-plt.show()
-
-# 6. 결과 해석
-# 1. 이동 평균선을 통해 주가의 흐름을 파악할 수 있다.
-# 2. 5일 이동 평균선이 20일 이동 평균선을 상향 돌파하는 경우(골든크로스)는 상승 신호로 해석된다.
-# 3. 반대로, 5일 이동 평균선이 20일 이동 평균선을 하향 돌파하는 경우(데드크로스)는 하락 신호로 해석된다.
-# 4. 장기 이동 평균선(60일)을 함께 분석하면 주가의 장기적인 방향성을 이해하는 데 도움을 줄 수 있다.
-# 5. 특정 구간에서의 교차점(골든크로스, 데드크로스)을 강조하여 투자 의사 결정을 지원할 수 있다.
-```
-
-data_science1_ws_4_4
-``` py
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-plt.rcParams['font.family'] = 'Malgun Gothic'
-
-# 1. 데이터 불러오기 및 기본 탐색
-# 주어진 매장 매출 데이터 파일을 불러온다.
-file_path = "../data/store_sales.csv"  # 실제 데이터 파일 경로
-df = pd.read_csv(file_path)
-
-# 데이터의 첫 5행 출력 (EDA의 첫 단계)
-print("데이터 미리보기")
-df.head()
-
-# 데이터의 기본 정보 확인 (컬럼명, 데이터 타입, 결측값 확인)
-print("\n데이터 정보")
-df.info()
-
-# 2. 날짜 변환 및 연-월 데이터 생성
-df["Date"] = pd.to_datetime(df["Date"], format="%Y-%m")  # 'Date' 컬럼을 datetime 형식으로 변환
-df["YearMonth"] = df["Date"].dt.to_period("M")  # 연-월(YYYY-MM) 형식으로 변환하여 새로운 컬럼 생성
-
-# 3. 월별 매출 집계
-monthly_sales = df.groupby("YearMonth")["Revenue"].sum().reset_index()  # 'YearMonth' 기준으로 매출 합산
-monthly_sales["YearMonth"] = monthly_sales["YearMonth"].astype(str)  # 문자열로 변환하여 시각화에서 오류 방지
-
-# 4. 제품별 총 판매량 분석
-product_sales = df.groupby("Product")["Quantity"].sum().reset_index()  # 'Product'별로 총 판매량 합산
-
-# 5. 가장 많이 팔린 제품 상위 10개 선정
-top_products = product_sales.sort_values(by="Quantity", ascending=False).head(10)  # 판매량 기준으로 내림차순 정렬 후 상위 10개 선택
-
-# 6. 시각화 - 월별 매출 변화
-plt.figure(figsize=(12, 6))  # 그래프 크기 설정
-sns.lineplot(data=monthly_sales, x="YearMonth", y="Revenue", marker="o")  # 선 그래프(lineplot) 생성
-plt.xticks(rotation=45)  # x축 라벨 45도 회전
-plt.title("월별 매출 변화")  # 그래프 제목 설정
-plt.xlabel("연-월")  # x축 레이블 설정
-plt.ylabel("매출")  # y축 레이블 설정
-plt.grid(True)  # 격자 추가
-plt.show()  # 그래프 출력
-
-# 7. 시각화 - 가장 많이 팔린 제품
-plt.figure(figsize=(12, 6))  # 그래프 크기 설정
-sns.barplot(data=top_products, x="Product", y="Quantity")  # 바 그래프(barplot) 생성
-plt.xticks(rotation=45)  # x축 라벨 45도 회전
-plt.title("가장 많이 팔린 제품 상위 10개")  # 그래프 제목 설정
-plt.xlabel("제품")  # x축 레이블 설정
-plt.ylabel("판매량")  # y축 레이블 설정
-plt.show()  # 그래프 출력
-```
-
-data_science1_ws_4_5
-``` py
-import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-plt.rcParams['font.family'] = 'Malgun Gothic'
-
-# 1. 데이터 불러오기 및 기본 탐색
-# 주어진 영화 리뷰 데이터 파일을 불러온다.
-file_path = "../data/movie_reviews.csv"  # 실제 데이터 파일 경로
-df = pd.read_csv(file_path)
-
-# 데이터의 첫 5행 출력 (EDA의 첫 단계)
-print("데이터 미리보기")
-df.head()
-
-# 데이터의 기본 정보 확인 (컬럼명, 데이터 타입, 결측값 확인)
-print("\n데이터 정보")
-df.info()
-
-# 2. 리뷰 길이 계산 및 새로운 컬럼 추가
-# - 각 리뷰의 문자 길이를 계산하여 새로운 컬럼 'Review Length'를 생성합니다.
-df["Review Length"] = df["Review"].apply(len)
-
-# 3. 평점과 리뷰 길이의 관계 시각화
-# - 박스 플롯을 사용하여 평점별 리뷰 길이의 분포를 시각화합니다.
-# - 이를 통해 특정 평점에서 리뷰 길이가 더 긴 경향이 있는지 확인할 수 있습니다.
-plt.figure(figsize=(10, 6))
-sns.boxplot(x=df["Rating"], y=df["Review Length"])
-plt.xlabel("Rating (평점)")
-plt.ylabel("Review Length (리뷰 길이)")
-plt.title("평점과 리뷰 길이의 관계")
-plt.show()
-
-# 4. 리뷰 길이의 분포 확인
-# - 히스토그램과 KDE(커널 밀도 추정)를 사용하여 리뷰 길이의 분포를 확인합니다.
-# - 리뷰 길이의 평균과 편차를 시각적으로 파악할 수 있습니다.
-plt.figure(figsize=(10, 6))
-sns.histplot(df["Review Length"], bins=30, kde=True)
-plt.xlabel("Review Length (리뷰 길이)")
-plt.ylabel("Count (개수)")
-plt.title("리뷰 길이 분포")
-plt.show()
-
-# 5. 장문 리뷰 필터링 (상위 25% 이상의 길이를 가진 리뷰)
-# - 전체 리뷰 길이 데이터에서 75번째 백분위수(Q3)를 계산합니다.
-# - Q3 이상인 리뷰를 '장문 리뷰'로 간주하여 필터링합니다.
-long_review_threshold = df["Review Length"].quantile(0.75)  # 75% 백분위수
-long_reviews = df[df["Review Length"] >= long_review_threshold]
-
-# 6. 필터링된 장문 리뷰 개수 및 샘플 출력
-# - 장문 리뷰의 개수를 출력하여 얼마나 많은 리뷰가 해당하는지 확인합니다.
-print(f"장문 리뷰 개수: {long_reviews.shape[0]}")
-
-# - 일부 장문 리뷰 샘플을 출력하여 필터링이 잘 되었는지 확인합니다.
-print("\n장문 리뷰 샘플:")
-long_reviews.head()
-```
+# 딥러닝 및 이미지 모델 "1차시: 이미지 딥러닝 모델"
+## 0. 학습 시작
+
+---
+
+### 학습 목표
+- 이미지 기반 학습 모델의 구조와 작동 방식을 이해합니다.  
+- 대표적 CNN 기반 이미지 모델의 변천사를 배웁니다.  
+- 이미지 분류 문제에서 실습을 통해 주요 이미지 모델을 적용해봅니다.
+
+---
+
+### CONTENTS
+1. **CNN 살펴보기**  
+   1. CNN vs. FCN  
+   2. 모델 구조  
+2. **CNN 기반 모델 변천사**  
+   1. AlexNet  
+   2. VGGNet  
+   3. ResNet  
+   4. MobileNet  
+
+---
+
+### CNN 모델의 기본 구조는 무엇이며, 왜 이미지 과업에서 중요한가?
+- CNN 모델의 기원 및 모델 주요 모듈 소개
+
+---
+
+### CNN의 단위 연산과 디자인 철학은 어떻게 발전했을까?
+- 계층 깊이, 스케일, 학습 방법, 경량화
+
+---
+
+### CNN 기반 주요 모델은 어떻게 변화해왔고, 왜 중요한가?
+- 깊이와 효율성을 동시에 높이는 방향으로 개선
+
+---
+
+### 산업 현장 사례
+- 금형 표면 스크래치 검출  
+- 식품/의약품의 이물질 검출  
+- PCB 불량 자동 판정  
+  (부품과 기판 사이의 접합 불완전한 냉땜, 표면에 남은 플럭스 잔여물, 납땜부 미세 크랙 등 불량 검출)
+
+---
+
+### 내 일상 속에서 찾아볼 수 있는 사례
+- 성동구, 픽토그램 활용 ‘안심우회전시설’ 첫 설치  
+- 인공지능(AI) 카메라를 이용하여 차량, 보행자 등을 실시간으로 감지  
+- 상황에 맞게 움직이는 픽토그램을 모니터로 표출하는 방식으로  
+  교통사고를 효율적으로 예방
+
+## 1. CNN 살펴보기
+## 1-1. FCN & CNN 모델
+
+---
+
+### FCN 모델
+**완전 연결층 (Fully-Connected Layer)**  
+- 입력을 받아서 출력을 변환하는 신경망의 기본 모듈  
+- **FCN 변환 예시**
+  - **입력:** 이미지가 32×32×3의 고차행렬이라고 가정  
+    (이미지의 높이, 너비가 각각 32픽셀, RGB값 3개를 의미하며 RGB 값은 0~255 사이)  
+    → 이미지의 모든 화소를 나열하여 1차원 벡터로 만들어 입력 데이터로 받는다.
+  - **출력:** 10×1의 1차원 벡터  
+  - **모델 상수:** 모델이 학습해야 하는 파라미터(parameter)  
+    - 상기 출력될 시, 모델상수 W는 10×3072로 입력의 모든 값이 출력에 미치는 영향을 나타냄
+
+---
+
+### CNN 모델
+**합성곱 레이어 (Convolution Layer)**  
+- 입력 이미지를 필터와 연산하여 **특징 맵(feature map)** 을 뽑아내는 모듈  
+- 1차원 구조로 변환하는 FCN과 달리, **3차원 구조를 그대로 보존하면서 연산**  
+- **Convolution(컨볼루션):**  
+  필터를 이미지 상에서 이동시키면서 내적을 반복 수행,  
+  내적으로 구한 모든 값을 출력으로 제공
+
+---
+
+### 주의 사항
+- **차원을 반드시 주의!**  
+- Filter는 항상 **입력의 깊이/채널 축과 동일한 차원**을 가져야 함.
+
+---
+
+### 수식 표현
+- 특정 위치에서 **필터와 동일 사이즈의 이미지 영역 간 내적한 결과값**  
+- 필요한 연산은 (3×5×5=75)차원 내적 곱 + bias 벡터  
+
+\[
+w^T x + b
+\]
+
+> x : 필터가 덮는 이미지 영역  
+> w : 필터의 가중치  
+> b : 편향(보정값)
+
+---
+
+### 합성곱 레이어 (Convolution Layer)
+- 입력 이미지를 **필터와 연산하여 특징 맵(feature map)** 을 뽑아내는 모듈
+
+---
+
+### 합성곱 레이어 (Convolution Layer)
+- **출력 해상도 계산 공식**  
+  \[
+  출력 해상도 = 입력 해상도 - 필터 해상도 + 1
+  \]  
+  예시:  
+  \[
+  8 = 10 - 3 + 1
+  \]
+
+## 1-2. CNN 모델 구조
+
+---
+
+### 합성곱 레이어 (중첩)
+- 모델 상수(파라미터)를 증가시키면?
+
+---
+
+### 합성곱 레이어 (중첩)
+- 비선형 블록 (Conv[Linear] + ReLU[비선형 변환])과 함께하면 모델링 파워 향상
+
+---
+
+### 필터의 의미
+**필터 시각화**  
+- 학습된 필터 시각화를 통해 각 모델(구조)이 학습한 정보를 이해 가능
+
+---
+
+### 수용영역 (Receptive Field)
+**중첩과 수용영역**  
+- CNN 레이어는 이미지 작은 부분인 “지역 정보”를 추출하는데 유리하게 설계됨  
+- 이미지 활용은 다양한 작업에서 이미지 전체(예: 맥락) 의미 파악이 필요  
+- 따라서 “지역 정보 + 이미지 전체의 맥락”을 이해/활용하기 위한 설계가 필요함  
+
+**수용영역이란?**  
+- CNN이 이미지를 처리하면서 한 번에 볼 수 있는 영역의 크기  
+- 네트워크의 시야  
+- 일반적으로 네트워크가 깊어질수록 수용영역도 넓어짐 → 폭 넓은 맥락 이해 가능
+
+---
+
+### 수용영역 (추가)
+**중첩과 수용영역**  
+- 고해상도 이미지 처리 시, 많은 레이어를 통과해야 함  
+  → 연산, 비용, 학습 가능성 고려할 때 비실용적  
+- 실제 해법: **입력 사이즈를 줄여 모델에 입력함**
+
+---
+
+### 풀링 (Pooling)
+**효율적 연산 및 위치 변화의 강건성 확보**  
+- CNN 레이어의 출력을 줄여 연산 효율성 확보:  
+  입력 크기가 줄면 CNN의 연산량이 크게 줄어듦  
+- 예시: 2×2 풀링으로 입력의 해상도가 각각 ½로 줄었을 경우
+
+---
+
+### 풀링 (Pooling)
+**효율적 연산 및 위치 변화의 강건성 확보**
+- **위치 변화 강건성:** 입력 내 객체 위치가 다소 변해도 동일한 출력을 제공  
+- 사실상 저해상도 정보에 근거하여 작업 수행하므로 몇 화소 이동은 무시됨
+
+---
+
+### 풀링 (Pooling)
+**효율적 연산 및 위치 변화의 강건성 확보**
+- **맥스풀링(Max Pooling):** 정해진 커널 사이즈(예: 2×2)로 이미지를 나누어  
+  각 영역 내 가장 큰 값을 선택하는 연산
+
+---
+
+### 스트라이드 합성곱 (Strided Convolution)
+**풀링 한계 개선**
+- **일반 합성곱:** 필터를 1칸씩 이동하면서 연산 수행 (출력값 계산)  
+- **스트라이드 합성곱:** 필터를 스트라이드 값만큼(S칸) 이동한 후 출력 연산  
+- **효과:** 풀링처럼 입력 해상도를 줄임  
+  → **연산 효율** 및 **위치 강건성** 확보  
+
+**추가 비교**
+- 풀링 vs. 스트라이드 합성곱:  
+  풀링은 학습 파라미터가 없지만, 스트라이드는 커널을 동시에 학습  
+- 스트라이드 합성곱은 해상도 저하로 인한 정보 손실이 적으며,  
+  풀링 + 합성곱을 하나의 레이어로 대체함  
+- 고도화된 CNN에서는 **스트라이드 합성곱을 풀링 대신 활용**하는 경향
+
+## 2. CNN 기반 모델 변천사
+
+---
+
+### 2010~2017년까지의 CNN 모델
+- **세로축:** 에러율(Error Rate, %) — 낮을수록 성능이 좋은 모델  
+- **가로축:** 연도 & 모델명
+
+## 2-1. AlexNet
+- 5개의 합성곱 계층과 3개의 완전연결 계층으로 구성된 8계층 CNN 모델
+
+## 2-1. AlexNet
+
+---
+
+### 개요
+**5개의 합성곱 계층 + 3개의 완전연결 계층으로 구성된 8계층 CNN 모델**
+
+#### 🧩 모델 구조 특징
+- 5개 합성곱 레이어  
+- 맥스 풀링  
+- 3개 연결층 레이어  
+- ReLU 비선형 활성화  
+
+> **총 8-레이어**
+
+#### 💡 입력/출력
+- 입력: 이미지 (3×227×227 해상도)  
+- 출력: 레이블 (1×1024 벡터)  
+- 학습 시 정답은 **원-핫 벡터** (정답 클래스만 1, 나머지 0)  
+- 모델 예측값은 0~1 사이 확률값  
+  (ImageNet 기준, 각 클래스에 해당할 확률)
+
+---
+
+### Image Input & GPU 구성
+
+#### Image input 224, 2*GPU (논문 당시)
+- 논문 그림에는 입력 크기가 224로 되어 있었으나, 실제로는 **227**로 정정됨  
+- 사용된 GPU: GTX 580 (VRAM 3GB)  
+  → 메모리 한계로 2개의 GPU를 병렬 사용  
+- Conv / FC 레이어를 GPU 2개에 분산  
+  = 채널/뉴런을 반씩 나누어 계산
+
+#### Image input 227, 1*GPU (현재)
+- 최신 GPU (예: RTX 3090, A100, H100 등)  
+  → 24GB~80GB VRAM 보유  
+  → 단일 GPU로도 충분히 처리 가능
+
+---
+
+### AlexNet 단계별 구조
+
+#### 입력 (Input)
+- 크기: 227×227×3  
+- RGB 이미지 (3채널)
+
+#### 첫 번째 합성곱 층 (Conv1)
+- Conv 11×11, stride=4, **96개 필터**  
+- 출력 크기: 55×55×96  
+- 큰 필터와 큰 stride로 초반에 이미지를 강하게 줄이고 특징 추출 시작
+
+#### 첫 번째 풀링 층 (Max Pool1)
+- Max Pool 3×3, stride=2 (**Overlapping Pooling**)  
+- 출력 크기: 27×27×96  
+- 해상도 절반으로 줄이면서 중요한 특징만 남김
+
+#### 두 번째 합성곱 층 (Conv2)
+- Conv 5×5, pad=2, **256개 필터**  
+- 출력 크기: 27×27×256  
+- padding 적용으로 해상도 유지, 더 복잡한 특징 추출
+
+#### 두 번째 풀링 층 (Max Pool2)
+- Max Pool 3×3, stride=2  
+- 출력 크기: 13×13×256  
+
+#### 세 번째 합성곱 층 (Conv3)
+- Conv 3×3, pad=1, **384개 필터**  
+- 출력 크기: 13×13×384  
+
+#### 네 번째 합성곱 층 (Conv4)
+- Conv 3×3, pad=1, **384개 필터**  
+- 출력 크기: 13×13×384  
+
+## 2-1. AlexNet
+
+---
+
+### AlexNet 단계별 구조 (후반부)
+
+#### 다섯 번째 합성곱 층 (Conv5)
+- Conv 3×3, pad=1, **256개 필터**  
+- 출력 크기: 13×13×256  
+
+#### 세 번째 풀링 층 (Max Pool3)
+- Max Pool 3×3, stride=2  
+- 출력 크기: 6×6×256  
+- 마지막 공간 축소 → 이후 완전연결층으로 연결하기 쉽게 함  
+
+---
+
+### 완전 연결층 (FC Layers)
+- Flatten → 벡터 크기: 9216 (6×6×256)  
+- **FC1:** 4096 뉴런  
+- **FC2:** 4096 뉴런  
+
+---
+
+### 출력층 (Output)
+- **FC3 → Softmax (1000 클래스)**  
+- ImageNet 1000개 클래스 확률 분포 출력
+
+## 2-1. AlexNet
+
+---
+
+### 🧮 출력 사이즈 계산법 [Conv1]
+
+#### 📘 기본 공식
+- 출력 채널 수 = 현재 레이어의 필터(커널) 개수  
+- 출력 해상도  
+  \[
+  W' = \frac{W - K + 2P}{S} + 1
+  \]
+
+#### 예시 (Conv1)
+- 출력 채널 수 = 96  
+- \[
+  W' = \frac{227 - 11 + 2 \times 0}{4} + 1 = 55
+  \]
+  → 출력 크기: **55 × 55 × 96**
+
+---
+
+### 💾 연산비용 계산법 [Conv1]
+
+#### 1️⃣ 출력 활성 메모리 (KB)
+\[
+C × H' × W' = 96 × 55 × 55 = 290{,}400
+\]  
+- 각 값이 4Byte →  
+  \[
+  290{,}400 × 4 = 1{,}161{,}600 \text{ Byte} = 1.134 \text{ MB}
+  \]
+
+#### 2️⃣ 파라미터 수 (Weights)
+\[
+출력채널 × 입력채널 × K^2 + 출력채널(바이어스)
+\]  
+\[
+96 × 3 × 11 × 11 + 96 = 34{,}944 ≒ 34.9K
+\]
+
+#### 3️⃣ FLOPs (연산량)
+\[
+(H' × W') × (C_{in} × K × K × C_{out}) × 2
+\]  
+\[
+(55 × 55) × (3 × 11 × 11 × 96) × 2 = 105{,}415{,}200 ≒ 105.4M FLOPs
+\]
+
+---
+
+### ⚙️ GPU 병렬 처리 구조
+- 당시 **Conv2 / Conv4 / Conv5**에 **Group Convolution** 적용  
+  → 2개의 GPU에 분산 계산 (연산량 절감)
+
+---
+
+### 📊 리소스 사용 집중도
+
+| 구분 | 특징 |
+|------|------|
+| **Memory [1Group]** | 메모리 사용은 **초기 레이어**에 집중 |
+| **Params [1Group]** | 모델 상수(K)는 **완전연결층**에 집중 |
+| **FLOPs [1Group]** | 연산량은 **합성곱층(Conv Layer)** 에서 주로 발생 |
+
+## 2-2. VGGNet
+
+---
+
+### 📘 기본 구조
+- **5개의 합성곱 블록 + 맥스 풀링 구조**
+- 각 블록은 2~3개의 Conv + ReLU로 구성  
+- 풀링(Max Pooling)으로 블록 간 크기를 절반씩 축소
+
+---
+
+### 🧱 VGG-16 기준
+
+#### 모델 구조 특징
+- 5개 합성곱 블록 (각 블록당 Conv + ReLU 반복)
+- 각 블록마다 맥스 풀링
+- 3개 완전연결층 (FC Layers)
+- ReLU 비선형 활성화
+- 총 16개의 합성곱/연결층 레이어
+- 마지막 Softmax 수행 (ImageNet 1000 클래스 분류)
+
+#### 입력/출력
+- 입력: 이미지 (3 × 224 × 224)
+- 출력: 레이블 (1 × 1024 벡터)
+
+---
+
+### ⚖️ 모델 비교
+| 모델 | 주요 특징 |
+|------|------------|
+| **AlexNet** | 큰 필터(11×11), 얕은 구조, GPU 2개 병렬 |
+| **VGG16** | 작은 필터(3×3) 반복, 깊은 구조 |
+| **VGG19** | VGG16보다 3개 Conv 추가, 더 깊은 네트워크 |
+
+---
+
+### 💡 VGG의 레슨
+- “**작고 단순한 필터를 깊게 쌓으면 성능이 향상된다.**”  
+- → 새로운 설계 철학 제시 (Simple & Deep)
+
+---
+
+### 🧩 VGG의 디자인 룰
+
+#### 기본 원칙
+- **3×3 합성곱 / stride=1 / padding=1** 반복 적용  
+- **MaxPooling(2×2)** 으로 크기 절반씩 축소  
+- **Pooling 후 채널 수 2배로 증가**
+
+#### 설계 효과
+- 3×3 합성곱 2개 연달아 적용 시  
+  → 5×5 합성곱과 동일한 Receptive Field 확보  
+  → 연산량 절감 및 표현력 유지
+
+---
+
+### 🔧 설계 옵션 비교
+
+| 옵션 | 구성 | 파라미터 수 | FLOPs |
+|------|------|--------------|--------|
+| **Option 1** | 합성곱 (5×5, C→C) | 25C² | 25C²HW |
+| **Option 2** | 합성곱 (3×3, C→C) ×2 | 18C² | 18C²HW |
+| **결론** | 3×3 두 번이 더 효율적 (ReLU 두 번, 파라미터 감소) | ✅ 연산량 절감 |
+
+---
+
+### ⚙️ 연산 효율 설계 철학
+- AlexNet은 레이어별 연산량 차이가 매우 큼  
+- VGG는 **해상도 축소 시마다 채널 수를 증가**시켜  
+  레이어별 연산량을 **균형 있게 유지**함
+
+## 2-3. ResNet
+
+---
+
+### 📘 기본 구조 개요
+- **합성곱 블록(VGG 유사)** + **잔차(Residual) 블록**
+- 잔차 블록은 입력값을 그대로 출력에 더하는 **지름길(Shortcut) 연결** 포함  
+- **1×1 합성곱**으로 차원 축소 → 연산 효율 향상  
+- (ResNet-50 기준)
+  - 입력: 3 × 224 × 224  
+  - 출력: 1 × 1024 벡터
+
+---
+
+### 🧩 등장 배경
+- Batch 정규화(Batch Normalization) 도입으로 10+ 레이어 학습 가능  
+- 하지만 **깊다고 항상 잘 학습되지 않음 (Degradation Problem)**  
+  - 20-layer: 학습 안정, 에러 감소  
+  - 56-layer: 오히려 **training error 증가**, **test error 유지**  
+- 단순히 깊게 만드는 것은 한계가 있음 → **성능 하락 현상 발생**
+
+---
+
+### 💡 핵심 아이디어
+- 작은 모델(10+ 레이어)의 최소 성능을 보장하기 위해  
+  **입력값(x)을 후속 레이어 출력(F(x))에 그대로 더함**
+- 즉, 모델이 학습에 실패해도 **F(x) ≈ 0** → 출력은 x 유지  
+  → 최소한 기존 성능은 보장됨  
+- 이 구조가 바로 **Residual Block(잔차 블록)**
+
+---
+
+### 🔁 Residual Block 구조
+입력 X가 두 경로로 나뉘어 전달됨:
+
+1️⃣ **변환 경로 (F(x))**  
+   - Conv(3×3) → ReLU → Conv(3×3) → ReLU  
+   - 결과값: F(x)
+
+2️⃣ **지름길 경로 (Shortcut / Identity mapping)**  
+   - 입력 X 그대로 전달
+
+➡️ **최종 출력:**  
+\[
+Output = F(x) + x
+\]  
+- 학습 실패 시 F(x)≈0 → Output≈x → 최소 성능 보장
+
+---
+
+### 🧠 잔차 블록의 종류
+| 구분 | 구성 | 특징 |
+|------|------|------|
+| **Plain Block** | 3×3 Conv 2회 | 기본 잔차 구조 |
+| **Bottleneck Block** | 1×1 → 3×3 → 1×1 | 연산 효율 개선, 깊은 모델에 적합 |
+
+- Bottleneck 구조 도입 시 FLOPs 감소  
+  → **18HWC² → 17HWC²**
+
+---
+
+### ⚙️ Stem 구조
+- 모델 초기에 **입력 해상도를 1/4로 축소** (연산 효율↑)
+- 이후 잔차 블록 반복 적용
+- 여러 FC 레이어 제거, 대신 **전역 평균 풀링(Global Average Pooling)** 사용  
+  → 마지막에 FC 1개만 적용 (GoogleLeNet의 아이디어 차용)
+
+---
+
+### 🧩 다양한 조합
+| 모델 | 주요 차이점 |
+|------|--------------|
+| **ResNet-34** | Basic 잔차 블록 사용 |
+| **ResNet-50** | Bottleneck 블록 사용 |
+| ✅ ResNet-50 | 지금도 활발히 사용되는 강력한 CNN 기반 베이스라인 |
+
+---
+
+### 📈 핵심 요약
+- **Degradation Problem 해결**  
+- **Residual Connection(지름길 연결)** 로 깊은 네트워크 학습 가능  
+- **1×1 합성곱 + Bottleneck 구조** 로 효율성 향상  
+- 현재까지도 CNN 계열의 기본 구조로 널리 활용됨
+
+### 🧪 잘 알려진 ResNet 학습 레시피
+
+- 모든 Conv Layer에 **Batch Normalization** 수행  
+- **Xavier(He) 초기화** 적용 → 그래디언트 소실 문제 완화  
+- **SGD + Momentum(0.9)** 사용  
+- 학습률: 0.1 → Validation Error가 정체되면 1/10로 감소  
+- **Mini-batch Size = 256**  
+- **Weight Decay = 1e-5**  
+- **Dropout 미사용**
+
+---
+
+### 🏁 최종 요약
+
+- **100+ 레이어 학습 가능** → 깊은 네트워크 학습의 전환점  
+- 깊은 모델의 강력함 재확인  
+- 당시 모든 벤치마크에서 **최고 성능 달성**  
+- 지금도 **CNN 기반 구조 중 가장 활발히 활용되는 아키텍처**
+
+## 2-4. MobileNet
+
+---
+
+### 🎯 목표: 모바일·임베디드 환경에서 구동 가능
+- 기존 합성곱은 공간(H×W)과 채널(C)을 동시에 처리 → **연산량 과도**
+- MobileNet의 핵심 아이디어:  
+  👉 **공간과 채널을 분리하여 처리 (두 단계로 나눔)**
+
+---
+
+### ⚙️ 핵심 구조
+1️⃣ **깊이별 합성곱 (Depthwise Convolution)**  
+   - 각 채널별로 독립적인 3×3 합성곱 수행
+
+2️⃣ **화소별 합성곱 (Pointwise Convolution)**  
+   - 1×1 합성곱으로 채널 방향 결합 (채널 통합 역할)
+
+➡️ 두 단계를 결합해 기존 Conv를 대체  
+→ **Depthwise Separable Convolution** 구조 형성
+
+---
+
+### 📉 효과
+- 연산량 기존 대비 **약 9배 절감**
+- 모델 파라미터(상수 K) 대폭 감소
+- 속도 향상 및 메모리 효율 극대화
+
+---
+
+### 📲 이후 모델에 미친 영향
+- 경량·고속 모델의 대표 예시로 자리잡음  
+  → **엣지 디바이스(스마트폰, IoT 등)** 에서 실시간 딥러닝 가능  
+- 효율형 모델의 표준 구조로 자리매김  
+  → “깊이별 합성곱 + Bottleneck 구조” 가 이후 경량 모델(예: EfficientNet, ShuffleNet 등)에 지속적으로 채택됨
+
+---
+
+### 🧩 MobileNet의 의의
+- “**연산 효율 극대화 + 정확도 유지**” 라는 새로운 설계 철학 제시  
+- 경량 CNN 모델의 시작점으로,  
+  이후 MobileNetV2/V3, EfficientNet으로 발전함
+
+# 딥러닝 및 이미지 모델 "2차시: 다양한 신경망 모델"
+## 3. 시퀀스와 어텐션 (Overview)
+
+---
+
+### 📚 학습 목표
+
+- **CNN의 한계를 이해**하고, 이미지 인식에서 왜 새로운 접근이 필요한지 확인  
+- **RNN, Attention, Transformer** 의 핵심 아이디어와 구조 파악  
+- 각 모델이 해결하는 문제(순차성, 긴 의존성 등)를 비교  
+- 데이터 유형(이미지, 시퀀스, 긴 맥락)에 따라 **적절한 모델을 선택**할 수 있게 함
+
+---
+
+### 🧭 CONTENTS
+
+1️⃣ **CNN의 한계**  
+   - CNN의 구조 및 장점  
+   - 한계점
+
+2️⃣ **시퀀스 데이터: RNN**  
+   - 순차 데이터 처리 방식  
+   - 단순 RNN의 한계  
+   - 대안 모델(LSTM, GRU 등)
+
+3️⃣ **긴 거리 의존성: 어텐션 / ViT**  
+   - 어텐션 메커니즘 개념  
+   - 비전 트랜스포머(ViT)의 위치 인코딩
+
+---
+
+### 🚀 0. 학습 시작
+
+#### 🔹 왜 CNN만으로는 부족할까?
+- 순서가 중요한 데이터(시퀀스) 처리 불가  
+- **긴 거리 의존성(Long-range Dependency)** 부족
+
+#### 🔹 순차 데이터에 적합한 접근은?
+- **RNN (Recurrent Neural Network)**  
+  - 순서 정보 반영  
+  - 시간적 의존성 학습 가능  
+  - 하지만 **장기 의존성 학습 한계 존재**
+
+#### 🔹 긴 거리 의존성을 해결하려면?
+- **Attention 메커니즘**
+  - 입력 간 중요도(가중치)를 학습  
+  - 병렬 연산 가능, 효율적
+- **Vision Transformer (ViT)**
+  - 어텐션을 이미지에 적용  
+  - CNN 없이도 강력한 성능 달성
+
+## 1. CNN의 구조와 한계
+
+---
+
+### 🧩 1-1. CNN 구조의 장점
+
+**합성곱 구조의 특성**
+- 지역적 특징 학습에 특화  
+  → 작은 필터로 패턴·경계선 등 국소적 특성 포착  
+- 파라미터 효율성 우수  
+  → 지역 특성 추출 시 이미지 블록별 가중치 공유 → 연산량 절감  
+- 위치 변화·노이즈에 강건  
+  → Pooling / Stride 연산으로 세부 차이는 줄이고 전체 의미에 집중  
+- 이미지 기반 과업(분류, 탐지 등)에서 표준 모델로 자리잡음  
+
+---
+
+### ⚠️ 1-2. CNN의 핵심 한계 (1)  
+#### 🔹 **데이터 순서(order)를 무시함**
+
+- CNN은 **순차적(sequential)** 정보(텍스트, 음성, 시간 흐름 등)를 반영하기 어려움  
+- 순서가 의미를 바꾸는 데이터에서는 한계 존재  
+
+**예시**  
+- “약을 먹고 잠을 자고” vs “잠을 자고 약을 먹고” → 순서에 따라 의미 변화  
+- “I am a boy not a girl” vs “I am a girl not a boy” → 같은 단어 조합이라도 순서가 중요  
+
+---
+
+### ⚠️ 1-2. CNN의 핵심 한계 (2)  
+#### 🔹 **긴 거리 의존성(Long-range Dependency) 부족**
+
+- CNN은 **국소적(로컬) 특징 추출**에는 강하지만  
+  멀리 떨어진 요소 간의 관계 학습에는 취약함  
+- 즉, **멀리 떨어진 패턴 간의 의존성**을 잘 포착하지 못함  
+
+**예시**  
+- 이미지 내 반복되는 패턴 (예: 대칭, 반복 구조)  
+  → CNN은 “가까운 영역”만 보므로 전체 구조 이해에 한계  
+
+---
+
+### ⚠️ 1-2. CNN의 핵심 한계 (3)  
+#### 🔹 **픽셀 단위 복원 한계**
+
+- CNN은 이미지를 **압축된 표현(라벨 중심)** 으로 처리함  
+  → 전체 정보는 효율적으로 인식하지만, **정밀한 위치 정보는 손실됨**  
+  (Pooling / Stride 연산의 부작용)
+- 따라서 **세밀한 복원·생성 작업** (예: 세그멘테이션, 이미지 생성/편집 등)에는 부적합  
+
+👉 픽셀 단위 복원이나 영상 생성 문제를 다루려면  
+   **새로운 구조(예: U-Net, Transformer 기반 구조)** 가 필요함
+
+## 2-1. RNN (Recurrent Neural Networks)
+
+---
+
+### 🧩 RNN의 기본 개념
+- **순차적(sequential) 데이터 처리**를 위해 고안된 신경망 구조  
+- 이전 단계의 출력을 다음 단계의 입력으로 전달하여 **시간적 흐름**을 학습  
+  → “문맥(Context)” 유지 가능  
+
+**적용 예시**  
+- 시계열 데이터: 음성신호, 센서, 주가, 날씨  
+- 언어 데이터: 문장 생성, 번역, 음성 인식 등  
+
+---
+
+### 🧠 입력층 (Input Layer)
+- 입력 데이터: 학습할 문자(문자열)의 시퀀스  
+- 각 문자는 숫자 형태로 변환되어 입력됨  
+  → 일반적으로 **One-hot Encoding** 사용  
+
+**특징**
+- 각 문자는 1과 0으로 구성된 벡터  
+- 길이는 **알파벳 집합 크기(어휘 수)** 와 동일  
+- 가중치 행렬 `W_xh`: **입력 → 은닉 변환**
+
+---
+
+### 🔁 은닉층 (Hidden Layer)
+- 현재 입력(Input) + 이전 단계의 은닉 상태를 결합 → **내부 메모리 형성**  
+- 은닉 상태(`hidden state`)는 “이전까지의 문맥(Context)”을 보존  
+  → 다음 시점으로 전달되어 **시퀀스의 흐름 유지**
+
+**가중치**
+- `W_hh`: **이전 은닉 → 현재 은닉**  
+
+---
+
+### 📤 출력층 (Output Layer)
+- 은닉 상태를 **출력 벡터**로 변환한 것  
+- 각 출력은 “다음 문자가 될 확률”을 의미  
+- 가중치 행렬 `W_hy`: **은닉 → 출력 변환**
+
+---
+
+### 🎯 Target (정답)
+- 각 시점에서 **예측해야 하는 실제 문자**  
+- 예측 확률(`Output Layer`)과 비교 → 오차 계산 후 역전파로 가중치 업데이트  
+
+---
+
+### 🔄 RNN의 순환 구조 핵심 요약
+| 단계 | 입력 | 연산 | 출력 |
+|------|------|------|------|
+| ① Input | One-hot 벡터 | `W_xh` | 은닉 입력 |
+| ② Hidden | 이전 hidden + 입력 | `W_hh` | 새로운 hidden |
+| ③ Output | hidden 상태 | `W_hy` | 다음 문자 확률 |
+
+➡️ 시간 흐름에 따라 “입력 → 은닉 → 출력”이 반복되며 학습됨  
+➡️ 과거 정보가 은닉 상태를 통해 다음 단계로 전달됨  
+
+---
+
+📌 **정리**
+- CNN이 “공간적(Local)” 특징에 강하다면,  
+  RNN은 “시간적(Sequential)” 특징을 학습하는 구조  
+- 하지만 **긴 시퀀스에서의 학습 한계(Gradient Vanishing)** 가 존재함  
+  → 다음 단원: **RNN의 한계 & 개선 모델(LSTM, GRU)**
+
+## 2-1. RNN (Recurrent Neural Networks) — 구조 심화
+
+---
+
+### 🧠 RNN 셀 (RNN Cell)
+
+- **역할:** 은닉층에서 활성화 함수를 통해 입력을 처리하고 결과를 출력  
+- 입력(`x`): 입력층의 입력 벡터  
+- 출력(`y`): 출력층의 출력 벡터  
+- 셀(`cell`): 이전의 값을 기억하려는 **메모리 역할** 수행  
+- **은닉 상태(`hidden state`)**:  
+  - 메모리 셀이 출력층 방향 혹은 다음 시점(t+1)의 셀에 전달하는 값  
+  - 과거 정보를 보존하여 시퀀스의 흐름을 학습  
+
+---
+
+### 🔁 RNN의 표현 방식
+
+- **재귀(Recurrent) 구조 = 순환(Cyclic) 구조**  
+  → “왼쪽으로 접힌 네트워크” == “오른쪽으로 펼친 네트워크(Unrolled RNN)”  
+
+---
+
+### ⏱️ 시계열 의존성 (Temporal Dependency)
+
+RNN의 현재 상태는 이전 상태에 의존함.
+
+\[
+h_t = f_W(h_{t-1}, x_t)
+\]
+
+| 기호 | 의미 |
+|------|------|
+| \(h_t\) | 현재 은닉 상태 |
+| \(h_{t-1}\) | 이전 은닉 상태 |
+| \(f_W\) | 가중치 \(W\)가 포함된 RNN 함수 |
+| \(x_t\) | 현재 입력 데이터 |
+
+➡️ 모든 시점에서 동일한 가중치 \(W\)로 학습 (파라미터 공유)  
+➡️ 시간적 패턴을 일정하게 반영  
+
+---
+
+### ⚙️ 순수 RNN (Vanilla RNN)
+
+- **기본 형태:** 선형변환 + 바이어스 + 비선형 활성함수(`tanh`)  
+- 은닉 상태 계산:
+
+\[
+h_t = \tanh(W_{hh}h_{t-1} + W_{xh}x_t)
+\]
+
+| 기호 | 의미 |
+|------|------|
+| \(W_{hh}\) | 이전 은닉 → 현재 은닉 |
+| \(W_{xh}\) | 입력 → 은닉 |
+| \(tanh(\cdot)\) | 비선형 변환으로 복잡한 패턴 학습 가능 |
+
+**출력 계산:**
+
+\[
+y_t = W_{hy}h_t
+\]
+
+→ 은닉 상태 기반으로 최종 출력 생성 (예: 다음 문자 예측 등)
+
+---
+
+### 🔄 RNN 입출력 구조
+
+| 구조 | 설명 | 대표 예시 |
+|------|------|------------|
+| One-to-One | 단일 입력 → 단일 출력 | 이미지 → 라벨 (CNN 분류) |
+| One-to-Many | 단일 입력 → 시퀀스 출력 | 이미지 → 캡션 생성, 음악 생성 |
+| Many-to-One | 시퀀스 입력 → 단일 출력 | 문장 → 감정 분류, 음성 → 라벨 |
+| Many-to-Many | 시퀀스 입력 → 시퀀스 출력 | 번역(영→한), 음성 → 텍스트 |
+
+---
+
+### 📊 RNN 계산 그래프 시각화
+
+1️⃣ 초기 은닉 상태: \(h_0\)  
+2️⃣ 입력: 첫 번째 시계열 데이터 \(x_1\)  
+3️⃣ 동일한 함수 \(f_W\)가 모든 시점에 반복 적용  
+4️⃣ 각 시점의 은닉 상태가 다음 시점으로 전달  
+5️⃣ **마지막 은닉 상태 → 출력 생성**
+
+➡️ 동일한 네트워크를 시간축으로 **반복 적용**하여 전체 시퀀스 처리  
+➡️ 가중치는 모든 시점에서 **공유**됨  
+
+---
+
+📌 **정리**
+- RNN은 입력 순서를 반영하는 **순환 구조**  
+- 각 시점의 상태를 다음으로 전달하여 **시계열 의존성**을 학습  
+- 하지만 긴 시퀀스에서는 **기울기 소실(Vanishing Gradient)** 문제가 발생  
+  → 다음 단원: **RNN의 한계와 개선 (LSTM / GRU)**
+
+## 2-1. RNN 계산 그래프 (Computation Graph)
+
+---
+
+### 🧩 그래프 시각화 개요
+
+- **RNN 계산 그래프**는 시계열 데이터가 시간축을 따라  
+  반복적으로 처리되는 과정을 시각화한 것  
+- 동일한 RNN 셀(`f_W`)을 **모든 시점에 반복 적용**  
+  → 파라미터는 모든 시점에서 **공유(Shared Weights)**
+
+---
+
+### 🔁 계산 순서 요약
+
+1️⃣ **초기 은닉 상태**:  
+   - \( h_0 \): 첫 입력 전의 초기 메모리 상태  
+
+2️⃣ **입력 시퀀스 처리**:  
+   - 각 시점 \(t\)에서 입력 \(x_t\)를 받고  
+     이전 은닉 상태 \(h_{t-1}\)과 결합하여 새로운 은닉 상태 \(h_t\) 계산  
+
+3️⃣ **반복 적용**:  
+   - 동일한 가중치 \(W\)를 시간축 전체에 반복 적용  
+   - 모든 시점에 대해 동일한 함수 \( f_W(h_{t-1}, x_t) \) 사용  
+
+4️⃣ **출력 계산**:  
+   - 마지막 은닉 상태 혹은 각 시점의 은닉 상태에서  
+     \(y_t = W_{hy}h_t\) 형태로 출력 생성  
+
+---
+
+### ⚙️ 역전파(Backpropagation Through Time, BPTT)
+
+- **W 학습 원리:**  
+  - 역전파 시 모든 은닉 상태에 발생한 **기울기(gradient)** 를 더하여 연산  
+  - 시간에 따라 누적되므로 **기울기 소실/폭발(Vanishing/Exploding Gradient)** 문제가 발생하기도 함  
+
+---
+
+### 🔸 입출력 구조별 계산 그래프
+
+| 형태 | 설명 | 대표 예시 |
+|------|------|------------|
+| **시퀀스 입력 → 단일 출력** | 여러 입력 → 하나의 출력 | 감정 분류, 문장 판단 |
+| **단일 입력 → 시퀀스 출력** | 하나의 입력 → 여러 출력 | 이미지 → 캡션 생성 |
+| **시퀀스 입력 → 시퀀스 출력** | 입력과 출력 모두 시계열 | 기계 번역, 음성 → 텍스트 |
+
+---
+
+### 💬 예시: 언어 생성 (Language Generation)
+
+- 단어 시퀀스 입력: `[h, e, l, l, o]`  
+- 각 시점에서 다음 문자를 예측하며 학습  
+  → `"h" → "e"`, `"e" → "l"`, `"l" → "l"`, `"l" → "o"`
+
+---
+
+📌 **정리**
+- RNN은 시간축 방향으로 동일 연산을 반복 적용하는 **순환 구조**
+- 각 시점의 은닉 상태가 다음 시점으로 전달되어 문맥을 유지
+- 학습 시 모든 시점의 기울기를 합산하여 가중치를 갱신
+- 실제 과업에서는 One-to-One, Many-to-One, Many-to-Many 구조로 확장 가능
+
+## 2-2. 단순 RNN의 한계
+
+---
+
+### ⚠️ 기울기 폭발(Exploding Gradient) & 기울기 소실(Vanishing Gradient)
+
+- **문제 원인:**  
+  - RNN은 역전파(Backpropagation Through Time, BPTT) 시  
+    시퀀스 전체에 걸쳐 동일한 가중치 \( W \)를 반복적으로 곱하며 학습함  
+  - 이 과정에서 **기울기가 연속적으로 곱해져 누적됨**
+
+| 현상 | 원인 | 결과 |
+|------|------|------|
+| **기울기 폭발** | \( |W| > 1 \) → 곱할수록 무한히 커짐 | 학습 불안정, 발산 |
+| **기울기 소실** | \( |W| < 1 \) → 곱할수록 0에 수렴 | 과거 정보 손실, 장기 의존 학습 불가 |
+| **이상적 상태** | \( |W| = 1 \) | 안정적 학습 가능 |
+
+---
+
+### ⚙️ 강제 절삭(Gradient Clipping)
+- 기울기가 **폭발하지 않도록 제한**하는 기법  
+- 하지만,  
+  - 잘못된 기울기를 억지로 유지하는 부작용 존재  
+  - **기울기 소실 문제는 근본적으로 해결 불가!**  
+  → ➡️ **새로운 구조 필요 → LSTM, GRU**
+
+---
+
+## 2-3. 대안 모델: LSTM (Long Short-Term Memory)
+
+---
+
+### 🧠 LSTM의 핵심 개념
+
+- **목적:**  
+  - 단순 RNN의 기울기 소실 문제를 해결하기 위한 구조
+- **핵심 구성:**  
+  - **셀 상태(Cell State, C):**  
+    중요한 정보를 장기적으로 **저장 / 유지 / 기억**
+  - **게이트(Gate):**  
+    정보의 흐름을 제어하는 필터 역할  
+    (입력 정보는 얼마나 저장? 과거 정보는 얼마나 버릴지 결정)
+
+---
+
+### 🔸 LSTM의 구조적 아이디어
+
+| 구성요소 | 역할 | 설명 |
+|-----------|------|------|
+| **입력 게이트 (i)** | 정보 저장 | 새로운 정보를 셀 상태에 **추가** |
+| **망각 게이트 (g or f)** | 정보 삭제 | 필요 없는 정보는 **줄여 셀 상태 폭발 방지** |
+| **출력 게이트 (o)** | 정보 출력 | 필요한 정보만 **은닉 상태로 전달** |
+
+➡️ **중요한 정보만 유지하고 불필요한 정보는 잊는 구조**  
+➡️ 긴 시퀀스에서도 안정적으로 학습 가능  
+
+---
+
+### 🔹 셀 상태(Cell State)의 도입
+
+- RNN은 모든 정보를 은닉 상태 하나에 저장하려 해 **기억 손실** 발생  
+- LSTM은 **Cell State(C)** 를 추가하여  
+  기울기를 **덧셈(additive)** 형태로 전달  
+  → 곱셈 형태보다 안정적이어서 **장기 기억 유지 가능**
+
+---
+
+### 🧮 요약 비교
+
+| 항목 | 단순 RNN | LSTM |
+|------|-----------|------|
+| 정보 전달 | 은닉 상태(h)만 전달 | 은닉 상태(h) + 셀 상태(C) 전달 |
+| 주요 문제 | 기울기 소실 | 해결 가능 |
+| 기억 유지 | 단기 | 장기 |
+| 구조 요소 | 단순 순환 | 게이트 3종 (입력, 망각, 출력) |
+| 장점 | 구조 단순, 계산 빠름 | 긴 시퀀스 학습 가능, 안정적 |
+
+---
+
+📌 **핵심 정리**
+- RNN의 기울기 소실/폭발 문제는 **시간에 따른 연속 곱셈** 때문  
+- **LSTM**은 셀 상태와 게이트 제어를 통해  
+  필요한 정보만 선택적으로 유지 → 장기 의존성 문제 해결  
+- 이후 **GRU**가 등장하여 LSTM 구조를 간소화 (다음 단원에서 다룸)
+
+## 3-1. 어텐션 메커니즘 (Attention Mechanism)
+
+---
+
+### 🎯 핵심 개념
+
+- **목적:**  
+  CNN/RNN은 **순차 처리**에 한계 →  
+  **모든 위치(패치)** 간의 상관관계를 동시에 고려하도록 설계  
+  (즉, “어디에 집중할지(Attention)”를 학습)
+
+---
+
+### 🧩 이미지 기반으로 이해하기
+
+- 이미지에는 **픽셀 거리와 무관하게 유사한 패치(Patch)** 가 존재  
+  - 패치(Patch): 이미지를 일정 크기로 잘라 만든 **작은 조각 단위**
+
+- **핵심 아이디어:**  
+  관련 **높은** 패치 정보는 강조,  
+  관련 **낮은** 패치 정보는 약화시켜  
+  최종 출력에 반영!
+
+---
+
+### 🔹 구성 요소 (Q, K, V)
+
+| 기호 | 의미 | 설명 |
+|------|------|------|
+| **Query (Q)** | 쿼리 | “무엇에 집중할지”를 결정하는 대상 |
+| **Key (K)** | 키 | 다른 패치의 정보 |
+| **Value (V)** | 값 | 키에 해당하는 실제 정보 |
+| **Attention (a)** | 가중치 | 쿼리와 키의 유사도를 계산해 확률 분포로 표현 |
+| **Output** | 결과 | 가중치가 적용된 값들의 종합 |
+
+➡️ 즉, **“Q와 K의 유사도에 따라 V를 가중합”** 하는 구조
+
+---
+
+### ✨ 자기 어텐션 (Self-Attention)
+
+- 하나의 입력 내부에서 **자기 자신 간의 관계**를 학습  
+  - Q, K, V 모두 **같은 입력으로부터 생성**
+- **같은 이미지 내의 패치 간 유사도**를 계산  
+  → 서로 비슷한 특성을 가진 패치끼리 묶여 **클러스터링 효과** 발생
+
+> 🧠 Clustering: 비슷한 특성의 패치들이 서로 연결되어 그룹을 형성
+
+**효과:**  
+입력 내부의 각 위치가 **다른 모든 위치**를 참조할 수 있어  
+CNN이나 RNN보다 **장거리 의존성(Long-range Dependency)** 학습에 유리
+
+---
+
+### 🔄 교차 어텐션 (Cross-Attention)
+
+- **두 개 이상의 입력(이종 데이터)** 간 상관관계 학습  
+  - 예: 이미지 ↔ 텍스트 (Text-to-Image 모델)
+- 한 입력의 **Query(Q)** 와  
+  다른 입력의 **Key(K), Value(V)** 를 사용해  
+  서로 다른 도메인 간 연결을 구축
+
+| 구분 | Self-Attention | Cross-Attention |
+|------|----------------|----------------|
+| 입력 | 단일 입력 내부 | 이종 입력 간 (예: 텍스트 ↔ 이미지) |
+| Q, K, V | 동일 입력에서 생성 | Q는 A, K/V는 B에서 생성 |
+| 역할 | 내부 정보 통합 | 다른 도메인 정보 결합 |
+
+---
+
+📌 **정리**
+- Attention은 입력의 **모든 위치 간 관계를 직접 계산**  
+- Self-Attention은 입력 내부 패치 간 유사도 계산  
+- Cross-Attention은 서로 다른 입력 간 연관성 계산  
+- Transformer, ViT 등의 기반 메커니즘으로 확장됨
+
+## 3-2. ViT (Vision Transformer)
+
+---
+
+### 🧩 1️⃣ 모델 별 특성 비교
+
+| 모델 | 장점 | 한계 |
+|------|------|------|
+| **CNN** | 지역적(로컬) 패턴 학습에 강함 | 장거리 맥락 파악 어려움<br>데이터 순서 반영 불가 |
+| **RNN** | 데이터 순서 반영 가능 | 장거리 의존 학습 어려움 (기울기 소실/폭발) |
+| **LSTM** | 장기 의존 학습 가능 | 정보 희석 문제 발생 |
+| **Attention** | 장거리 맥락 완전 대응, 정보 손실 없음 | 순서 정보 직접 반영 불가 → **위치 인코딩 필요** |
+
+---
+
+### 🧭 2️⃣ ViT의 핵심 아이디어
+
+- CNN처럼 **이미지 전체를 한 번에 처리하지 않고**,  
+  이미지를 **작은 패치(Patch)** 로 분할한 뒤  
+  각 패치를 하나의 **토큰(Token)** 으로 간주  
+  → NLP의 문장 단어 처리 방식과 유사  
+
+**이미지 → [패치 토큰] 시퀀스 변환 → Transformer 입력**
+
+---
+
+### 📍 3️⃣ 위치 인코딩 (Position Encoding)
+
+#### 패치 순서 정보 제공
+- 이미지 패치마다 “이 패치가 어디 위치에 있는가”를 알려주는 벡터 추가  
+- 모델이 공간적 구조(예: (2,2) 위치)를 이해하도록 도움
+
+---
+
+#### 🔹 학습 가능한 위치 인코딩
+- 데이터에 **맞게 최적화**되는 방식  
+  - (+) 해상도 변경에도 동일한 룰 적용 가능  
+  - (–) 해상도 바뀌면 **다시 학습 필요**
+
+#### 🔹 사인파(Sinusoidal) 인코딩
+- 고정된 수학적 함수로 위치 표현  
+  - (+) **새 데이터나 해상도에도 재학습 불필요**  
+  - (–) 데이터 특성에 완벽히 최적화되진 않음  
+
+#### 🔹 상대 위치 인코딩
+- 절대 좌표 대신 **상대적 위치 관계** 인코딩  
+  - (+) 해상도 변화에도 강건  
+  - (–) 절대 위치 정보(예: 좌상단) 반영 어려움  
+
+---
+
+### 🧠 4️⃣ ViT 인코더 구조
+
+구성 순서:
+> **정규화 → 다중 헤드 어텐션 → 정규화 → 연결층(MLP)**
+
+| 구성 요소 | 역할 |
+|------------|------|
+| **정규화(Normalization)** | 입력을 균일하게 맞춰 학습 안정화 |
+| **다중 헤드 어텐션 (Multi-Head Attention)** | 여러 관점에서 패치 간 관계 학습 |
+| **연결층 (MLP)** | 어텐션 결과를 조합·변환해 새로운 특징 생성 |
+
+- 인코더 블록은 여러 개(보통 12개 이상) 반복되어  
+  전체 이미지의 **전역적 맥락(Global Context)** 학습
+
+---
+
+### 🌐 5️⃣ 전역 관계 학습 비교
+
+| 항목 | CNN | ViT |
+|------|------|------|
+| 학습 영역 | 국소(로컬) 중심 | 전역(Global) 중심 |
+| 관계 학습 방식 | 인접 픽셀/필터 기반 | 패치 전체 간 관계 직접 학습 |
+| 결과 | 지역적 패턴 인식 | 전체 맥락 이해 가능 |
+
+---
+
+### ⚔️ 6️⃣ ViT vs ResNet
+
+| 구분 | ViT | ResNet |
+|------|------|--------|
+| **소규모 데이터 (ImageNet)** | ResNet이 우세 | ✅ |
+| **대규모 데이터 (JFT-300M)** | ViT 우세 | ✅ |
+| **사전학습 여부** | 사전학습(Pretraining) 유무에 따라 성능 차이 큼 |
+| **성능 개선 포인트** | 큰 모델일수록, 많은 데이터일수록 ViT가 유리 |
+
+> 즉, ViT는 “데이터가 많을수록 더 강한 모델”
+
+---
+
+### 🧩 7️⃣ ViT 학습 시 유의점
+
+#### 정규화 & 데이터 증강 기술 필수
+- ViT는 **매우 많은 파라미터(상수)** 를 가짐  
+  → 과적합 방지를 위한 **정규화/증강 기술 중요**
+
+#### ⚙️ 종류학습(DeiT, 2021)
+- CNN 모델을 “교사(Teacher)”로 두고  
+  ViT 모델이 “학생(Student)”으로 따라 학습하는 방식
+
+**2단계 과정**
+1️⃣ “선생님 CNN 모델”이 이미지-레이블 관계 학습  
+2️⃣ “학생 ViT 모델”이 선생님 예측을 모방하며 학습  
+   → CNN 지식을 **ViT로 전이(Transfer)**
+
+---
+
+📌 **정리**
+- ViT는 CNN·RNN·LSTM의 한계를 넘어  
+  **전역적 패턴 학습**과 **장거리 의존성 처리**를 동시에 달성  
+- 단, **위치 정보 보완(인코딩)** 과 **대규모 데이터 학습 기술**이 핵심  
+- DeiT 같은 **지식증류(knowledge distillation)** 를 통해  
+  소규모 데이터에서도 ViT의 효율성을 확보할 수 있음
+
+## 3-2. Vision Transformer (ViT)
+
+---
+
+### 🧠 ViT 학습 시 유의점
+
+- **DeiT (Data-efficient Image Transformer, 2021)**  
+  → **지식증류(knowledge distillation)** 기반의 효율적 학습법  
+- **효과:**  
+  - 작은 데이터셋에서도 CNN 수준 성능 확보  
+  - “선생님 CNN 모델”의 예측을 “학생 ViT 모델”이 모방하여 학습  
+  - 실제로 **상당한 성능 개선 효과** 확인됨  
+
+---
+
+### 🌍 Vision Transformer의 트렌드
+
+#### 1️⃣ Swin Transformer (윈도우 기반 어텐션)
+- 전역 어텐션은 계산량이 너무 많음 → 효율 저하  
+- 해결책:
+  1. **윈도우(Window) 영역 내 어텐션** 수행  
+  2. 윈도우를 **이동(Shift)** 시켜 전역 정보를 점진적으로 통합  
+  → CNN처럼 **계층적(hierarchical)** 특징 추출 가능  
+- 결과:  
+  - **비용↓**, **성능↑**, **전역 문맥 고려** 가능  
+
+---
+
+#### 2️⃣ Vision 백본 vs 데이터 확장형 vs 멀티모달 모델
+
+| 구분 | 특징 | 예시 |
+|------|------|------|
+| **Vision 백본 (Supervised)** | 대규모 지도학습 기반, 강력한 성능 | 🔹 ViT-22B (Google) <br> - 220억 파라미터 <br> - JFT-3B 비공개 데이터셋 기반 |
+| **자기지도 백본 (Self-Supervised)** | 라벨 없는 대규모 데이터 활용 | 🔹 DINOv2 (Meta AI) <br> - 14억 개 공개 이미지 <br> - Self/Contrastive 학습 |
+| **멀티모달 백본 (Cross-modal)** | 텍스트-이미지 통합 학습 | 🔹 EVA-CLIP (상하이 AI Lab) <br> - LAION 데이터셋 <br> - 텍스트-이미지 대조학습 + 마스킹 사전학습 |
+| **범용 시각 백본 (Hybrid)** | Conv + Transformer 결합 | 🔹 InternImage-H (상하이 AI Lab) <br> - CNN+Transformer 하이브리드 <br> - 탑1급 성능, 코드 공개 |
+
+---
+
+### ⚖️ ViT의 장단점 및 활용
+
+| 구분 | 내용 |
+|------|------|
+| **장점** | 🔹 전역 문맥을 한 번에 고려 가능 <br> 🔹 순서 고려 가능 (위치 인코딩) <br> 🔹 시계열/시퀀스 데이터에도 적용 가능 |
+| **단점** | 🔹 대규모 데이터·GPU 자원 필요 <br> 🔹 데이터 규모 작으면 CNN보다 성능 저하 <br> 🔹 입력 토큰 수가 많을수록 계산량 급증 |
+| **활용** | 🔹 이미지 분류 / 탐지 / 분할 / 생성 등 SOTA 달성 <br> 🔹 멀티모달 모델의 기본 백본으로 사용 <br> 🔹 다양한 분야에서 기존 CNN 대체 중 |
+
+---
+
+📌 **최종 요약**
+
+| 항목 | 핵심 내용 |
+|------|------------|
+| **ViT 등장 배경** | CNN의 국소 한계, RNN의 장기 의존 문제 해결 |
+| **핵심 기술** | 어텐션 메커니즘 + 위치 인코딩 |
+| **장점** | 전역 관계 학습, 구조 단순 |
+| **한계** | 학습 자원·데이터 요구 큼 |
+| **트렌드** | Swin, DINOv2, EVA-CLIP, InternImage 등으로 진화 |
+| **미래 방향** | CNN+Transformer 융합, 멀티모달 통합, 경량화 연구 지속 |
+
+# 딥러닝 및 이미지 모델 "3차시: 이미지 모델 학습 전략"
+207~
