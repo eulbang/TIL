@@ -1,14 +1,7 @@
-<!-- MathJax v3: 이 페이지에서만 수식 렌더링 -->
-<script>
-window.MathJax = {
-  tex: {
-    inlineMath: [['$', '$'], ['\\(', '\\)']],   // $...$ 또는 \(...\) 인라인
-    displayMath: [['$$','$$'], ['\\[','\\]']]  // $$...$$ 또는 \[...\] 블록
-  }
-};
-</script>
-<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
-
+---
+title: 테스트 페이지
+layout: default
+---
 
 # AI & 기계학습 방법론 - 선형회귀(Linear Regression)
 ## 선형회귀(Linear Regression)
