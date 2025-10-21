@@ -1,3 +1,15 @@
+<!-- MathJax v3: 이 페이지에서만 수식 렌더링 -->
+<script>
+window.MathJax = {
+  tex: {
+    inlineMath: [['$', '$'], ['\\(', '\\)']],   // $...$ 또는 \(...\) 인라인
+    displayMath: [['$$','$$'], ['\\[','\\]']]  // $$...$$ 또는 \[...\] 블록
+  }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+
+
 # AI & 기계학습 방법론 - 선형회귀(Linear Regression)
 ## 선형회귀(Linear Regression)
 입력 변수와 출력 변수 사이의 관계를 **직선 형태로 근사**하여, 새로운 값을 예측하는 통계적 방법
