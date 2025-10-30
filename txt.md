@@ -524,4 +524,420 @@ which we transformed into a dialogue format.
 
 # 3. 거대 언어 모델의 추론
 
-57p 부터
+# 3-1. 디코딩 (Decoding) 알고리즘
+
+## 거대 언어 모델의 자동회귀 생성 (Auto-regressive Generation)
+- 학습이 완료된 거대 언어 모델은 어떻게 응답을 생성할까? ⇒ 순차적 추론을 통한 “토큰별 생성”
+
+출처 : https://jalammar.github.io/illustrated-transformer/
+
+
+## 거대 언어 모델의 자동회귀 생성 (Auto-regressive Generation)
+- Q. 언제 추론 및 토큰 생성을 멈추고 응답을 제공?  
+  A. EOS 토큰 생성 시 종료 or 사전에 정의된 토큰 수 도달 시 종료  
+  - E.g. `[SEP]`: BERT에서 사용된 EOS (End Of Sentence) 토큰
+
+1. 원문 텍스트 입력  
+   ````python
+   text = "Tokenizing text is a core task of NLP."
+   encoded_text = tokenizer(text)
+   ````
+
+2. 토큰 ID 시퀀스  
+   ````python
+   {'input_ids': [101, 19204, 6026, 3793, 2003, 1037, 4563, 4708, 1997, 17953, 2361, 1012, 102],}
+   ````
+
+3. 토큰 문자열 리스트  
+   ````python
+   ['[CLS]', 'token', '##izing', 'text', 'is', 'a', 'core', 'task', 'of', 'nl', '##p', '.', '[SEP]']
+   ````  
+   → 문장 종료 표시 (EOS 토큰)
+
+출처 : https://medium.com/@abdallahashraf90x/tokenization-in-nlp-all-you-need-to-know-45c00cfa2df7
+
+
+## 거대 언어 모델의 자동회귀 생성 (Auto-regressive Generation)
+- Goal: 주어진 입력 `x = [x₁, ..., x_L]` 에 대해 다음 토큰 `x_{L+1}` 을 생성  
+  - Remark. 거대 언어 모델: 입력 `x`에 대해 다음 토큰에 대한 확률 분포 `p̂(x)`를 제공
+- 디코딩(Decoding) 알고리즘: `p̂(x)`로부터 `x_{L+1}`을 생성하는 알고리즘 (다음 단어를 선택하는 방법)
+
+`x = [x₁, x₂, x₃] = [아까, 밥, 먹고]`
+
+단어 목록과 확률 예시  
+왔군 - 0.06  
+왔어 - 0.5  
+왔는데 - 0.2  
+왔거든 - 0.1
+
+출처 : https://tilnote.io/books/6480b090e92fe5ef635f54df/6480a73ee92fe5ef635f4d77
+
+
+## 거대 언어 모델의 자동회귀 생성 (Auto-regressive Generation)
+- Pytorch 실제 예시
+
+````python
+from transformers import AutoTokenizer, AutoModelForCausalLM
+
+tokenizer = AutoTokenizer.from_pretrained("gpt2")
+model = AutoModelForCausalLM.from_pretrained("gpt2")
+
+prompt = "Today I believe we can finally"
+input_ids = tokenizer(prompt, return_tensors="pt").input_ids
+
+# generate up to 30 tokens
+outputs = model.generate(input_ids, do_sample=False, max_length=30)
+tokenizer.batch_decode(outputs, skip_special_tokens=True)
+````
+
+자동회귀 생성 파트  
+출처 : https://huggingface.co/blog/introducing-csearch
+
+
+## 거대 언어 모델의 자동회귀 생성 (Auto-regressive Generation)
+- Pytorch 실제 예시
+
+디코딩(Decoding) 알고리즘 종류:
+- `greedy decoding` by calling `greedy_search()`  
+- `contrastive search` by calling `contrastive_search()`  
+- `multinomial sampling` by calling `sample()`  
+- `beam-search decoding` by calling `beam_search()`  
+- `beam-search multinomial sampling` by calling `beam_sample()`  
+- `diverse beam-search` by calling `group_beam_search()`  
+- `constrained beam-search decoding` by calling `constrained_beam_search()`
+
+출처 : https://docs.pytorch.org/torchtune/0.3/generated/torchtune.generation.generate.html#torchtune.generation.generate
+
+
+## 디코딩(Decoding) 알고리즘: ① Greedy Decoding
+- 핵심 아이디어: 가장 확률이 높은 다음 토큰을 선택  
+  - 장점: 사용하기 쉽다.  
+  - 단점: 직후만 고려하기 때문에 생성 응답이 최종적으로 최선이 아닐 수 있다.
+
+출처 : https://heidloff.net/article/greedy-beam-sampling/
+
+
+## 디코딩(Decoding) 알고리즘: ② Beam Search
+- 핵심 아이디어: 확률이 높은 k개(beam size)의 후보를 동시에 고려  
+  - 고르는 기준: 누적 생성 확률(지금까지 생성된 문장 전체가 나올 확률의 곱)
+  - 앞선 Greedy Decoding은 매 시점마다 가장 높은 확률의 선택지 1개만을 선택했지만,  
+    Beam Search는 전체 문장 후보들의 누적 확률을 기준으로 상위 k개를 남기는 것
+
+출처 : https://d2l.ai/chapter_recurrent-modern/beam-search.html
+
+
+## 디코딩(Decoding) 알고리즘: ② Beam Search
+- 핵심 아이디어: 확률이 높은 여러 후보를 동시에 고려  
+  - 장점: 최종적으로 좋은 응답 생성 확률이 높다.  
+  - 단점: 계산 비용이 많이 늘어난다(각 후보마다 LLM 추론을 수행).
+
+예시 계산  
+“The dog has” = 0.4 * 0.9 = 0.36  
+“The nice woman” = 0.5 * 0.4 = 0.20
+
+Greedy 방식의 경우 매번 가장 높은 확률을 계산해 “The nice woman…” 경로를 선택하지만  
+Beam Search의 경우 전체 문장 후보의 누적 확률을 고려하여 “The dog has…” 경로를 선택함.
+
+출처 : https://heidloff.net/article/greedy-beam-sampling/
+
+
+## 디코딩(Decoding) 알고리즘: ③ Sampling
+- 핵심 아이디어: 거대 언어 모델이 제공한 확률을 기준으로 랜덤하게 생성  
+  - 장점: 다양한 응답을 생성할 수 있음.  
+  - 단점: 생성된 응답의 품질이 감소할 수 있음.
+
+단어 사전에 대해 정의된 확률 분포  
+모델이 아는 모든 단어에 대해 ‘다음 단어가 될 확률’을 매겨 놓은 것
+
+출처 : https://huyenchip.com/2024/01/16/sampling.html#constraint_sampling
+
+# 3-1. 디코딩 (Decoding) 알고리즘
+
+## 디코딩(Decoding) 알고리즘: ④ Sampling “with Temperature”
+- 핵심 아이디어: 하이퍼 파라미터 `T`를 통해 거대 언어 모델이 생성한 확률 분포를 임의로 조작
+  - `T > 1`: 확률 분포를 *Smooth*하게 만듦 (더 다양한 응답 생성)
+  - `T < 1`: 확률 분포를 *Sharp*하게 만듦 (기존에 확률이 높은 응답에 집중)
+
+출처 : https://medium.com/@harshit158/softmax-temperature-5492e4007f71
+
+- `T < 1`: 확률 분포를 *Sharp*하게 만듦 (기존에 확률이 높은 응답에 집중)
+  - 특정 후보(예: 9번 그래프)가 압도적으로 높은 확률을 갖고, 나머지는 매우 낮음
+  - → 모델이 항상 비슷한 답(가장 높은 확률의 단어)만 내놓게 됨
+  - * 안정적이나 다양성이 떨어짐
+
+출처 : https://medium.com/@harshit158/softmax-temperature-5492e4007f71
+
+- `T > 1`: 확률 분포를 *Smooth*하게 만듦 (더 다양한 응답 생성)
+  - 분포가 평평해짐
+  - 모든 단어가 거의 비슷한 확률로 선택될 수 있음.
+  - → 모델이 예측할 때 다양성이 극대화되지만, 품질은 불안정해짐.
+  - * 창의적이나 품질이 떨어질 수 있음.
+
+출처 : https://medium.com/@harshit158/softmax-temperature-5492e4007f71
+
+
+## 디코딩(Decoding) 알고리즘: ⑤ Top-K Sampling
+- 핵심 아이디어: 확률이 높은 `K`개의 토큰들 중에서만 랜덤하게 확률에 따라 샘플링
+  - 장점: 품질이 낮은 응답을 생성할 가능성을 줄일 수 있음
+
+출처 : https://sooftware.io/generate/
+
+- 단점: 확률 분포의 모양에 상관 없이 고정된 `K`개의 후보군을 고려
+
+출처 : https://sooftware.io/generate/
+
+- 문맥에 따라 다음 단어의 예측 확률 합이 다르다.
+  - `Σ_{w ∈ V_top-K} P(w | “The”) = 0.68`
+  - `Σ_{w ∈ V_top-K} P(w | “The”, “car”) = 0.99`
+
+출처 : https://sooftware.io/generate/
+
+
+## 디코딩(Decoding) 알고리즘: ⑥ Top-P Sampling (or Nucleus Sampling)
+- 핵심 아이디어: `K`를 고정하는 대신, 누적 확률(`P`)에 집중하여 `K`를 자동으로 조절
+  - 예시: `P = 0.9` → 확률이 높은 응답 후보의 확률을 더했을 때 `0.9`를 처음으로 초과하는 `K`를 사용
+
+출처 : https://sooftware.io/generate/
+
+- 핵심 아이디어: `K`를 고정하는 대신, 누적 확률(`P`)에 집중하여 `K`를 자동으로 조절
+- 다양한 평가 지표에서 기존 디코딩 알고리즘들 대비 좋은 성능을 달성
+
+출처 : Holtzman et al., The Curious Case of Neural Text Degeneration., ICLR 2020
+
+
+## 디코딩(Decoding) 알고리즘 별 장단점 요약
+- Greedy Decoding
+  - 장점: 쉬운 사용법
+  - 단점: 최적해 보장 `X`
+- Beam Search
+  - 장점: 좋은 응답 생성 확률 ↑
+  - 단점: 큰 계산 비용
+- Sampling
+  - 장점: 다양한 응답 생성 가능
+  - 단점: 품질 불안정
+- Sampling with “Temperature”
+  - 장점: 창의성/안정성 조절 가능
+  - 단점: `T ↑` : 품질 저하 / `T ↓` : 다양성 부족
+- Top-K Sampling
+  - 장점: 잡음 단어 배제, 품질 향상
+  - 단점: `K`값 고정 → 문맥 따라 불균형
+- Top-P Sampling (Nucleus)
+  - 장점: 확률 누적 기준, 품질·다양성 균형
+  - 단점: `P`값 설정 필요 (경우에 따라 랜덤성 여전)
+
+<표3-1_텍스트 파운데이션 모델_거대 언어 모델의 추론_디코딩 알고리즘 별 장단점 요약>
+
+# 3-1. 디코딩(Decoding) 알고리즘
+## 디코딩(Decoding) 알고리즘: 실제 예시 with ChatGPT
+- **OpenAI Playground / 모델 설정창**
+  - 이 값들을 조정하면서 앞서 나온 디코딩 알고리즘 값을 간접적으로 제어할 수 있음.
+
+*출처: https://platform.openai.com/chat/edit?models=gpt-4o-2024-11-20*  
+<그림3-13_텍스트 파운데이션 모델_거대 언어 모델의 추론_ChatGPT에서 실제로 활용되고 있는 디코딩 알고리즘 및 효과 예시>
+
+---
+
+# 3-2. 프롬프트 엔지니어링
+## 입력 프롬프트 = (1) 지시(instruction) + (2) 예시(few-shot examples)
+- **지시 (Instruction)**
+- **예시 (few-shot examples)**
+  - 모델은 학습을 새로 하지 않고 프롬프트 안의 예시를 보고 패턴을 따라 함.
+
+*출처: Brown et al., Language Models are Few-Shot Learners., NeurIPS 2020*  
+<그림3-14_텍스트 파운데이션 모델_거대 언어 모델의 추론_인 컨텍스트 학습 (or 퓨샷 프롬프팅) 예시>
+
+---
+
+## 입력 프롬프트의 영향
+- 어떻게 지시를 주는지, 어떤 예시를 보여주는지가 거대 언어 모델의 성능에 크게 영향을 미침
+- **프롬프트 엔지니어링**: 원하는 답을 얻기 위해 모델에 주어지는 입력(프롬프트)을 설계·조정하는 기법
+
+*출처: Brown et al., Language Models are Few-Shot Learners., NeurIPS 2020*  
+<그림3-15_텍스트 파운데이션 모델_프롬프트 엔지니어링_프롬프트에 따른 ChatGPT의 응답 차이>
+
+---
+
+## 프롬프트 엔지니어링: 지시(instruction)
+- 감정 분류와 같은 쉬운 문제뿐 아니라 수학, 코딩과 같은 어려운 문제를 거대 언어 모델로 푸는 것에 많은 관심 집중
+  - 예시: 수학 질의 응답 (GSM8K → 미국 초등학교 고학년 수준 수학 문제)
+    - **질문:** Josh는 쿠키 한 상자를 사려고 돈을 모으고 있어요. 돈을 벌기 위해 팔찌를 만들어 팔기로 했습니다. 팔찌 하나를 만들 때 재료비로 \$1이 들고, 팔찌는 하나당 \$1.5에 판매합니다. Josh가 팔찌를 12개 만들고 쿠키를 산 뒤에도 \$3가 남아있다면, 쿠키 한 상자의 가격은 얼마일까요?
+    - **정답:** Josh는 팔찌 하나당 \$1.5 - \$1 = \$0.5의 이익을 얻습니다. Josh가 팔찌를 12개 만들면, 총 이익은 12 * \$0.5 = \$6입니다. 쿠키를 산 뒤에도 \$3가 남아 있으므로, Josh는 \$6 - \$3 = \$3을 쿠키 한 상자에 썼습니다. 따라서 쿠키 한 상자의 가격은 \$3입니다. 정답은 \$3입니다.
+
+*출처: https://huggingface.co/datasets/openai/gsm8k*  
+<그림3-16_텍스트 파운데이션 모델_프롬프트 엔지니어링_GSM8K 수학 문제 예시와 거대 언어 모델의 생성한 풀이 예시>
+
+---
+
+## 프롬프트 엔지니어링: 성능 비교
+- 감정 분류와 같은 쉬운 문제뿐 아니라 수학, 코딩과 같은 어려운 문제를 거대 언어 모델로 푸는 것에 많은 관심 집중
+  - Claude 3, GPT-4, Gemini 등 최신 모델들의 벤치마크 비교 (Grade School Math, MATH 등)
+
+*출처: https://www.anthropic.com/news/claude-3-family*  
+<그림3-17_텍스트 파운데이션 모델_프롬프트 엔지니어링_다양한 벤치마크에서의 최신 SOTA 거대 언어 모델들 간의 성능 비교>
+
+---
+
+## Chain-of-Thought (CoT) 프롬프팅
+- **아이디어:** 단순히 질문과 응답만을 예시로 활용하는 것이 아니라, **추론(Reasoning)** 과정도 예시에 포함
+  - 이를 통해 테스트 질문에 대해 추론을 생성하고 응답하도록 유도함으로써, 더 정확한 정답 생성을 기대할 수 있음
+  - 질문에 대한 정답을 바로 제시 → 틀림
+  - 질문에 대한 정답이 나오는 추론 과정을 함께 제시 → 정답률 상승
+
+*출처: Wei et al., Chain-of-Thought Prompting Elicits Reasoning in Large Language Model., NeurIPS 2022*  
+<그림3-18_텍스트 파운데이션 모델_프롬프트 엔지니어링_CoT 프롬프팅을 통한 추론 기반 응답 예시>
+
+---
+
+## CoT 프롬프팅의 효과
+- **결과:** CoT는 거대 언어 모델(PaLM)의 추론 성능을 크게 증가시킴
+  - *PaLM*: 당시 구글에서 사용했던 가장 큰 거대 언어 모델 (PaLM 540B vs. GPT-3 175B)
+- **CoT로 인한 성능 향상은 모델 크기가 커질수록 더 확대됨**  
+  (추론 ~= 창발성?)
+  - *창발성:* 모델 크기가 커지면 갑자기 새로운 능력이 나타나는 현상을 의미  
+    (*PaLM의 창발적 능력이 발현되었을 수 있음*)
+
+*출처: Wei et al., Chain-of-Thought Prompting Elicits Reasoning in Large Language Model., NeurIPS 2022*  
+<그림3-19_텍스트 파운데이션 모델_프롬프트 엔지니어링_CoT 프롬프팅을 통한 복잡한 추론 테스크에 대한 성능 향상 예시: GSM8K>
+
+# 3-2. 프롬프트 엔지니어링
+## Chain-of-Thought (CoT) 프롬프팅
+- **결과:** CoT는 거대 언어 모델(PaLM)의 추론 성능을 크게 증가시킴  
+- **다른 추론 테스크:** 마지막 단어 연결  
+  - In-domain: 예시도 2 단어, 테스트도 2 단어  
+  - Out-of-domain: 예시는 2 단어, 테스트는 4 단어  
+  - 마지막 글자 이어붙이기 문제 → 단계적 추론이 필요함
+
+<그림3-20_텍스트 파운데이션 모델_프롬프트 엔지니어링_CoT 프롬프팅을 통한 복잡한 추론 테스크에 대한 성능 향상 예시: 마지막 단어 연결>  
+출처: Wei et al., *Chain-of-Thought Prompting Elicits Reasoning in Large Language Model.*, NeurIPS 2022
+
+---
+
+## Chain-of-Thought (CoT) 프롬프팅
+- **결과:** CoT는 거대 언어 모델(PaLM)의 추론 성능을 크게 증가시킴  
+- **다른 추론 테스크:** 마지막 단어 연결  
+  - In-domain: 예시도 2 단어, 테스트도 2 단어  
+  - Out-of-domain: 예시는 2 단어, 테스트는 4 단어  
+
+- **2 letters**
+  - 두 모델 다 꾸준히 증가  
+  - 모델 크기가 클수록 성능이 좋아짐  
+- **4 letters**
+  - 학습 예시와 다른 일반화된 문제(out of domain)  
+  - CoT를 썼을 때 향상됨
+
+➡ CoT는 추론 테스크에서 성능을 크게 높일 뿐 아니라 훈련에 없던 더 어려운 문제도 효과적으로 대응할 수 있게 함
+
+출처: Wei et al., *Chain-of-Thought Prompting Elicits Reasoning in Large Language Model.*, NeurIPS 2022
+
+---
+
+## Chain-of-Thought (CoT) 프롬프팅
+- 예시 기반 CoT는 강력하지만, 예시를 위한 추론 과정을 수집해야 하는 문제가 있음  
+- **Q. 예시 없이도(0-shot) 거대 언어 모델의 추론 성능을 강화할 수 있을까? (i.e., 0-shot CoT)**  
+  - 단계별 사고 과정을 예시로 제공하여 LLM의 추론 능력을 향상시킴
+
+출처: Wei et al., *Chain-of-Thought Prompting Elicits Reasoning in Large Language Model.*, NeurIPS 2022
+
+---
+
+## Chain-of-Thought (CoT) 프롬프팅
+- 예시 기반 CoT는 강력하지만, 예시를 위한 추론 과정을 수집해야 하는 문제가 있음  
+- **Q. 예시 없이도(0-shot) 거대 언어 모델의 추론 성능을 강화할 수 있을까? (i.e., 0-shot CoT)**  
+  - “Let’s think step by step.”이라는 문구 추가로 예시 없이 LLM 성능 향상
+
+출처: Wei et al., *Chain-of-Thought Prompting Elicits Reasoning in Large Language Model.*, NeurIPS 2022
+
+---
+
+## 0-shot CoT 프롬프팅
+- **1. 유인 문장을 통한 추론 생성** (e.g. “Let’s think step by step”)
+
+<그림3-22_텍스트 파운데이션 모델_거대 언어 모델의 추론_0-shot CoT 프롬프팅 개요도>  
+출처: Kozima et al., *Large Language Models are Zero-Shot Reasoners.*, NeurIPS 2022
+
+---
+
+## 0-shot CoT 프롬프팅
+- **1. 추론 문장을 통한 추론 생성** (e.g. “Let’s think step by step”)  
+- **2. 주어진 질문과 생성된 추론을 통한 정답 생성** (e.g. “Therefore, the answer is”)
+
+출처: Kozima et al., *Large Language Models are Zero-Shot Reasoners.*, NeurIPS 2022
+
+---
+
+## 0-shot CoT 프롬프팅
+- **결과:** 0-shot CoT는 기존 0-shot 프롬프팅보다 훨씬 높은 추론 성능을 달성  
+- 또한, 0-shot CoT는 모델 크기가 임계점을 넘어서야 효과성이 발휘됨  
+  - 따라서, 추론 능력은 거대 언어 모델의 창발성 결과라고 볼 수 있음
+
+출처: Kozima et al., *Large Language Models are Zero-Shot Reasoners.*, NeurIPS 2022
+
+---
+
+## 0-shot CoT 프롬프팅
+- **Q. 추론 문장의 중요성?**
+  - 단순한 문구 하나가 성능을 크게 향상시킴
+  - 적절하지 못한 문구를 제시했을 때 성능을 떨어뜨리거나 역효과가 남
+
+출처: Kozima et al., *Large Language Models are Zero-Shot Reasoners.*, NeurIPS 2022
+
+---
+
+# 4. 거대 언어 모델의 평가와 응용
+
+---
+
+# 4-1. 거대 언어 모델의 평가
+
+## 평가 (Evaluation): 구축한 시스템(e.g. 코드 or 앱)이 실제로 잘 동작하는지를 확인하는 단계
+
+- 평가의 3가지 요소
+  1) 목표: 시스템으로 무엇을 달성하고자 하는지  
+  2) 평가 방법: 어떤 방법으로 평가할 것인지  
+  3) 평가 지표: 어떻게 성공 여부를 판단할 것인지
+
+> 출처: https://www.ytn.co.kr/_ln/0102_202404130800061445
+
+- 예시: 배달 어플
+  1) 목표: 음식을 음식점으로부터 유저에게까지 배달하는 것  
+  2) 평가 방법: 배달 시간을 측정  
+  3) 평가 지표: 전체 유저 배달 건수에 대한 평균 배달 시간
+
+> 출처: https://platform.openai.com/chat/edit?models=gpt-4o-2024-11-20
+
+## AI 모델의 평가: “테스트 데이터”
+
+- 핵심 가정: 학습 단계에서 본 적이 없고, 질문과 정답을 알고 있음
+- 예시: 감정 분류  
+  1) 목표: 주어진 입력 텍스트의 감정을 올바르게 예측하는 것  
+  2) 평가 방법: AI 모델의 예측 감정과 사람이 작성한 정답을 비교하는 것  
+  3) 평가 지표: 테스트 데이터 셋에서의 평균 정확도  
+
+“총평하자면, 두 시간 동안 영화를 보고 얻은 건 팝콘과 음료 뿐입니다. 영화는 정말 형편없었어요.”
+
+데이터 입력 → 추가 학습된 언어 모델 → 예측과 정답 비교  
+예측 감정: 0 (부정적) = 정답 감정: 0 (부정적)
+
+<그림 4-1. 텍스트 파운데이션 모델_거대 언어 모델의 평가와 응용_AI 모델의 테스트 데이터 기반 평가 예시>
+
+출처: Delvin et al., BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding, NAACL 2019
+
+## 거대 언어 모델 평가의 특징
+
+- 특정 테스트에서 학습된 기존 AI 모델들과 달리, 거대 언어 모델은 다양한 테스트에 대해 동시에 학습됨  
+  - 따라서, 거대 언어 모델의 성능을 올바르게 평가하기 위해서는 많은 테스트에서의 성능을 종합적으로 판단해야 함  
+  - 또한, 디코딩 알고리즘, 입력 프롬프트에 따라 같은 질문에 대해서도 예측이 바뀌므로, 공평한 비교를 위해서는 해당 부분도 고려해야 함
+
+<그림 4-2. 텍스트 파운데이션 모델_거대 언어 모델의 평가와 응용_거대 언어 모델간의 성능 비교 예시>
+
+출처: OpenAI, GPT-4 Technical Report
+
+- 특정 테스트에서 학습된 기존 AI 모델들과 달리, 거대 언어 모델은 다양한 테스트에 대해 동시에 학습됨  
+  - 따라서, 거대 언어 모델의 성능을 올바르게 평가하기 위해서는 많은 테스트에서의 성능을 종합적으로 판단해야 함  
+  - 또한, 디코딩 알고리즘, 입력 프롬프트에 따라 같은 질문에 대해서도 예측이 바뀌므로, 공평한 비교를 위해서는 해당 부분도 고려해야 함
+
+<그림 4-2. 텍스트 파운데이션 모델_거대 언어 모델의 평가와 응용_거대 언어 모델간의 성능 비교 예시>
+
+출처: OpenAI, GPT-4 Technical Report
+
+102p~
