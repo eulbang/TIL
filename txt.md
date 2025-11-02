@@ -1,943 +1,1096 @@
-# 자연어처리 및 텍스트 파운데이션 모델
-## 거대 언어 모델
+# 삼성청년 SW·AI아카데미
+데이터엔지니어링 기초  
+데이터 파이프라인 이해와 WSL  
 
 ---
 
-## 목차
-1. 텍스트 파운데이션 모델 살펴보기
-   - 텍스트 파운데이션 모델 (거대 언어 모델)이란?
-   - 거대 언어 모델 예시
-2. 거대 언어 모델의 학습
-   - 지시 학습
-   - 선호 학습
-3. 거대 언어 모델의 추론
-   - 디코딩
-   - 프롬프트 엔지니어링
-4. 거대 언어 모델의 평가와 응용
-   - 거대 언어 모델의 평가
-   - 거대 언어 모델의 응용/한계
+# 데이터 파이프라인 이해와 WSL
 
 ---
 
-## 학습 목표
-- 텍스트 파운데이션 모델(거대 언어 모델)이 무엇인지 이해합니다.
-- 거대 언어 모델의 학습 및 추론 방식을 이해합니다.
-- 거대 언어 모델의 응용 및 한계를 파악하고, 실습을 통해 실제 사례에 적용해봅니다.
+# 챕터의 포인트
+- 데이터의 시대와 엔지니어링  
+- 데이터 사이언스와 엔지니어링  
+- 데이터 파이프라인  
 
 ---
 
-## 0. 학습 시작: 파운데이션 모델
-
-### 파운데이션 모델이란?
-- 대량의 데이터를 기반으로 사전 학습된 대규모 AI 모델
-- 다양한 작업에 범용적으로 활용할 수 있는 기초(foundation) 역할을 함
-
-### We will learn: 파운데이션 모델의 주요 특징
-- 기존 AI 모델과의 차이점
-- 3가지 핵심 구성요소
-
-### We will learn: 텍스트 파운데이션 모델 (거대 언어 모델)
-- 거대 언어 모델의 특징
-- 대표적인 예시
+# 데이터의 시대와 엔지니어링
 
 ---
 
-## 예시: 텍스트 생성 (ChatGPT)
-- ChatGPT를 활용한 텍스트 생성 예시
+## 데이터의 시대
+### 데이터?
+정보 vs 데이터  
+- 과거에는 정리되고 유의미하게 도움이 되는 ‘정보’만이 중요했음  
+- 그러나 현재는 원시적인 자료인 ‘데이터’의 중요성이 강조됨  
 
-출처: [https://openai.com/chatgpt/](https://openai.com/chatgpt/)
-- <그림0-1_텍스트 파운데이션 모델_파운데이션 모델_ChatGPT사용 예시>
+**정보**
+- 1970~2000년대를 대표하는 키워드  
+- 실제 도움이 되는 데이터  
+- 유의미함  
 
----
-
-## 예시: 비디오 생성 (SORA)
-- 텍스트 기반 비디오 생성 예시
-
-출처: [https://openai.com/index/sora/](https://openai.com/index/sora/)
-- <그림0-2_텍스트 파운데이션 모델_파운데이션 모델_SORA를 통한 텍스트 기반 비디오 생성 예시>
-
----
-
-## 예시: 멀티모달 입력과 출력 (GPT-4o)
-- 멀티모달: 이미지, 비디오, 오디오, 텍스트
-
-출처: [https://openai.com/index/hello-gpt-4o/](https://openai.com/index/hello-gpt-4o/)
-- <그림0-3_텍스트 파운데이션 모델_파운데이션 모델_GPT-4o를 통한 실시간 질의 응답 예시>
+**데이터**
+- 2010년대 이후를 대표하는 키워드  
+- 단순 수집된 원시 자료  
+- 의미나 목적을 포함하지 않음  
 
 ---
 
-## 파운데이션 모델 이전
-- 새로운 테스크를 해결하려면 해당 테스크에 대한 “별도의 학습” 필요
+## 데이터의 중요성
+### 데이터가 중요해진 이유?
+- 빅데이터: 데이터의 양(Volume), 다양성(Variety), 증가 속도(Velocity) 향상  
+- 데이터를 수집, 가공, 활용할 수 있는 기술의 대두  
 
-예시:
-- Early days [features] → 0/1  
-- AlexNet (2012) → ship  
-- BERT (2018) → "i love this movie" → pos/neg
+모바일 데이터  
+사물 인터넷  
 
-출처: [https://cs231n.stanford.edu/](https://cs231n.stanford.edu/)
-- <그림0-4_텍스트 파운데이션 모델_파운데이션 모델_AI 모델을 학습하기 위한 이전 방법론들에 대한 예시>
-
----
-
-## 파운데이션 모델의 등장
-- 새로운 테스크를 해결하려면 “자세한 설명(프롬프트)”을 입력해주는 것으로 충분
-- ChatGPT: 텍스트 파운데이션 모델  
-  (a.k.a 거대 언어 모델 or Large Language Model or LLM)
-
-출처: [https://www.gotai.co.kr/](https://www.gotai.co.kr/)
-- <그림0-5_텍스트 파운데이션 모델_파운데이션 모델_텍스트 파운데이션 모델(ChatGPT)을 통한 새로운 테스크(4행시) 해결 예시>
-
-## 파운데이션 모델
-- 새로운 테스크를 해결하려면 “자세한 설명(프롬프트)”을 입력해주는 것으로 충분 😊  
-  - SORA: 비디오 파운데이션 모델
-
-> “세련된 여성이 따뜻하게 빛나는 네온과 움직이는 도시 간판으로 가득한 도쿄 거리를 걸어 내려온다.  
-> 그녀는 검은 가죽 재킷, 긴 빨간 드레스, 검은 부츠를 착용하고 검은 가방을 들고 있다.  
-> 그녀는 선글라스를 쓰고 빨간 립스틱을 바르고 있다. 그녀는…”
-
-출처: https://openai.com/index/sora/
+**그래프**  
+Annual Size of the Global Datasphere  
+(Data Age 2025, sponsored by Seagate with data from IDC Global DataSphere Nov 2018)  
 
 ---
 
-## 파운데이션 모델의 3가지 구성요소
+## 데이터의 중요성
+### 데이터가 중요해진 이유?
+- 빅데이터: 데이터의 양(Volume), 다양성(Variety), 증가 속도(Velocity) 향상  
+- 데이터를 수집, 가공, 활용할 수 있는 기술의 대두 → **데이터 파이프라인**  
 
-### (1) 빅데이터
-- 인터넷에 존재하는 데이터 수가 기하급수적으로 증가
-
-출처: https://medium.com/@koshwemoethu.blacknet/the-era-of-big-data-863e87f0515d
-
----
-
-### (1) 빅데이터 (심화)
-- 딥러닝 기반 AI 모델은 학습 데이터가 늘어날수록 성능이 증가
-
-출처: https://epochai.org/blog/trends-in-training-dataset-sizes
+**데이터 수집**  
+**AI / ML**  
+**가공 / 시각화**
 
 ---
 
-### (2) 자가 학습(Self-supervised Learning)
-- 사람이 정답을 알려줄 필요 없음
-- 예시: **다음 토큰 예측(Next token prediction)** 을 통한 텍스트 파운데이션 모델(거대 언어 모델) 학습
+## 데이터의 중요성
+### 데이터가 중요해진 이유?
+- 빅데이터: 데이터의 양(Volume), 다양성(Variety), 증가 속도(Velocity) 향상  
+- 데이터를 수집, 가공, 활용할 수 있는 기술의 대두  
 
-  - 인터넷에서 데이터 추출 → “아까 밥 먹고 왔어”
-  - 학습 데이터 생성  
-    - 입력: 아까 밥 먹고  
-    - 정답: 왔어  
-
-출처: https://tilnote.io/books/6480b090e92fe5ef635f54df/6480a73ee92fe5ef635f4d77
+> “데이터는 미래 경쟁력을 좌우하는 21세기의 원유”  
+> — 미국 시장조사 기관 ‘가트너’
 
 ---
 
-### (3) 어텐션(Attention) 기반 트랜스포머(Transformer) 모델
-- 더 많은 데이터를 학습할 수 있는 인공신경망 구조  
-  - **어텐션(Attention)**: 입력 데이터에서 중요한 부분에 주의를 집중하는 메커니즘  
-  - **트랜스포머(Transformer)**: 어텐션 메커니즘을 기반으로 한 신경망 구조  
+## 데이터의 중요성
+### 데이터는 어디에 쓰일까?
+- 비즈니스 리더들의 의사 결정  
+- 데이터를 통한 서비스/제품 강화  
 
-출처: https://www.researchgate.net/figure/Decoder-only-Transformer-architecture-The-input-to-the-decoder-is-tokenized-text-and_fig3_373183262
-
----
-
-# 1. 텍스트 파운데이션 모델 살펴보기
-
-## 1-1. 텍스트 파운데이션 모델이란?
-
-### 파운데이션 모델의 3가지 구성 요소 in 언어 모델 (Language Model)
-- GPT-1, BERT와 같은 언어 모델에도 3가지 구성 요소가 이미 포함되어 있음  
-  - 그러나 파운데이션 모델과 같은 능력을 보여주지 못함 → **어떤 차이 때문일까?**
-
-출처: Delvin et al., *BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding*, NAACL 2019
+의사 결정  
+서비스/제품 강화  
 
 ---
 
-### GPT-2: 추가 학습 없이 새로운 테스크 수행 가능
-- 언어 모델이 추가 학습 없이도 텍스트 지시를 통해 새로운 테스크를 “어느 정도” 수행할 수 있음을 확인
+# 데이터 엔지니어의 주요 활동
 
-출처: Radford et al., *Language Models are Unsupervised Multitask Learners*, OpenAI 2019
+## 주요 역할
+- 데이터를 안정적으로 수집하고 가공하여 전달  
+- 분석과 모델링이 가능하도록 데이터 흐름을 자동화  
+- 신뢰성 있고 재사용 가능한 파이프라인 구축  
 
-## 파운데이션 모델의 3가지 구성 요소 in 언어 모델 (Language Model)
-- GPT-2: 언어 모델이 추가 학습 없이도 텍스트 지시를 통해 새로운 테스크를 “어느 정도” 수행할 수 있음을 확인  
-  - 가장 큰 GPT-2 모델조차도 *underfitting*된 결과를 보여줌 → **모델 크기를 더 늘렸을 때 성능이 개선될 여지가 있음**
+## 주요 하는 일
+- 다양한 시스템에서 데이터 수집  
+- 정제 및 변환 (ETL/ELT 설계)
 
-$$
-Perplexity = \sqrt[N]{\frac{1}{P(w_1, w_2, \ldots, w_N)}} = \sqrt[N]{\prod_{i=1}^{N} \frac{1}{P(w_i|w_1, w_2, \ldots, w_{i-1})}}
-$$
+> “좋은 모델은 좋은 파이프라인에서 나온다”  
+데이터 엔지니어는 모델의 품질을 받쳐주는 기반을 설계합니다.
 
-출처: Radford et al., *Language Models are Unsupervised Multitask Learners*, OpenAI 2019
-
----
-
-## 텍스트 파운데이션 모델(거대 언어 모델)의 특이점
-
-### (1) 규모의 법칙 (Scaling Law)
-- 더 많은 데이터, 큰 모델, 긴 학습 → 더 좋은 성능
-
-출처: Kaplan et al., *Scaling Laws for Neural Language Models*, arXiv:20.01
+# 데이터 파이프라인
 
 ---
 
-### (2) 창발성 (Emergent Property)
-- 특정 규모를 넘어서면 갑자기 모델에서 발현되는 성질  
-  - **예시 #1. 인-컨텍스트 학습 (In-context Learning)**  
-    주어진 설명과 예시만으로 새로운 테스크를 수행  
-  - **예시 #2. 추론 (Reasoning)** 능력  
+## 데이터 파이프라인 개요
 
-출처: Brown et al., *Language Models are Few-Shot Learners*, NeurIPS 2020
+### 데이터 파이프라인이란?
+- 데이터를 추출하고 정제하고 저장, 분석, 시각화하는 일련의 자동화 과정
 
----
-
-# 1-2. 거대 언어 모델 예시
-
-## 텍스트 파운데이션 모델 (or 거대 언어 모델, LLM)
-- 기존 대비  
-  1. 더 큰 모델(>7B)  
-  2. 더 많은 데이터(>1T)에서 학습되어 창발성이 나타나기 시작한 언어 모델  
-- 일반적으로 거대 언어모델은 GPT와 같이 다음 토큰 예측을 통해 많은 텍스트 데이터에서 사전 학습된 트랜스포머 기반 모델을 의미  
-
-| 구분 | 대표 모델 |
-|------|------------|
-| **폐쇄형 거대언어 모델** | ChatGPT, Claude 3, Gemini |
-| **개방형 거대언어 모델** | LLaMA 2, DeepSeek, Mistral AI |
-
-출처: SSAFY 텍스트 파운데이션 모델 슬라이드
+**구성 단계**
+- **데이터 추출**
+- **데이터 가공**
+- **데이터 저장**
 
 ---
 
-## 폐쇄형 (Closed) 거대 언어 모델
-- 예시: ChatGPT (OpenAI), Claude (Anthropic), Gemini (Google)
-- **장점:** 일반적으로 더 우수한 성능 및 최신 기능을 갖고 있으며 사용하기 쉬움  
-- **단점:**  
-  1. 사용 시마다 비용이 발생  
-  2. 모델이나 출력에 대한 정보가 제한적으로 제공됨  
+## OLAP와 OLTP
 
-출처: https://platform.openai.com/docs/guides/text?lang=python  
-https://openai.com/ko-KR/api/pricing/
+### OLTP (Online Transaction Processing)
+- 운영 데이터 처리 시스템  
+- 실시간 트랜잭션(주문, 결제, 예약 등) 처리  
+- 행(Row) 단위 저장 구조  
+- 빠른 입력, 수정, 삭제에 최적화  
 
-# 2. 거대 언어 모델의 학습
-
-## GPT-3: “거대 언어 모델의 시초”
-- 가장 큰 버전의 GPT-3: **1750억 개의 매개변수(Parameters)**  
-  → 이전 언어 모델 대비 최소 10배 이상 큰 모델  
-- 본격적으로 **인-컨텍스트 학습(In-context learning)** 능력이 나타나기 시작한 언어 모델
-
-출처: https://medium.com/analytics-vidhya/openai-gpt-3-language-models-are-few-shot-learners-82531b3d3122
+### OLAP (Online Analytical Processing)
+- 분석 데이터 처리 시스템  
+- OLTP에서 수집된 데이터를 기반으로 통계·리포트 분석  
+- 열(Column) 단위 저장 구조  
+- 집계, 요약, 예측 분석에 최적화  
 
 ---
 
-### 학습 방법 및 비용
-- **학습 방법:** 다음 토큰 예측 (Next token prediction)  
-- **학습 데이터:** 약 3000억 토큰 (4TB 텍스트 데이터 = 인터넷 + 양질의 텍스트북)  
-- **학습 비용:** 약 **150억 원 수준**으로 추산  
+## ETL의 구조
 
-#### GPT-3 모델 구성 요약
-| Model | Parameters | Layers | Hidden Size | Attention Heads |
-|--------|-------------|---------|--------------|----------------|
-| GPT-3 Small | 125M | 12 | 768 | 12 |
-| GPT-3 Medium | 350M | 24 | 1024 | 16 |
-| GPT-3 Large | 760M | 24 | 1536 | 16 |
-| GPT-3 XL | 1.3B | 24 | 2048 | 24 |
-| GPT-3 2.7B | 2.7B | 32 | 2560 | 32 |
-| GPT-3 6.7B | 6.7B | 32 | 4096 | 32 |
-| GPT-3 13B | 13.0B | 40 | 5140 | 40 |
-| **GPT-3 175B** | **175.0B** | **96** | **12288** | **96** |
+### ETL이란?
+- 데이터를 가공한 후 저장. 전통적인 방식  
+- **추출 → 가공 → 저장**
 
-#### 학습 데이터 구성
-| Dataset | Quantity (Tokens) | 비중(%) |
-|----------|------------------|----------|
-| Common Crawl (filtered) | 410B | 60 |
-| WebText2 | 19B | 22 |
-| Books1 | 12B | 8 |
-| Books2 | 55B | 8 |
-| Wikipedia | 3B | 3 |
-
-출처: Brown et al., *Language Models are Few-Shot Learners*, NeurIPS 2020
+**ETL 단계**
+- **데이터 추출**
+- **데이터 가공**
+- **데이터 저장**
 
 ---
 
-## 다음 토큰 예측 기반 거대 언어 모델의 한계
-- 사람의 지시에 대해 **올바르지 않은 응답**을 생성하거나,  
-  **유해한 응답**을 생성할 수 있음.
-
-예시:
-- GPT-3: 엉뚱한 내용 생성 (문맥 무관한 문장 나열)
-- GPT-4: 유해한 지시에 대해 실행 방법을 제시하는 오류 발생
-
-출처: Ouyang et al., *Training Language Models to Follow Instructions with Human Feedback*, NeurIPS 2022  
-Wei et al., *Jailbroken: How Does LLM Safety Training Fail?*, NeurIPS 2023
+### ETL (Extract, Transform, Load)
+- **Extract**: 데이터 수집  
+- **Transform**: 데이터 가공  
+- **Load**: 데이터 저장  
 
 ---
 
-## 정렬(Alignment) 학습
-> 거대 언어 모델의 출력이 사용자의 **의도와 가치**를 반영하도록 학습
+## ELT의 구조
 
-- (1) **지시 학습 (Instruction tuning)**: 주어진 지시에 대해 어떤 응답이 생성되어야 하는지 학습  
-- (2) **선호 학습 (Preference learning)**: 상대적으로 어떤 응답이 더 선호되어야 하는지 학습  
+### ELT란?
+- 데이터를 저장한 후 가공. 클라우드 시대의 방식  
+- **추출 → 저장 → 가공**
 
-출처: Ouyang et al., *Training Language Models to Follow Instructions with Human Feedback*, NeurIPS 2022  
-Wei et al., *Jailbroken*, NeurIPS 2023
-
----
-
-# 2-1. 지시 학습 (Instruction Tuning)
-
-## 지시 학습의 개념
-> 주어진 지시에 대해 어떤 응답이 생성되어야 하는지를 학습
-
-- 학습 방법 자체는 기존 언어 모델 (예: BERT) 에서의 **지도 학습(Supervised Fine-Tuning, SFT)** 과 동일  
-- 기존 언어 모델은 각 테스크마다 별도의 **추가 학습 및 모델 저장** 필요
-
-예시:
-> “전체적으로, 두 시간 동안 영화를 보는 것에서 얻은 가치는 팝콘과 음료의 합계였습니다. 영화는 정말 끔찍했습니다.”  
-→ 출력: **0 (부정적)**
+**ELT 단계**
+- **데이터 추출**
+- **데이터 저장**
+- **데이터 가공**
 
 ---
 
-## 지시 학습 (Instruction tuning): 주어진 지시에 대해 어떤 응답이 생성되어야 하는지
-- **Idea:** 모든 자연어 테스크는 텍스트 기반 지시(instruction)와 응답으로 표현할 수 있지 않을까?
+### ELT (Extract, Load, Transform)
+- **Extract**: 데이터 수집  
+- **Load**: 데이터 저장  
+- **Transform**: 데이터 가공  
 
-예시:
-- 감정 분석: “주어진 리뷰 속 유저의 감정이 긍정적이야, 부정적이야?”
-- 번역: “주어진 문장을 영어로 번역해줘.”
+---
 
-입력:  
-> 지시: “주어진 리뷰 속 유저의 감정이 긍정적이야, 부정적이야?”  
-> 리뷰: “전체적으로, 두 시간 동안 영화를 보는 것에서 얻은 가치는 팝콘과 음료의 합계였습니다. 영화는 정말 끔찍했습니다.”  
+## ETL과 ELT의 차이
 
-출력:  
-> “부정적으로 보입니다.”
+| 항목 | ETL (전통 방식) | ELT (클라우드 중심) |
+|------|------------------|---------------------|
+| 순서 | 추출 → 가공 → 저장 | 추출 → 저장 → 가공 |
+| 환경 | 온프레미스 DW | 클라우드, 데이터 레이크 |
+| 장점 | 정제된 데이터 보장 | 연한 가공, 확장성 우수 |
+| 단점 | 느림, 유연성 부족 | 처리 비용 증가 가능성 |
 
-출처: SSAFY 텍스트 파운데이션 모델 강의 슬라이드
+> “ETL은 정제 우선, ELT는 속도와 유연성 중심”  
+> 환경에 따라 적합한 방식 선택
 
-# 2-1. 지시 학습
+---
 
-## 지시 학습: 거대 언어 모델을 다양한 지시 기반 입력과 이에 대한 응답으로 추가학습 (FLAN)
-- 학습 방법: 주어진 입력을 받아서 이에 대한 응답을 따라 하도록 지도 추가 학습 (Supervised Fine-Tuning, SFT)
-- (A) Pretrain–finetune (BERT, T5)
-  - Typically requires many task-specific examples
-  - One specialized model for each task
-- (B) Prompting (GPT-3)
-  - Improve performance via few-shot prompting or prompt engineering
-- (C) Instruction tuning (FLAN)
-  - Model learns to perform many tasks via natural language instructions
-  - Inference on unseen task
-- 출처: Wei et al., *Finetuned Language Models Are Zero-Shot Learners*, ICLR 2022
+## 데이터 처리 방식 - 배치와 스트리밍
 
-## 지시 학습: 거대 언어 모델을 다양한 지시 기반 입력과 이에 대한 응답으로 추가학습 (FLAN)
-- 학습 데이터의 다양성 증대를 위해, 각 테스크를 다양한 지시(템플릿)로 표현할 수 있음
-- Premise  
-  `Russian cosmonaut Valery Polyakov set the record for the longest continuous amount of time spent in space, a staggering 438 days, between 1994 and 1995.`
-- Hypothesis  
-  `Russians hold the record for the longest stay in space.`
-- Target  
-  `Options: - yes  - no`
-- Template 예시
-  - Template 1: Based on the paragraph above, can we conclude that `<hypothesis>`?
-  - Template 2: Can we infer the following? `<hypothesis>`
-  - Template 3: Read the following and determine if the hypothesis can be inferred from the premise  
-    Premise: `<premise>`  
-    Hypothesis: `<hypothesis>`  
-    `<options>`
-- 출처: Wei et al., *Finetuned Language Models Are Zero-Shot Learners*, ICLR 2022
+### 배치 처리 방식 (Batch Processing)
+- 데이터를 모아서 한 번에 처리하는 방식  
+- 주로 하루 1회, 또는 일정 시간 단위로 처리가 이뤄진다.
+- 정확성과 대량 처리에 적합함
 
-## 지시 학습: 거대 언어 모델을 다양한 지시 기반 입력과 이에 대한 응답으로 추가학습 (FLAN)
-- 기존 NLP 테스크 데이터를 지시 학습을 위한 데이터로 수정하여 학습 및 테스트에 활용
-- 학습시에 보지 못한 지시에 대한 일반화 성능 평가를 위해, 관련 없는 테스크들을 테스트에 별도로 활용
-  - 예시: 요약(`summarization`)을 테스트 때의 테스크로 활용하기 위해, 학습 시에는 제거
-- 주요 데이터셋
-  - Natural language inference (7): ANLI(R1-R3), CB, MNLI, QNLI, RTE, SNLI, WNLI  
-  - Commonsense (4): CoPA, HellaSwag, PiQA, StoryCloze  
-  - Sentiment (4): IMDB, Sent140, SST-2, Yelp  
-  - Paraphrase (4): MRPC, QQP, PAWS, STS-B  
-  - Closed-book QA (3): ARC(easy/chal.), NQ, TQA  
-  - Struct to text (4): CommonGen, DART, E2ENLG, WEBNLG  
-  - Translation (8): ParaCrawl EN/DE, EN/ES, EN/FR, WMT-16 EN/CS, EN/DE, EN/FI, EN/RO, EN/RU, EN/TR  
-  - Reading comp. (5): BoolQ, DROP, MultiRC, OBQA, SQuAD  
-  - Read. comp. w/ commonsense (2): CosmosQA, ReCoRD  
-  - Coreference (3): DPR, Winogrande, WSC273  
-  - Misc. (7): CoQA, QuAC, WIC, Math, Fix Punctuation(NLG), TREC, CoLA  
-  - Summarization (11): AESLC, AG News, CNN-DM, Gigaword, Multi-News, Newsroom, SamSum, Wiki Lingua EN, XSum, Opin-Abs: iDebate, Opin-Abs: Movie
-- 출처: Wei et al., *Finetuned Language Models Are Zero-Shot Learners*, ICLR 2022
+**Process**
+- Data → Batch Storage → Processing → Results
 
-## 지시 학습: 거대 언어 모델을 다양한 지시 기반 입력과 이에 대한 응답으로 추가학습 (FLAN)
-- 실험 결과: 예시 없이도 (`0-shot`) 새로운 지시에 대해 올바른 응답을 내놓는 성능이 크게 증가!
-- `LaMDA-PT 137B`는 구글의 당시 기준 `SOTA` 텍스트 파운데이션 모델을 추가 학습
-- 주요 비교 대상: FLAN 137B, LaMDA-PT137B, GPT-3 175B, GLAM 64B/64E, Supervised model
-- Natural language inference: ANLI R1-R3, CB, RTE  
-- Reading comprehension: MultiRC, OBQA, BoolQ  
-- Closed-book QA: NQ, ARC-C, TQA, ARC-e  
-- Translation: EN↔RO, EN↔DE, EN↔FR  
-- 출처: Wei et al., *Finetuned Language Models Are Zero-Shot Learners*, ICLR 2022
+---
 
-## 지시 학습: 파운데이션 모델을 다양한 지시 기반 입력과 이에 대한 응답으로 추가학습 (FLAN or T0)
-- 실험 결과: 성능 향상을 위한 핵심 요소는 다음과 같음
-  1. 학습 테스크의 개수: 다양한 종류의 지시를 학습할수록 보지 못한 지시에 대한 일반화 성능이 좋아짐
-  2. 추가 학습하는 모델의 크기: 특정 규모 이하에서는 지시 학습의 효과성이 떨어짐 → 지시를 이해하고 응답하는 것도 창발성의 하나
-  3. 지시를 주는 방법: 자연어 지시로 사람에게 대화하듯 지시하는 것이 가장 효과적
-- 성능 비교  
-  - Held-out clusters: CommonSense / Average NLI / Closed-book QA  
-  - FT: instruction / Eval: instruction (FLAN) → `55.2`  
-  - FT: dataset name / Eval: instruction → `46.6`  
-  - FT: dataset name / Eval: dataset name → `47.0`  
-  - FT: no instruction → `37.3`
-- 출처: Wei et al., *Finetuned Language Models Are Zero-Shot Learners*, ICLR 2022
+### 데이터 스트리밍 처리 방식 (Data Stream Processing)
+- 데이터가 들어오는 즉시 실시간 처리하는 방식
+- 빠르게 변화하는 데이터에 즉시 반응 가능  
+- 실시간 분석과 대응 가능  
 
-# 2-2. 선호 학습 (Preference Learning)
+**Process**
+- Real time events → Continuous data processing → Live results
 
-## 지시 학습의 한계: 주어진 입력에 대해 적절한 하나의 응답이 있다고 가정
-- 이는 정답이 정해져 있는 객관적 테스트 (e.g. 수학) 에서는 자연스러움  
-  - `Question`: 양의 정수 m과 n의 최대공약수는 6이고, 최소공배수는 126이다. 이때 m + n의 가능한 최소값은 얼마인가?  
-  - `Answer`: 60
-- 출처: Cobbe et al., *Training Verifiers to Solve Math Word Problems*, OpenAI
+# 데이터 파이프라인 기본 개념
 
-## 지시 학습의 한계: 주어진 입력에 대해 적절한 하나의 응답이 있다고 가정
-- 이는 정답이 정해져 있는 객관적 테스트 (e.g. 수학)에서는 자연스러움
-- 그러나, 정답이 정해져 있지 않은 개방형(Open-ended) 테스트 (e.g. 번역)에서는 한계가 있음
-  - Goal: 단순히 복수 정답을 허락하는 대신, 더 좋은(선호되는) 응답을 생성하도록 하고 싶음
-- 예시 (번역)
-  - 입력:  
-    `When I am down and, oh my soul, so weary  
-    When troubles come and my heart burdened be  
-    Then, I am still and wait here in the silence  
-    Until you come and still awhile with me`
-  - 출력 1:  
-    `내가 우울하고, 아, 내 영혼이 너무 지쳤을 때  
-    고난이 닥치고 내 마음이 무거워질 때  
-    그때, 나는 조용히 기다리며 이 침묵 속에 머물러 있네  
-    당신이 오셔서 나와 함께 잠시 머물러 주실 때까지`
-  - 출력 2:  
-    `내 마음이 지치고 영혼마저 무거울 때  
-    근심이 찾아와 가슴이 짓눌릴 때  
-    나는 잠잠히 이곳에서 기다리네  
-    그대가 와서 잠시 곁에 머물러 주기를`
-- 출처: Cobbe et al., *Training Verifiers to Solve Math Word Problems*, OpenAI
-
-## 선호 학습 (Preference Learning)
-- 다양한 응답 중 사람이 더 선호하는 응답을 생성하도록 추가학습
-- 다양한 응답은 모델이 생성, 응답 간의 선호도는 사람이 제공
-- ChatGPT를 만들기 위한 핵심 알고리즘!
-  - 공식 문서는 공개되어 있지 않지만, 아래와 같은 힌트가 공식 블로그에 제공되어 있음
-- 인용:
+## 데이터 처리 방식 - 배치와 스트리밍
+``` 
+| 항목 | 배치 처리 | 스트리밍 처리 |
+|------|-------------|----------------|
+| 처리 방식 | 일정 주기로 대량 처리 | 실시간으로 지속 처리 |
+| 예시 | 하루 1회 통계 리포트 | 실시간 사용자 클릭 분석 |
+| 장점 | 안정적, 대규모 처리 적합 | 즉시 대응, 실시간 분석 가능 |
+| 단점 | 지연 발생 가능 | 복잡한 설계 필요 |
 ```
-We trained this model using Reinforcement Learning from Human Feedback (RLHF),
-using the same methods as InstructGPT,
-but with slight differences in the data collection setup.
-We trained an initial model using supervised fine-tuning:
-human AI trainers provided conversations in which they played both sides—the user and an AI assistant.
-We gave the trainers access to model-written suggestions to help them compose their responses.
-We mixed this new dialogue dataset with the InstructGPT dataset,
-which we transformed into a dialogue format.
+
+> “배치는 정확성과 안정성 중심, 스트리밍은 실시간성과 즉시성 중심”  
+> 데이터의 속도·목표에 따라 적절한 방식을 선택해야 합니다.
+
+---
+
+## 데이터 파이프라인의 기본 구조
+- 자동화된 데이터 흐름
+- 데이터 소스 → 수집 → 가공 → 저장 → 분석/제공
+
+**단계 구성**
+- 데이터 소스  
+- 데이터 수집  
+- 데이터 가공  
+
+---
+
+## 데이터 파이프라인의 기본 구조 (계속)
+- 자동화된 데이터 흐름
+- 데이터 소스 → 수집 → 가공 → 저장 → 분석/제공
+
+**단계 구성**
+- 데이터 저장  
+- 데이터 분석 & 제공  
+
+---
+
+# 데이터 저장소 개요
+
+## 데이터 저장소의 중요성
+- 저장소는 분석을 위한 인프라
+- 데이터를 단순히 저장하는 것이 아니라 분석·활용을 위한 설계가 필요
+- 저장소에 따라 처리 방식과 유연성이 달라짐
+- 파이프라인에서 중요한 핵심 축
+
+---
+
+## 데이터 저장소
+- 데이터 저장소의 종류
+  - 데이터 웨어하우스 : 정형 데이터를 저장하는 구조, 기본 저장구조
+  - 데이터 레이크 : 원본 데이터를 저장하는 구조, 수집 후 재가공하여 활용
+  - 데이터 마트 : 특정한 목적을 위해 데이터 웨어하우스의 내용을 다시 추출하여 저장
+
+---
+
+# 데이터 파이프라인 개요
+
+## 데이터 웨어하우스의 구성
+- 데이터 웨어하우스
+  - 정형 데이터 중심  
+  - 스키마 사전 정의  
+  - ETL 기반의 처리 방식  
+  - OLAP(Online Analytical Processing) 중심의 구조  
+
+**처리 단계**
+- 원천 데이터 → 장기보관 데이터 → 분석용 데이터  
+
+---
+
+## 데이터 레이크의 구성
+- 데이터 레이크
+  - DW의 구조적 질서에 유연성을 결합  
+  - 분석, 모델링, BI 모두 대응하는 형태  
+  - OLAP(Online Analytical Processing) 확장 구조  
+    (정형 + 비정형 데이터 모두 대응)  
+
+**처리 단계**
+- 원천 데이터 → 원천 데이터 그대로 → 분석용 데이터  
+
+---
+
+# 데이터 저장소 개요
+
+## 데이터 저장소의 종류
+``` 
+| 항목 | 데이터 레이크 (Data Lake) | 데이터 웨어하우스 (Data Warehouse) |
+|------|----------------------------|-------------------------------------|
+| 주요 목적 | 다양한 원천 데이터를 원형 그대로 저장<br>추후 분석·활용을 위한 유연한 데이터 저장소 | 비즈니스 의사결정을 위한 정제된 데이터 저장소<br>리포팅과 분석 업무 최적화 |
+| 데이터 형태 | 정형, 반정형, 비정형 데이터 모두 수용 가능<br>(예: 로그, 이미지, 오디오, JSON 등) | 정형 데이터 위주 (관계형 테이블 기반, 스키마 존재) |
+| 사용 대상 | 데이터 사이언티스트, 분석가, 기술적 역량이 있는 일반 사용자 | 분석가, 관리자, 경영진 등 특정 목적 중심 사용자 |
+| 데이터 적재 시점 | 가공 없이 원본 데이터 그대로 저장<br>스키마 적용 없이 유연하게 수용 | 사전 정의된 스키마에 맞춰 가공 후 저장 |
+| 스키마 적용 시점 | Schema-on-Read: 조회 시점에 스키마 적용<br>다양한 데이터 활용 가능 | Schema-on-Write: 적재 시점에 스키마 적용<br>정형화된 구조 필수 |
 ```
-- 출처: https://openai.com/index/chatgpt/
-
-# 2-2. 선호 학습
-
-## 선호 학습 (Preference Learning): 다양한 응답 중 사람이 더 선호하는 응답을 생성하도록 추가학습
-- InstructGPT의 핵심 아이디어:
-  - 사람의 피드백을 통한 강화학습 (Reinforcement Learning from Human Feedback, RLHF)
-  - 사람의 피드백 := 응답에 대한 선호도
-- Step 1: Collect demonstration data, and train a supervised policy.
-- Step 2: Collect comparison data, and train a reward model.
-- Step 3: Optimize a policy against the reward model using reinforcement learning.
-- 출처: Ouyang et al., *Training Language Models to Follow Instructions with Human Feedback*, NeurIPS 2022
-
-## InstructGPT의 학습 방법: Step 1. 지시 학습을 통한 텍스트 파운데이션모델(e.g. GPT-3)의 추가 학습
-- 실제 유저로부터 다양한 지시 입력을 수집하고, 해당 입력에 대해 훈련된 사람 주석자들이 정답 데이터를 생성
-- Step 1: Collect demonstration data, and train a supervised policy.
-  - A prompt is sampled from our prompt dataset.
-  - A labeler demonstrates the desired output behavior.
-  - This data is used to fine-tune GPT-3 with supervised learning.
-- 출처: Ouyang et al., *Training Language Models to Follow Instructions with Human Feedback*, NeurIPS 2022
-
-## InstructGPT의 학습 방법: Step 2. 사람의 선호 데이터를 수집하여, 보상 모델(Reward model, RM)을 학습
-- 주어진 입력에 대한 선택지는 모델이 생성, 다양한 선택지에 대한 선호도는 사람이 생성
-- 사람과 일치한 선호도를 출력할 수 있도록 보상 모델을 지도 학습
-  - 사람이 선호하는 응답이 입력으로 주어짐 → 높은 보상을 출력
-- Step 2: Collect comparison data, and train a reward model.
-  - A prompt and several model outputs are sampled.
-  - A labeler ranks the outputs from best to worst.
-  - This data is used to train our reward model.
-- 출처: Ouyang et al., *Training Language Models to Follow Instructions with Human Feedback*, NeurIPS 2022
-
-## InstructGPT의 학습 방법: Step 2. 사람의 선호 데이터를 수집하여, 보상 모델(Reward model, RM)을 학습
-- 주어진 입력에 대한 선택지는 모델이 생성, 다양한 선택지에 대한 선호도는 사람이 생성
-- 사람과 일치한 선호도를 출력할 수 있도록 보상 모델을 지도 학습
-  - 사람이 선호하는 응답이 입력으로 주어짐 → 높은 보상을 출력
-- 예시
-  - 선택지 A: Explain gravity... → Reward: `-5`
-  - 선택지 D: People went to the moon... → Reward: `100`
-- 출처: Ouyang et al., *Training Language Models to Follow Instructions with Human Feedback*, NeurIPS 2022
-
-## InstructGPT의 학습 방법: Step 3. 보상이 높은 응답을 생성하도록 강화 학습을 통해 추가 학습
-- 핵심: Step 1 & 2에서 보지 못한 질문에 대해 사람의 추가적인 개입 없이 학습된 모델들을 통해 추가 학습이 진행
-- 지시 학습된 모델을 보상 모델 기반 강화 학습을 통해 한 번 더 추가 학습
-- Step 3: Optimize a policy against the reward model using reinforcement learning.
-  - A new prompt is sampled from the dataset.
-  - The policy generates an output.
-  - The reward model calculates a reward for the output.
-  - The reward is used to update the policy using PPO.
-- 출처: Ouyang et al., *Training Language Models to Follow Instructions with Human Feedback*, NeurIPS 2022
-
-## InstructGPT의 결과: 유저의 지시를 얼마나 잘 수행하는지를 사람이 직접 평가
-- 단순 프롬프팅이나 지시 학습에 비해 발전된 지시 수행능력을 보여줌
-  - InstructGPT: Likert score 5점대
-  - Supervised Fine-Tuning: 4점대
-  - GPT (prompted): 3점대
-  - GPT: 2점대
-- 출처: Ouyang et al., *Training Language Models to Follow Instructions with Human Feedback*, NeurIPS 2022
-
-## InstructGPT의 결과: 얼마나 안전한 응답을 생성하는지 평가
-- 기존 대비, InstructGPT는 해로운 응답(RealToxicity)과 거짓말(TruthfulQA, Hallucinations)을 덜 생성
-  - RealToxicity  
-    GPT: `0.233`  
-    SFT: `0.199`  
-    InstructGPT: `0.196`
-  - TruthfulQA  
-    GPT: `0.224`  
-    SFT: `0.206`  
-    InstructGPT: `0.413`
-  - Hallucinations  
-    GPT: `0.414`  
-    SFT: `0.078`  
-    InstructGPT: `0.172`
-- 출처: Ouyang et al., *Training Language Models to Follow Instructions with Human Feedback*, NeurIPS 2022
-
-## LLaMA2
-- InstructGPT와 비슷하게 RLHF와 대화 데이터를 활용한 LLaMA2 Chat 모델을 공개
-  - LLaMA1 때에는 사전 학습된 모델만 공개
-- 구성
-  - Human feedback: Human preference data → Helpful & Safety Reward Model 생성
-  - Fine-tuning: RLHF, Rejection Sampling, Proximal Policy Optimization
-  - Pretraining: Self-supervised learning 기반 LLaMA2 학습
-  - 최종 모델: LLaMA-2-chat
-- 출처: Touvron et al., *Llama 2: Open Foundation and Fine-Tuned Chat Models*, Meta AI
-
-## LLaMA2
-- InstructGPT와 비슷하게 RLHF와 대화 데이터를 활용한 LLaMA2 Chat 모델을 공개
-- 당시 대화형 타입 개방형 거대 언어 모델 중 가장 우수한 성능을 보여줌
-- 성능 비교 (% Win Rate)
-  - LLaMA-2-70b-chat vs ChatGPT-0301 → Win: `35.9`, Tie: `31.5`, Loss: `32.5`
-  - LLaMA-2-70b-chat vs PaLM-Bison → Win: `53.0`, Tie: `24.6`, Loss: `22.4`
-  - LLaMA-2-34b-chat vs Falcon-40b-instruct → Win: `76.3`, Tie: `14.6`, Loss: `9.1`
-  - LLaMA-2-34b-chat vs Vicuna-33b-v1.3 → Win: `37.2`, Tie: `31.2`, Loss: `31.2`
-  - LLaMA-2-13b-chat vs Vicuna-13b-v1.1 → Win: `45.4`, Tie: `29.8`, Loss: `24.9`
-  - LLaMA-2-7b-chat vs MPT-7b-chat → Win: `61.1`, Tie: `20.9`, Loss: `18.0`
-- 출처: Touvron et al., *Llama 2: Open Foundation and Fine-Tuned Chat Models*, Meta AI
-
-# 3. 거대 언어 모델의 추론
-
-# 3-1. 디코딩 (Decoding) 알고리즘
-
-## 거대 언어 모델의 자동회귀 생성 (Auto-regressive Generation)
-- 학습이 완료된 거대 언어 모델은 어떻게 응답을 생성할까? ⇒ 순차적 추론을 통한 “토큰별 생성”
-
-출처 : https://jalammar.github.io/illustrated-transformer/
-
-
-## 거대 언어 모델의 자동회귀 생성 (Auto-regressive Generation)
-- Q. 언제 추론 및 토큰 생성을 멈추고 응답을 제공?  
-  A. EOS 토큰 생성 시 종료 or 사전에 정의된 토큰 수 도달 시 종료  
-  - E.g. `[SEP]`: BERT에서 사용된 EOS (End Of Sentence) 토큰
-
-1. 원문 텍스트 입력  
-   ````python
-   text = "Tokenizing text is a core task of NLP."
-   encoded_text = tokenizer(text)
-   ````
-
-2. 토큰 ID 시퀀스  
-   ````python
-   {'input_ids': [101, 19204, 6026, 3793, 2003, 1037, 4563, 4708, 1997, 17953, 2361, 1012, 102],}
-   ````
-
-3. 토큰 문자열 리스트  
-   ````python
-   ['[CLS]', 'token', '##izing', 'text', 'is', 'a', 'core', 'task', 'of', 'nl', '##p', '.', '[SEP]']
-   ````  
-   → 문장 종료 표시 (EOS 토큰)
-
-출처 : https://medium.com/@abdallahashraf90x/tokenization-in-nlp-all-you-need-to-know-45c00cfa2df7
-
-
-## 거대 언어 모델의 자동회귀 생성 (Auto-regressive Generation)
-- Goal: 주어진 입력 `x = [x₁, ..., x_L]` 에 대해 다음 토큰 `x_{L+1}` 을 생성  
-  - Remark. 거대 언어 모델: 입력 `x`에 대해 다음 토큰에 대한 확률 분포 `p̂(x)`를 제공
-- 디코딩(Decoding) 알고리즘: `p̂(x)`로부터 `x_{L+1}`을 생성하는 알고리즘 (다음 단어를 선택하는 방법)
-
-`x = [x₁, x₂, x₃] = [아까, 밥, 먹고]`
-
-단어 목록과 확률 예시  
-왔군 - 0.06  
-왔어 - 0.5  
-왔는데 - 0.2  
-왔거든 - 0.1
-
-출처 : https://tilnote.io/books/6480b090e92fe5ef635f54df/6480a73ee92fe5ef635f4d77
-
-
-## 거대 언어 모델의 자동회귀 생성 (Auto-regressive Generation)
-- Pytorch 실제 예시
-
-````python
-from transformers import AutoTokenizer, AutoModelForCausalLM
-
-tokenizer = AutoTokenizer.from_pretrained("gpt2")
-model = AutoModelForCausalLM.from_pretrained("gpt2")
-
-prompt = "Today I believe we can finally"
-input_ids = tokenizer(prompt, return_tensors="pt").input_ids
-
-# generate up to 30 tokens
-outputs = model.generate(input_ids, do_sample=False, max_length=30)
-tokenizer.batch_decode(outputs, skip_special_tokens=True)
-````
-
-자동회귀 생성 파트  
-출처 : https://huggingface.co/blog/introducing-csearch
-
-
-## 거대 언어 모델의 자동회귀 생성 (Auto-regressive Generation)
-- Pytorch 실제 예시
-
-디코딩(Decoding) 알고리즘 종류:
-- `greedy decoding` by calling `greedy_search()`  
-- `contrastive search` by calling `contrastive_search()`  
-- `multinomial sampling` by calling `sample()`  
-- `beam-search decoding` by calling `beam_search()`  
-- `beam-search multinomial sampling` by calling `beam_sample()`  
-- `diverse beam-search` by calling `group_beam_search()`  
-- `constrained beam-search decoding` by calling `constrained_beam_search()`
-
-출처 : https://docs.pytorch.org/torchtune/0.3/generated/torchtune.generation.generate.html#torchtune.generation.generate
-
-
-## 디코딩(Decoding) 알고리즘: ① Greedy Decoding
-- 핵심 아이디어: 가장 확률이 높은 다음 토큰을 선택  
-  - 장점: 사용하기 쉽다.  
-  - 단점: 직후만 고려하기 때문에 생성 응답이 최종적으로 최선이 아닐 수 있다.
-
-출처 : https://heidloff.net/article/greedy-beam-sampling/
-
-
-## 디코딩(Decoding) 알고리즘: ② Beam Search
-- 핵심 아이디어: 확률이 높은 k개(beam size)의 후보를 동시에 고려  
-  - 고르는 기준: 누적 생성 확률(지금까지 생성된 문장 전체가 나올 확률의 곱)
-  - 앞선 Greedy Decoding은 매 시점마다 가장 높은 확률의 선택지 1개만을 선택했지만,  
-    Beam Search는 전체 문장 후보들의 누적 확률을 기준으로 상위 k개를 남기는 것
-
-출처 : https://d2l.ai/chapter_recurrent-modern/beam-search.html
-
-
-## 디코딩(Decoding) 알고리즘: ② Beam Search
-- 핵심 아이디어: 확률이 높은 여러 후보를 동시에 고려  
-  - 장점: 최종적으로 좋은 응답 생성 확률이 높다.  
-  - 단점: 계산 비용이 많이 늘어난다(각 후보마다 LLM 추론을 수행).
-
-예시 계산  
-“The dog has” = 0.4 * 0.9 = 0.36  
-“The nice woman” = 0.5 * 0.4 = 0.20
-
-Greedy 방식의 경우 매번 가장 높은 확률을 계산해 “The nice woman…” 경로를 선택하지만  
-Beam Search의 경우 전체 문장 후보의 누적 확률을 고려하여 “The dog has…” 경로를 선택함.
-
-출처 : https://heidloff.net/article/greedy-beam-sampling/
-
-
-## 디코딩(Decoding) 알고리즘: ③ Sampling
-- 핵심 아이디어: 거대 언어 모델이 제공한 확률을 기준으로 랜덤하게 생성  
-  - 장점: 다양한 응답을 생성할 수 있음.  
-  - 단점: 생성된 응답의 품질이 감소할 수 있음.
-
-단어 사전에 대해 정의된 확률 분포  
-모델이 아는 모든 단어에 대해 ‘다음 단어가 될 확률’을 매겨 놓은 것
-
-출처 : https://huyenchip.com/2024/01/16/sampling.html#constraint_sampling
-
-# 3-1. 디코딩 (Decoding) 알고리즘
-
-## 디코딩(Decoding) 알고리즘: ④ Sampling “with Temperature”
-- 핵심 아이디어: 하이퍼 파라미터 `T`를 통해 거대 언어 모델이 생성한 확률 분포를 임의로 조작
-  - `T > 1`: 확률 분포를 *Smooth*하게 만듦 (더 다양한 응답 생성)
-  - `T < 1`: 확률 분포를 *Sharp*하게 만듦 (기존에 확률이 높은 응답에 집중)
-
-출처 : https://medium.com/@harshit158/softmax-temperature-5492e4007f71
-
-- `T < 1`: 확률 분포를 *Sharp*하게 만듦 (기존에 확률이 높은 응답에 집중)
-  - 특정 후보(예: 9번 그래프)가 압도적으로 높은 확률을 갖고, 나머지는 매우 낮음
-  - → 모델이 항상 비슷한 답(가장 높은 확률의 단어)만 내놓게 됨
-  - * 안정적이나 다양성이 떨어짐
-
-출처 : https://medium.com/@harshit158/softmax-temperature-5492e4007f71
-
-- `T > 1`: 확률 분포를 *Smooth*하게 만듦 (더 다양한 응답 생성)
-  - 분포가 평평해짐
-  - 모든 단어가 거의 비슷한 확률로 선택될 수 있음.
-  - → 모델이 예측할 때 다양성이 극대화되지만, 품질은 불안정해짐.
-  - * 창의적이나 품질이 떨어질 수 있음.
-
-출처 : https://medium.com/@harshit158/softmax-temperature-5492e4007f71
-
-
-## 디코딩(Decoding) 알고리즘: ⑤ Top-K Sampling
-- 핵심 아이디어: 확률이 높은 `K`개의 토큰들 중에서만 랜덤하게 확률에 따라 샘플링
-  - 장점: 품질이 낮은 응답을 생성할 가능성을 줄일 수 있음
-
-출처 : https://sooftware.io/generate/
-
-- 단점: 확률 분포의 모양에 상관 없이 고정된 `K`개의 후보군을 고려
-
-출처 : https://sooftware.io/generate/
-
-- 문맥에 따라 다음 단어의 예측 확률 합이 다르다.
-  - `Σ_{w ∈ V_top-K} P(w | “The”) = 0.68`
-  - `Σ_{w ∈ V_top-K} P(w | “The”, “car”) = 0.99`
-
-출처 : https://sooftware.io/generate/
-
-
-## 디코딩(Decoding) 알고리즘: ⑥ Top-P Sampling (or Nucleus Sampling)
-- 핵심 아이디어: `K`를 고정하는 대신, 누적 확률(`P`)에 집중하여 `K`를 자동으로 조절
-  - 예시: `P = 0.9` → 확률이 높은 응답 후보의 확률을 더했을 때 `0.9`를 처음으로 초과하는 `K`를 사용
-
-출처 : https://sooftware.io/generate/
-
-- 핵심 아이디어: `K`를 고정하는 대신, 누적 확률(`P`)에 집중하여 `K`를 자동으로 조절
-- 다양한 평가 지표에서 기존 디코딩 알고리즘들 대비 좋은 성능을 달성
-
-출처 : Holtzman et al., The Curious Case of Neural Text Degeneration., ICLR 2020
-
-
-## 디코딩(Decoding) 알고리즘 별 장단점 요약
-- Greedy Decoding
-  - 장점: 쉬운 사용법
-  - 단점: 최적해 보장 `X`
-- Beam Search
-  - 장점: 좋은 응답 생성 확률 ↑
-  - 단점: 큰 계산 비용
-- Sampling
-  - 장점: 다양한 응답 생성 가능
-  - 단점: 품질 불안정
-- Sampling with “Temperature”
-  - 장점: 창의성/안정성 조절 가능
-  - 단점: `T ↑` : 품질 저하 / `T ↓` : 다양성 부족
-- Top-K Sampling
-  - 장점: 잡음 단어 배제, 품질 향상
-  - 단점: `K`값 고정 → 문맥 따라 불균형
-- Top-P Sampling (Nucleus)
-  - 장점: 확률 누적 기준, 품질·다양성 균형
-  - 단점: `P`값 설정 필요 (경우에 따라 랜덤성 여전)
-
-<표3-1_텍스트 파운데이션 모델_거대 언어 모델의 추론_디코딩 알고리즘 별 장단점 요약>
-
-# 3-1. 디코딩(Decoding) 알고리즘
-## 디코딩(Decoding) 알고리즘: 실제 예시 with ChatGPT
-- **OpenAI Playground / 모델 설정창**
-  - 이 값들을 조정하면서 앞서 나온 디코딩 알고리즘 값을 간접적으로 제어할 수 있음.
-
-*출처: https://platform.openai.com/chat/edit?models=gpt-4o-2024-11-20*  
-<그림3-13_텍스트 파운데이션 모델_거대 언어 모델의 추론_ChatGPT에서 실제로 활용되고 있는 디코딩 알고리즘 및 효과 예시>
 
 ---
 
-# 3-2. 프롬프트 엔지니어링
-## 입력 프롬프트 = (1) 지시(instruction) + (2) 예시(few-shot examples)
-- **지시 (Instruction)**
-- **예시 (few-shot examples)**
-  - 모델은 학습을 새로 하지 않고 프롬프트 안의 예시를 보고 패턴을 따라 함.
-
-*출처: Brown et al., Language Models are Few-Shot Learners., NeurIPS 2020*  
-<그림3-14_텍스트 파운데이션 모델_거대 언어 모델의 추론_인 컨텍스트 학습 (or 퓨샷 프롬프팅) 예시>
-
----
-
-## 입력 프롬프트의 영향
-- 어떻게 지시를 주는지, 어떤 예시를 보여주는지가 거대 언어 모델의 성능에 크게 영향을 미침
-- **프롬프트 엔지니어링**: 원하는 답을 얻기 위해 모델에 주어지는 입력(프롬프트)을 설계·조정하는 기법
-
-*출처: Brown et al., Language Models are Few-Shot Learners., NeurIPS 2020*  
-<그림3-15_텍스트 파운데이션 모델_프롬프트 엔지니어링_프롬프트에 따른 ChatGPT의 응답 차이>
+## 데이터 저장소의 종류 (계속)
+``` 
+| 항목 | 데이터 레이크 (Data Lake) | 데이터 웨어하우스 (Data Warehouse) |
+|------|----------------------------|-------------------------------------|
+| 데이터 적재 방식 | ELT: 추출 → 적재 → 변환<br>대량 원본 수용 후 필요에 따라 처리 | ETL: 추출 → 변환 → 적재<br>품질 정제 후 스키마에 맞춰 적재 |
+| 데이터 품질 요구 | 품질 보장보다 유연성과 포괄성 중시<br>노이즈 포함 가능성 존재 | 정합성·신뢰성 중요<br>높은 품질 기준 충족 필요 |
+| 비용 및 확장성 | 상대적으로 저렴하고 확장성 높음<br>(HDFS, S3 등 파일 기반 저장소 사용) | 저장 비용이 상대적으로 높음<br>(고가의 RDBMS, 분석 엔진 활용) |
+| 분석 방식 | 머신러닝, AI, 통계 분석 등 고급 분석에 활용<br>탐색적 분석 중심 | 표준화된 리포트 및 대시보드 중심<br>운영 보고서, 경영 분석 등 |
+| 운영 및 거버넌스 | 데이터 거버넌스 체계 수립 필요<br>메타데이터 관리 및 품질 통제 체계 중요 | 엄격한 데이터 품질관리 체계<br>보안·접근 제어 체계 정비 |
+```
 
 ---
 
-## 프롬프트 엔지니어링: 지시(instruction)
-- 감정 분류와 같은 쉬운 문제뿐 아니라 수학, 코딩과 같은 어려운 문제를 거대 언어 모델로 푸는 것에 많은 관심 집중
-  - 예시: 수학 질의 응답 (GSM8K → 미국 초등학교 고학년 수준 수학 문제)
-    - **질문:** Josh는 쿠키 한 상자를 사려고 돈을 모으고 있어요. 돈을 벌기 위해 팔찌를 만들어 팔기로 했습니다. 팔찌 하나를 만들 때 재료비로 \$1이 들고, 팔찌는 하나당 \$1.5에 판매합니다. Josh가 팔찌를 12개 만들고 쿠키를 산 뒤에도 \$3가 남아있다면, 쿠키 한 상자의 가격은 얼마일까요?
-    - **정답:** Josh는 팔찌 하나당 \$1.5 - \$1 = \$0.5의 이익을 얻습니다. Josh가 팔찌를 12개 만들면, 총 이익은 12 * \$0.5 = \$6입니다. 쿠키를 산 뒤에도 \$3가 남아 있으므로, Josh는 \$6 - \$3 = \$3을 쿠키 한 상자에 썼습니다. 따라서 쿠키 한 상자의 가격은 \$3입니다. 정답은 \$3입니다.
+# 데이터 파이프라인 개요
 
-*출처: https://huggingface.co/datasets/openai/gsm8k*  
-<그림3-16_텍스트 파운데이션 모델_프롬프트 엔지니어링_GSM8K 수학 문제 예시와 거대 언어 모델의 생성한 풀이 예시>
+## 데이터 레이크
+- 데이터 웨어하우스와의 차이
+  - 데이터 웨어하우스는 최종 사용자가 보고싶은 관점별 데이터 구성을 위해 원천 DB로부터 데이터를 수집  
+  - 스키마 관리와 품질 관리를 통해 리포트를 제공하는 시스템  
+  - DW는 데이터 구조가 이미 결정되어 엄격한 스키마 관리가 필요하고 한 번 구축 시 변경이 어려움
 
----
+# 데이터 파이프라인 설계
 
-## 프롬프트 엔지니어링: 성능 비교
-- 감정 분류와 같은 쉬운 문제뿐 아니라 수학, 코딩과 같은 어려운 문제를 거대 언어 모델로 푸는 것에 많은 관심 집중
-  - Claude 3, GPT-4, Gemini 등 최신 모델들의 벤치마크 비교 (Grade School Math, MATH 등)
+## 파이프라인 설계
+- 람다 아키텍처 & 카파 아키텍처  
+  - 실시간 수집이 필요한 경우 참조할 수 있는 아키텍처가 존재한다.  
+  - 대표적으로 람다(Lambda) 아키텍처와 카파(Kappa) 아키텍처가 존재  
 
-*출처: https://www.anthropic.com/news/claude-3-family*  
-<그림3-17_텍스트 파운데이션 모델_프롬프트 엔지니어링_다양한 벤치마크에서의 최신 SOTA 거대 언어 모델들 간의 성능 비교>
-
----
-
-## Chain-of-Thought (CoT) 프롬프팅
-- **아이디어:** 단순히 질문과 응답만을 예시로 활용하는 것이 아니라, **추론(Reasoning)** 과정도 예시에 포함
-  - 이를 통해 테스트 질문에 대해 추론을 생성하고 응답하도록 유도함으로써, 더 정확한 정답 생성을 기대할 수 있음
-  - 질문에 대한 정답을 바로 제시 → 틀림
-  - 질문에 대한 정답이 나오는 추론 과정을 함께 제시 → 정답률 상승
-
-*출처: Wei et al., Chain-of-Thought Prompting Elicits Reasoning in Large Language Model., NeurIPS 2022*  
-<그림3-18_텍스트 파운데이션 모델_프롬프트 엔지니어링_CoT 프롬프팅을 통한 추론 기반 응답 예시>
+**설계 구분**
+- 배치 Only  
+- 배치 + 스트림 or 스트림  
+  → 람다 아키텍처, 카파 아키텍처  
 
 ---
 
-## CoT 프롬프팅의 효과
-- **결과:** CoT는 거대 언어 모델(PaLM)의 추론 성능을 크게 증가시킴
-  - *PaLM*: 당시 구글에서 사용했던 가장 큰 거대 언어 모델 (PaLM 540B vs. GPT-3 175B)
-- **CoT로 인한 성능 향상은 모델 크기가 커질수록 더 확대됨**  
-  (추론 ~= 창발성?)
-  - *창발성:* 모델 크기가 커지면 갑자기 새로운 능력이 나타나는 현상을 의미  
-    (*PaLM의 창발적 능력이 발현되었을 수 있음*)
+## 파이프라인 설계
+- 람다 아키텍처  
+  - 2011년에 제시된 아키텍처  
+  - 실시간 수집이 필요한 경우 배치 처리와 스트림 처리를 모두 이용 가능  
 
-*출처: Wei et al., Chain-of-Thought Prompting Elicits Reasoning in Large Language Model., NeurIPS 2022*  
-<그림3-19_텍스트 파운데이션 모델_프롬프트 엔지니어링_CoT 프롬프팅을 통한 복잡한 추론 테스크에 대한 성능 향상 예시: GSM8K>
-
-# 3-2. 프롬프트 엔지니어링
-## Chain-of-Thought (CoT) 프롬프팅
-- **결과:** CoT는 거대 언어 모델(PaLM)의 추론 성능을 크게 증가시킴  
-- **다른 추론 테스크:** 마지막 단어 연결  
-  - In-domain: 예시도 2 단어, 테스트도 2 단어  
-  - Out-of-domain: 예시는 2 단어, 테스트는 4 단어  
-  - 마지막 글자 이어붙이기 문제 → 단계적 추론이 필요함
-
-<그림3-20_텍스트 파운데이션 모델_프롬프트 엔지니어링_CoT 프롬프팅을 통한 복잡한 추론 테스크에 대한 성능 향상 예시: 마지막 단어 연결>  
-출처: Wei et al., *Chain-of-Thought Prompting Elicits Reasoning in Large Language Model.*, NeurIPS 2022
+**구성 예시**
+- Client → Queue → Batch Layers / Stream Layers → Serving Layers → Query  
+- Raw Data → Process Data  
 
 ---
 
-## Chain-of-Thought (CoT) 프롬프팅
-- **결과:** CoT는 거대 언어 모델(PaLM)의 추론 성능을 크게 증가시킴  
-- **다른 추론 테스크:** 마지막 단어 연결  
-  - In-domain: 예시도 2 단어, 테스트도 2 단어  
-  - Out-of-domain: 예시는 2 단어, 테스트는 4 단어  
+# 데이터 파이프라인 개요
 
-- **2 letters**
-  - 두 모델 다 꾸준히 증가  
-  - 모델 크기가 클수록 성능이 좋아짐  
-- **4 letters**
-  - 학습 예시와 다른 일반화된 문제(out of domain)  
-  - CoT를 썼을 때 향상됨
-
-➡ CoT는 추론 테스크에서 성능을 크게 높일 뿐 아니라 훈련에 없던 더 어려운 문제도 효과적으로 대응할 수 있게 함
-
-출처: Wei et al., *Chain-of-Thought Prompting Elicits Reasoning in Large Language Model.*, NeurIPS 2022
+## 데이터 수집 도구
+- **Kafka**
+  - 분산 메시지 큐 시스템  
+  - 대용량 데이터를 빠르고 안정적으로 전달  
+  - 실시간 스트리밍 수집에 강점  
 
 ---
 
-## Chain-of-Thought (CoT) 프롬프팅
-- 예시 기반 CoT는 강력하지만, 예시를 위한 추론 과정을 수집해야 하는 문제가 있음  
-- **Q. 예시 없이도(0-shot) 거대 언어 모델의 추론 성능을 강화할 수 있을까? (i.e., 0-shot CoT)**  
-  - 단계별 사고 과정을 예시로 제공하여 LLM의 추론 능력을 향상시킴
+## 데이터 처리(가공) 도구
+- **Spark**
+  - 대규모 배치 처리 프레임워크  
+  - ETL/머신러닝 통합 가능  
+  - DAG 기반 처리로 안정성과 확장성 확보  
 
-출처: Wei et al., *Chain-of-Thought Prompting Elicits Reasoning in Large Language Model.*, NeurIPS 2022
-
----
-
-## Chain-of-Thought (CoT) 프롬프팅
-- 예시 기반 CoT는 강력하지만, 예시를 위한 추론 과정을 수집해야 하는 문제가 있음  
-- **Q. 예시 없이도(0-shot) 거대 언어 모델의 추론 성능을 강화할 수 있을까? (i.e., 0-shot CoT)**  
-  - “Let’s think step by step.”이라는 문구 추가로 예시 없이 LLM 성능 향상
-
-출처: Wei et al., *Chain-of-Thought Prompting Elicits Reasoning in Large Language Model.*, NeurIPS 2022
+- **Flink**
+  - 스트리밍 처리 전문 프레임워크  
+  - 이벤트 기반 실시간 분석에 최적화  
+  - 상태 기반 연산 및 복잡한 처리 가능  
 
 ---
 
-## 0-shot CoT 프롬프팅
-- **1. 유인 문장을 통한 추론 생성** (e.g. “Let’s think step by step”)
+## 데이터 저장 도구
+- **RDBMS (PostgreSQL, Oracle, 등)**
+  - 고급 기능을 지원하는 오픈소스 관계형 데이터베이스  
+  - 정형 데이터 저장에 적합  
 
-<그림3-22_텍스트 파운데이션 모델_거대 언어 모델의 추론_0-shot CoT 프롬프팅 개요도>  
-출처: Kozima et al., *Large Language Models are Zero-Shot Reasoners.*, NeurIPS 2022
+- **Elasticsearch**
+  - 실시간 검색과 분석에 강력한 NoSQL DB  
+  - 로그, 텍스트 분석, 모니터링 등 다양한 사용처  
 
----
-
-## 0-shot CoT 프롬프팅
-- **1. 추론 문장을 통한 추론 생성** (e.g. “Let’s think step by step”)  
-- **2. 주어진 질문과 생성된 추론을 통한 정답 생성** (e.g. “Therefore, the answer is”)
-
-출처: Kozima et al., *Large Language Models are Zero-Shot Reasoners.*, NeurIPS 2022
-
----
-
-## 0-shot CoT 프롬프팅
-- **결과:** 0-shot CoT는 기존 0-shot 프롬프팅보다 훨씬 높은 추론 성능을 달성  
-- 또한, 0-shot CoT는 모델 크기가 임계점을 넘어서야 효과성이 발휘됨  
-  - 따라서, 추론 능력은 거대 언어 모델의 창발성 결과라고 볼 수 있음
-
-출처: Kozima et al., *Large Language Models are Zero-Shot Reasoners.*, NeurIPS 2022
+- **Hadoop (Data Lake)**
+  - 대용량 비정형 데이터 저장용 HDFS 기반 저장소  
+  - 정형·비정형 데이터 통합 저장 가능  
 
 ---
 
-## 0-shot CoT 프롬프팅
-- **Q. 추론 문장의 중요성?**
-  - 단순한 문구 하나가 성능을 크게 향상시킴
-  - 적절하지 못한 문구를 제시했을 때 성능을 떨어뜨리거나 역효과가 남
+## 데이터 모니터링 및 워크플로우 관리 도구
+- **Airflow**
+  - 워크플로우 스케줄러 (DAG 기반)  
+  - 파이프라인의 각 단계를 자동화 및 모니터링  
 
-출처: Kozima et al., *Large Language Models are Zero-Shot Reasoners.*, NeurIPS 2022
+- **Grafana**
+  - 실시간 시각화 대시보드  
+  - 다양한 데이터 소스와 연결 가능 (Prometheus, Elasticsearch 등)  
+
+- **Prometheus**
+  - 시계열 기반 모니터링 도구  
+  - 지표 수집, 알림, 시각화 연동 기능 제공  
 
 ---
 
-# 4. 거대 언어 모델의 평가와 응용
+## 데이터 레이크 분석 도구
+- **BI (Business Intelligence) / OLAP (Online Analytical Processing)**
+  - 데이터를 시각적으로 분석하거나 리포트를 만들기 위한 도구  
+  - 엑셀의 Pivot 기능 또는 시각화 기능과 같은 기능을 좀 더 전문적으로 다루는 도구  
+  - 원래 데이터 웨어하우스의 등장과 함께 같이 쓰이는 도구였으나,  
+    데이터 레이크도 연결 가능  
+  - 라이선스 비용이 높은 편  
+
+**예시 도구:** Power BI, Tableau  
 
 ---
 
-# 4-1. 거대 언어 모델의 평가
+## 데이터 레이크하우스
+- **데이터 레이크하우스의 구성**
+  - 정형 + 비정형 데이터 모두 저장  
+  - 스키마는 나중에 적용 (schema-on-read)  
+  - 대용량 로그/센서 데이터 수용 가능  
 
-## 평가 (Evaluation): 구축한 시스템(e.g. 코드 or 앱)이 실제로 잘 동작하는지를 확인하는 단계
+---
 
-- 평가의 3가지 요소
-  1) 목표: 시스템으로 무엇을 달성하고자 하는지  
-  2) 평가 방법: 어떤 방법으로 평가할 것인지  
-  3) 평가 지표: 어떻게 성공 여부를 판단할 것인지
+# 데이터 파이프라인 설계
 
-> 출처: https://www.ytn.co.kr/_ln/0102_202404130800061445
+## 아키텍처 설계
+- 데이터 엔지니어 관점에서 데이터 아키텍처 주 관심사는 파이프라인 설계  
+- 데이터 수집부터 분석/시각화 환경까지 데이터를 견고하게 전달할 수 있는  
+  아키텍처 설계를 목표로 함  
 
-- 예시: 배달 어플
-  1) 목표: 음식을 음식점으로부터 유저에게까지 배달하는 것  
-  2) 평가 방법: 배달 시간을 측정  
-  3) 평가 지표: 전체 유저 배달 건수에 대한 평균 배달 시간
+---
 
-> 출처: https://platform.openai.com/chat/edit?models=gpt-4o-2024-11-20
+## 파이프라인 설계
+- 파이프라인 설계는 환경마다 다르기에 정답은 없다.  
+  - (온프레미스 vs 클라우드)  
+- 요구사항에 따라 각양각색으로 구현 가능하나,  
+  실시간 수집이 필요한지 여부에 따라 파이프라인 설계 구분 가능  
 
-## AI 모델의 평가: “테스트 데이터”
+**설계 구분**
+- 배치 Only → 수집 데이터 배치 처리  
+- 배치 + 스트림 or 스트림 → 데이터 실시간 처리
 
-- 핵심 가정: 학습 단계에서 본 적이 없고, 질문과 정답을 알고 있음
-- 예시: 감정 분류  
-  1) 목표: 주어진 입력 텍스트의 감정을 올바르게 예측하는 것  
-  2) 평가 방법: AI 모델의 예측 감정과 사람이 작성한 정답을 비교하는 것  
-  3) 평가 지표: 테스트 데이터 셋에서의 평균 정확도  
+# 데이터 파이프라인 개요
 
-“총평하자면, 두 시간 동안 영화를 보고 얻은 건 팝콘과 음료 뿐입니다. 영화는 정말 형편없었어요.”
+---
 
-데이터 입력 → 추가 학습된 언어 모델 → 예측과 정답 비교  
-예측 감정: 0 (부정적) = 정답 감정: 0 (부정적)
+## 데이터 수집 도구
 
-<그림 4-1. 텍스트 파운데이션 모델_거대 언어 모델의 평가와 응용_AI 모델의 테스트 데이터 기반 평가 예시>
+### | Kafka
 
-출처: Delvin et al., BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding, NAACL 2019
+- 분산 메시지 큐 시스템  
+- 대용량 데이터를 빠르고 안정적으로 전달  
+- **실시간 스트리밍 수집**에 강점
 
-## 거대 언어 모델 평가의 특징
+---
 
-- 특정 테스트에서 학습된 기존 AI 모델들과 달리, 거대 언어 모델은 다양한 테스트에 대해 동시에 학습됨  
-  - 따라서, 거대 언어 모델의 성능을 올바르게 평가하기 위해서는 많은 테스트에서의 성능을 종합적으로 판단해야 함  
-  - 또한, 디코딩 알고리즘, 입력 프롬프트에 따라 같은 질문에 대해서도 예측이 바뀌므로, 공평한 비교를 위해서는 해당 부분도 고려해야 함
+## 데이터 처리(가공) 도구
 
-<그림 4-2. 텍스트 파운데이션 모델_거대 언어 모델의 평가와 응용_거대 언어 모델간의 성능 비교 예시>
+### | Spark
 
-출처: OpenAI, GPT-4 Technical Report
+- 대규모 **배치 처리 프레임워크**  
+- ETL / 머신러닝 통합 가능  
+- **DAG 기반 처리**로 안정성과 확장성 확보
 
-- 특정 테스트에서 학습된 기존 AI 모델들과 달리, 거대 언어 모델은 다양한 테스트에 대해 동시에 학습됨  
-  - 따라서, 거대 언어 모델의 성능을 올바르게 평가하기 위해서는 많은 테스트에서의 성능을 종합적으로 판단해야 함  
-  - 또한, 디코딩 알고리즘, 입력 프롬프트에 따라 같은 질문에 대해서도 예측이 바뀌므로, 공평한 비교를 위해서는 해당 부분도 고려해야 함
+### | Flink
 
-<그림 4-2. 텍스트 파운데이션 모델_거대 언어 모델의 평가와 응용_거대 언어 모델간의 성능 비교 예시>
+- **스트리밍 처리 전문 프레임워크**  
+- 이벤트 기반 실시간 분석에 최적화  
+- 상태 기반 연산 및 **복잡한 처리** 가능
 
-출처: OpenAI, GPT-4 Technical Report
+---
 
-102p~
+## 데이터 저장 도구
+
+### | RDBMS (예: PostgreSQL, Oracle 등)
+
+- 고급 기능을 지원하는 **오픈소스 관계형 데이터베이스**  
+- **정형 데이터 저장**에 적합
+
+---
+
+### | Elasticsearch
+
+- **실시간 검색과 분석**에 강력한 NoSQL DB  
+- **로그, 텍스트 분석, 모니터링** 등 다양한 사용처
+
+---
+
+### | Hadoop (Data Lake)
+
+- 대용량 **비정형 데이터 저장용** HDFS 기반 저장소  
+- **정형·비정형 데이터 통합 저장** 가능
+
+---
+
+## 데이터 모니터링 및 워크플로우 관리 도구
+
+### | Airflow
+
+- **워크플로우 스케줄러 (DAG 기반)**  
+- 파이프라인의 각 단계를 **자동화 및 모니터링** 가능
+
+---
+
+### | Grafana
+
+- **실시간 시각화 대시보드**  
+- 다양한 데이터 소스와 연결 가능 (예: Prometheus, Elasticsearch 등)
+
+---
+
+### | Prometheus
+
+- **시계열 기반 모니터링 도구**  
+- **지표 수집, 알림, 시각화 연동 기능** 제공
+
+---
+
+## 데이터 레이크 분석 도구
+
+### | BI (Business Intelligence) / OLAP (Online Analytical Processing)
+
+- 데이터를 **시각적으로 분석**하거나 **리포트를 생성**하기 위한 도구  
+- 엑셀의 **피벗 테이블** 기능 또는 **차트 시각화** 기능을  
+  → 좀 더 **전문적으로 다룰 수 있는 도구**
+
+- 원래는 **데이터 웨어하우스**와 함께 사용되었지만  
+  → 최근에는 **데이터 레이크**에도 연결 가능
+
+- 단점: **라이선스 비용이 높은 편**
+
+
+---
+
+## 데이터 레이크하우스
+
+### | 데이터 레이크하우스의 구성
+
+- **정형 + 비정형 데이터** 모두 저장 가능  
+- **스키마는 나중에 적용 (schema-on-read)**  
+- **대용량 로그 / 센서 데이터** 수용 가능
+
+---
+
+## 아키텍처 설계
+
+- 데이터 엔지니어 관점에서 **데이터 아키텍처의 주요 관심사**는 **파이프라인 설계**  
+- 데이터 **수집 → 저장 → 처리 → 분석/시각화 환경**까지  
+  → 데이터를 **견고하게 전달**할 수 있는 아키텍처 설계를 목표로 함
+
+---
+
+## 파이프라인 설계
+
+- **파이프라인 설계는 환경마다 다르기 때문에 정답은 없다**  
+  - 예: **온프레미스 vs 클라우드**
+
+- 요구사항에 따라 다양한 방식으로 구현 가능  
+  → 특히, **실시간 수집이 필요한지 여부**에 따라  
+    **파이프라인 설계를 구분**할 수 있음
+
+---
+
+## 파이프라인 설계  
+### | 람다 아키텍처 & 카파 아키텍처
+
+- **실시간 수집이 필요한 경우** 참조할 수 있는 대표적인 아키텍처 존재  
+- 대표적으로:  
+  - **람다 (Lambda) 아키텍처**  
+  - **카파 (Kappa) 아키텍처**
+
+
+---
+
+## 파이프라인 설계  
+### | 람다 아키텍처 (Lambda Architecture)
+
+- **2011년에 제시된 아키텍처**  
+- **실시간 수집이 필요한 경우**,  
+  → **배치 처리 + 스트림 처리**를 **모두 활용**할 수 있는 구조
+
+---
+
+## 파이프라인 설계  
+### | Serving Layer
+
+- **배치 Layer에 저장된 데이터**를 **빠르게 보여주기 위한 서비스 계층**  
+- 사용자가 직접 **쿼리할 수 있도록 지원**  
+- 필요에 따라 **스피드 Layer**에 있는 데이터와 **결합**하기도 함
+
+
+---
+
+## 파이프라인 설계  
+### | 배치 Layer & 스트림 Layer
+
+- **배치 Layer**에 저장된 데이터는 **기준 데이터** 역할  
+- **스피드 Layer**에는 **당일 데이터**를 저장 및 정제하는 공간  
+- 배치 Layer의 테이블 갱신이 완료되면  
+  → 스피드 Layer는 그 **이후 데이터부터 저장 및 정제**  
+
+- **람다 아키텍처는 개념적 컨셉만 제공** (구체 구현은 다양함)
+
+---
+
+## 파이프라인 설계  
+### | 카파 아키텍처 (Kappa Architecture)
+
+- **배치 Layer를 제거**하고,  
+  → 배치 Layer에서 수행하던 모든 작업을 **스피드 Layer에서 처리**하는 구조  
+  (전처리 후 필요한 테이블로 재구성)
+
+---
+
+- 데이터 소스는 주로 **메시지 큐(Message Queue)** 를 의미  
+- 메시지 큐에는 여러 솔루션이 존재하지만,  
+  **Kafka를 개발한 Jay Kreps**가 만든 카파 아키텍처에서는  
+  → 데이터 소스 = **Kafka 클러스터**를 의미  
+
+- 즉, **카파 아키텍처에서는 모든 데이터가 Kafka로 수집**됨을 전제  
+
+- ⚠️ 그러나 **실제 환경에서는 배치 파이프라인도 여전히 많이 활용**
+
+---
+
+## 파이프라인 설계  
+### | 람다 아키텍처나 카파 아키텍처만 가능한가?
+
+- 구조화된 아키텍처는 **참고용 개념**일 뿐,  
+  → 모든 데이터를 해당 아키텍처 기반의 파이프라인으로 구성할 필요는 없음  
+
+- **아키텍처 수용 여부**는  
+  → **각 파이프라인의 데이터 활용 요건**에 따라 결정됨  
+
+- 따라서,  
+  1. **데이터 활용 요건을 분석**한 후  
+  2. 어떤 아키텍처를 따를지, 어떤 **데이터 뷰**를 사용할지 결정
+
+---
+
+## 데이터 파이프라인 전체 구조  
+### | 상품 전략 예시로 알아보자
+
+- 당신은 **종합 인터넷 쇼핑몰의 사장**이다.
+
+---
+
+## 데이터 파이프라인 전체 구조  
+### | 데이터 소스
+
+- 데이터가 유입되는 소스(Source)
+
+---
+
+## 데이터 수집 및 변환  
+- 데이터 소스에서 내용을 추출하고  
+저장에 적절한 형태로 변환
+
+## 데이터 파이프라인 전체 구조  
+- 과거 데이터 분석  
+  - 과거 데이터를 활용한 분석 단계  
+  - 주목할 만한 제품은?  
+  - 금주 인기 제품: 3, 7, 22, 17  
+  - 실시간 인기 제품: 33, 5529
+
+- 예측 분석  
+  - 데이터를 바탕으로 머신러닝 및 예측을 하는 단계  
+  - 유저별 추천 제품  
+    - User A: 99, 17, 33  
+    - User B: 111, 26, 54
+
+- 데이터 분석 결과를 시각적으로 표현하거나 시스템에 제공
+
+### 출력
+- 데이터 분석 결과를 시각적으로 표현하거나 시스템에 제공
+- User A : 99, 17, 33  
+  금주 인기 제품 : 3, 7, 22, 17  
+  실시간 인기 제품 : 33, 55, 29  
+- User B : 111, 26, 54
+
+### 지원 시스템
+- 데이터 파이프라인을 관리하고 보완 및 모니터링 하는 시스템
+
+# 리눅스의 개념
+
+## 유닉스(UNIX)
+- 리눅스가 탄생하기 이전 운영체제(OS)
+- 지금도 많이 사용되는 운영체제 중 하나이지만 높은 비용 지불 필요
+- IBM의 AIX, HP의 HP/UX, 오라클의 Solaris, DEC의 Digital Unix, SCO의 SCO Unix 등
+
+## 리눅스(Linux)
+- 무료(Free) 유닉스 개념
+- 유닉스와 거의 동일한 운영체제이면서 무료, 어떤 면에서는 유닉스보다 뛰어남
+
+# 리눅스의 구성
+
+## 커널(Kernel)
+- 운영체제의 핵심 구성 요소로, 하드웨어와 응용 프로그램 사이를 중재하는 역할을 한다.
+
+## 리눅스 커널의 역사
+- 리누스 토르발스(Linus Torvalds)가 1991년, 리눅스 커널 0.01 버전을 개발
+- 1992년, 0.02 버전 소스를 공개하며 오픈소스 운동 본격화 → 리눅스의 시작
+- 리눅스 배포판은 토르발스가 만든 커널 + 다양한 오픈소스 프로그램으로 구성
+
+# 리눅스의 장점
+
+## 무료 & 오픈소스 (Free & Open Source)
+- 누구나 자유롭게 사용, 수정, 배포 가능
+- 라이선스 비용 부담 없이 교육/개발에 적합
+
+## 가볍고 빠른 성능
+- 구형 하드웨어에서도 작동 가능
+- 불필요한 GUI 없이 CLI 중심 운영 가능
+
+## 서버로서의 점유율
+- 전 세계 웹 서버의 70% 이상이 리눅스 기반
+- 클라우드, 데이터센터, 웹 호스팅에서 필수 OS
+
+## 개발 환경
+- Git, Docker, Python, Node.js 등 대부분 리눅스 친화적
+- 패키지 설치, 자동화, 백엔드 개발에 최적
+
+# 우분투 리눅스
+
+## 우분투 리눅스(Ubuntu Linux)
+- 데비안 기반 배포판, 다양한 플랫폼(Desktop, Server, IoT 등)
+- 릴리스 주기: 일반 버전(6개월), LTS 버전(2년)
+
+# WSL (Windows Subsystem for Linux)
+
+## WSL이란 무엇일까?
+- Windows 환경에서 리눅스를 실행할 수 있도록 도와주는 도구
+- 윈도우에서 리눅스를 가상 머신 없이 실행
+- 명령어, 파일 시스템, 리눅스 도구 사용 가능
+
+### WSL의 장점
+- 별도 리눅스 컴퓨터가 없어도 Windows에서 바로 리눅스 사용 가능
+- Docker, Python, Git 등 리눅스 친화 도구 활용이 쉬움
+- VM 대비 가볍고 빠르며, 설치가 간편함 (재부팅 없이 가능)
+
+## WSL 버전 별 차이점
+
+| 항목 | WSL 1 | WSL 2 |
+|------|-------|-------|
+| 핵심 구조 | Windows 커널 위 리눅스 API 구현 | 가상화된 리눅스 커널 내장 |
+| 성능 | 빠른 파일 접근 | 높은 시스템 호환성 |
+| Docker 사용 | 불가능 | 가능 |
+| 네트워크 | 윈도우와 동일 | 분리된 IP 사용 (WSL 네트워크) |
+
+> Docker를 이용하려면 꼭 WSL 2여야 합니다!
+
+# WSL 설치 방법
+
+## WSL 설치하기
+
+- 운영체제
+  - Windows 10 (빌드 1903 이상) 또는 Windows 11 필요
+
+- 필수 Windows 기능 활성화 (WSL1 핵심 구성요소 설치 / 가상화 기반 플랫폼 활성화하기)
+```
+dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
+dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
+```
+
+- Microsoft Store를 통해 직접 설치 후 진행
+  - https://apps.microsoft.com/detail/9p9tqf7mrm4r?hl=ko-KR&gl=KR
+
+- (docker 사용 및 최신 호환을 위해) WSL2로 설정하기
+```
+wsl --set-default-version 2
+```
+
+- 현재 설치된 wsl 목록 확인하기
+```
+wsl --list --verbose
+```
+- 만약 다른 버전이 있을 경우 (예시 : Ubuntu-24.04)
+
+(bash)
+```
+wsl --terminate Ubuntu-24.04
+wsl --unregister Ubuntu-24.04
+```
+
+(powershell)
+```
+Get-AppxPackage *Ubuntu* | Remove-AppxPackage
+```
+
+- Microsoft Store를 통해 “Ubuntu 22.04.5 LTS” 다운로드
+
+- Ubuntu 최초 실행 후 설정
+```
+ID : ssafy
+PW : ssafy
+```
+
+- 전체 설치 완료 후 기본 배포판으로 설정
+```
+wsl --set-default Ubuntu-22.04
+```
+
+- VS Code 실행 후 extension 확인
+
+- WSL install 하기
+
+- Ctrl+Shift+P -> 'WSL'입력
+- WSL: Connect to WSL in New Window
+
+- 우분투 환경 다운로드 후 연결
+
+- 폴더 경로가 우분투 환경과 동기화 된 것을 확인 가능
+
+# 리눅스 기본 명령어
+
+## 시작과 종료
+- Ubuntu 22.04를 통해 실행 가능. (VS code를 통해서도 가능)
+
+### 사용 불가 명령어
+- poweroff  
+- reboot  
+- shutdown  
+
+> WSL 특성상 자체적 부팅 구조가 아니기 때문에 해당 명령어는 무시됨.
+
+### WSL 종료
+- exit
+
+## root 사용자란?
+- 최고 권한(Superuser)을 가진 계정  
+  - 시스템의 모든 파일, 설정, 사용자 계정 등에 제약 없이 접근 가능  
+  - Windows의 Administrator에 대응되는 개념  
+
+| 작업 | 일반 사용자 | root 사용자 |
+|------|--------------|--------------|
+| 시스템 파일 수정 | X | O |
+| 새로운 프로그램 설치 | X | O |
+| 다른 사용자 계정 관리 | X | O |
+| 커널 모듈 수정 | X | O |
+
+### root 권한 이용 시 주의점
+- 실수로 중요한 시스템 파일 삭제 가능  
+- 잘못된 명령어로 OS 자체를 망가뜨릴 위험  
+- 외부 공격자가 root 권한을 얻으면 시스템 전체를 장악 가능  
+- 보통은 sudo 명령어로 필요한 작업만 root 권한을 임시로 위임받아 실행
+
+## root 사용자 권한 전환
+```
+sudo -i
+```
+- 현재 계정에서의 비밀번호 입력
+
+### 권한 확인 후 기존 계정으로 복귀
+```
+exit
+```
+
+## CLI 환경 관련 유용 명령
+| 명령어 | 설명 | 예시 | 비고 | 약자 의미 |
+|--------|------|------|------|------------|
+| clear | 터미널 화면 초기화 | clear | 화면 정리용 | **Clear** |
+| man | 매뉴얼 보기 | man grep, q로 종료 | 대부분 명령어 지원 | **Manual** |
+
+---
+
+## 파일 및 디렉토리 관리
+| 명령어 | 설명 | 예시 | 비고 | 약자 의미 |
+|--------|------|------|------|------------|
+| pwd | 현재 디렉토리 경로 확인 | pwd | 터미널 기준 작업 위치 파악 | **Print Working Directory** |
+| ls | 현재 디렉토리 목록 보기 | ls -l, ls -a | -l: 자세히, -a: 숨김 포함 | **List** |
+| cd | 디렉토리 이동 | cd ~/Downloads, cd .. | ..: 상위 디렉토리 | **Change Directory** |
+| mkdir | 새 폴더 생성 | mkdir my_folder | 여러 개도 가능: mkdir a b c | **Make Directory** |
+| rmdir | 빈 폴더 삭제 | rmdir my_folder | 폴더가 비어 있어야 함 | **Remove Directory** |
+| rm -r | 폴더 포함 삭제 | rm -r my_folder | 실수 방지 주의 필요 | **Remove (recursive)** |
+
+---
+
+## 파일 생성, 편집, 복사, 삭제
+| 명령어 | 설명 | 예시 | 비고 | 약자 의미 |
+|--------|------|------|------|------------|
+| touch | 빈 파일 생성 | touch test.txt | 수정 시간 갱신용으로도 사용됨 | (접촉하다 - 변경 시각 "touch") |
+| echo | 문자열 출력/파일에 저장 | echo "Hello" >> hi.txt | >>: 이어쓰기 | (echo - 메아리처럼 출력) |
+| cat | 파일 내용 출력 | cat file.txt | 대용량 파일은 less, more 추천 | **Concatenate** |
+| head, tail | 처음/끝 일부 출력 | head -n 3 file.txt | 로그 확인에 유용 | **Head/Tail (머리/꼬리)** |
+| cp | 파일/폴더 복사 | cp a.txt b.txt, cp -r dir1 dir2 | 디렉토리 전체 복사 | **Copy** |
+| mv | 이동 또는 이름 변경 | mv a.txt new.txt | 파일 위치 이동에도 사용 | **Move** |
+| rm | 파일 삭제 | rm test.txt | rm -rf: 위험! | **Remove** |
+
+---
+
+## 검색과 필터링
+| 명령어 | 설명 | 예시 | 비고 | 약자 의미 |
+|--------|------|------|------|------------|
+| grep | 특정 문자열 검색 | grep "ERROR" log.txt | 로그 분석에서 필수 | **Global Regular Expression Print** |
+| find | 파일 검색 | find . -name "*.txt" | 위치별 조건 검색 | **Find** |
+| history | 명령어 기록 확인 | history | 이전 명령 복기 | **History** |
+
+---
+
+## 시스템 정보 및 프로세스
+| 명령어 | 설명 | 예시 | 비고 | 약자 의미 |
+|--------|------|------|------|------------|
+| ps aux | 전체 프로세스 확인 | ps aux, ps aux grep python | 자원 소비 확인 | PS - process status<br>A - All users<br>U - User-oriented format<br>X - No controlling terminal |
+| kill | 프로세스 종료 | kill 1234 | -9 옵션은 강제 종료 | **Kill** |
+| top | 실시간 자원 모니터링 | top, q로 종료 | htop은 GUI 버전 | **Top of processes** |
+| uptime | 시스템 가동 시간 | uptime | 부팅 이후 시간 확인 | **Up Time** |
+| whoami | 현재 사용자 확인 | whoami | 스크립트에서 유용 | **Who am I** |
+| hostname | 호스트명 확인 | hostname | 네트워크 확인에 사용 | **Host Name** |
+
+---
+
+## 사용자 권한 및 보안
+| 명령어 | 설명 | 예시 | 비고 | 약자 의미 |
+|--------|------|------|------|------------|
+| sudo | 관리자 권한 명령 | sudo apt update | root 권한 필요 시 | **Superuser Do** |
+| sudo -i | root 전환 | sudo -i, su - root | 환경 유지하며 root 전환<br>su - root는 root pw 지정 후 이용 | **Interactive shell** |
+| chmod | 파일 권한 변경 | chmod 755 run.sh | 실행 권한 등 설정<br>조심해서 사용 | **Change Mode** |
+| chown | 파일 소유자 변경 | sudo chown user file.txt | 조심해서 사용 | **Change Owner** |
+
+---
+
+## chmod (Change Mode)
+
+### 리눅스 권한 구조
+- 리눅스에서는 각 파일/디렉토리에 대해 다음 3가지 주체에 대한 권한을 따로 설정할 수 있다.
+
+#### 주체
+- u(user): 파일의 소유자  
+- g(group): 파일이 속한 그룹  
+- o(other): 그 외 사용자
+
+#### 권한
+- r(read): read (내용 보기 가능)  
+- w(write): write (수정, 삭제 가능)  
+- x(execute): execute (실행 가능, 디렉토리 접근 포함)
+
+---
+
+## chmod (Change Mode) 실습
+
+### 샘플 sh 파일 만들고 간단하게 확인
+```
+touch sample.sh
+echo 'echo "Hello, Linux!"' > sample.sh
+cat sample.sh
+```
+
+---
+
+## chmod (Change Mode) 권한 확인
+
+| U | G | O |
+|---|---|---|
+| r w x | r w x | r w x |
+| r w - | r - - | r - - |
+| 4 2 0 | 4 0 0 | 4 0 0 |
+
+- `sample.sh`는 **644**의 권한을 가지고 있다.  
+  - 사용자는 읽기 + 쓰기  
+  - 그룹은 읽기 전용  
+  - 기타 사용자도 읽기 전용
+
+---
+
+## chmod (Change Mode) 권한 변경
+
+| U | G | O |
+|---|---|---|
+| r w x | r w x | r w x |
+| r w x | r - x | r - x |
+| 4 2 1 | 4 0 1 | 4 0 1 |
+
+```
+chmod +x sample.sh
+```
+
+- 사용자는 `sample.sh`에 실행 권한을 추가해서 **755**의 권한을 주게 됨.
+
+## CLI 환경 관련 유용 명령
+
+| 명령어 | 설명 | 예시 | 비고 | 약자 의미 |
+|--------|------|------|------|------------|
+| clear | 터미널 화면 초기화 | clear | 화면 정리용 | **Clear** |
+| man | 매뉴얼 보기 | man grep, q로 종료 | 대부분 명령어 지원 | **Manual** |
+
+# 리눅스 명령어 사용 실습
+
+## 간이 로그 확인 실습
+
+### 작업 디렉토리 만들기
+```bash
+ls                      # 현재 디렉토리 상태 확인
+pwd                     # 현재 디렉토리 위치 확인
+mkdir my_ssafy_project  # my_ssafy_project 폴더 생성
+cd my_ssafy_project     # my_ssafy_project 디렉토리로 이동
+# ※ tab키를 활용하면 디렉토리 전체 입력 안 해도 된다.
+```
+
+---
+
+### 더미 로그 파일 생성
+```bash
+touch system.log                                      # 빈 파일 생성
+echo "INFO: 시스템 시작" >> system.log                 # echo 명령으로 로그 생성
+echo "ERROR: 데이터베이스 연결 실패" >> system.log
+echo "INFO: 유저 로그인" >> system.log
+echo "WARNING: 디스크 공간 부족" >> system.log
+echo "ERROR: 서비스 중단" >> system.log
+```
+
+---
+
+### 로그 파일 내용 확인
+```bash
+vi system.log   # 로그 파일 정상 생성 여부 확인
+Esc → :q        # vi 모드에서 나가기
+```
+
+---
+
+### 로그 확인 및 분석
+```bash
+cat system.log          # 전체 보기
+head -n 3 system.log    # 처음 3줄
+tail -n 2 system.log    # 마지막 2줄
+grep ERROR system.log   # 에러만 추출
+```
+
+---
+
+### 백업 및 파일 복사
+```bash
+cp system.log backup.log    # 백업 파일 생성(복사)
+mv backup.log old.log       # 이름 변경
+ls -l                       # 파일 목록 확인
+```
+
+---
+
+### 파일 & 디렉토리 삭제
+```bash
+rm old.log                      # old.log 삭제
+mkdir archive                   # 새 폴더 생성
+mv system.log archive/          # 파일 이동
+rmdir archive                   # 삭제 불가 (내용 있음)
+rm archive/system.log           # 안의 파일 먼저 삭제
+rmdir archive                   # 이제 삭제 가능
+```
+
+---
+
+### vi를 활용한 파일 만들기
+```bash
+i   # 입력모드
+
+[INFO] System initialized at 10:23:01   # LOG
+[WARNING] Disk space low                # LOG
+[ERROR] Failed to load configuration    # LOG
+
+:wq # 저장
+```
+
+---
+
+### 파일 권한 & 프로세스 확인
+```bash
+ls -l system.log             # 현재 system.log 권한 확인
+chmod 700 system.log         # 권한 변경 (700)
+ls -l system.log             # 변경 후 권한 확인
+```
+
+```bash
+ps aux | grep bash           # bash 프로세스 확인
+kill [PID]                   # (원한다면) PID로 프로세스 종료
+# ※ 자기 셀 프로세스를 종료하면 로그아웃될 수 있음
+```
+
+### 기타 유용한 명령어
+
+```bash
+history             # 그동안 입력한 명령어 목록 확인
+```
+
+---
+
+```bash
+history | grep vi   # grep을 통해 필터링 가능
+```
+
+---
+
+```bash
+clear               # bash 터미널 창 정리
+```
+
+```bash
+man [명령어]        # 매뉴얼 설명서 확인
+예시: man grep
+```
