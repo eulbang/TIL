@@ -1,1096 +1,372 @@
-# 삼성청년 SW·AI아카데미
-데이터엔지니어링 기초  
-데이터 파이프라인 이해와 WSL  
+# 도커의 개념과 활용
+
+## 챕터의 포인트
+- 컨테이너와 도커  
+- Docker Desktop과 설치  
+- 도커 명령어로 컨테이너 다루기  
 
 ---
 
-# 데이터 파이프라인 이해와 WSL
+# 컨테이너와 도커
+
+## 도커의 개념
+- **도커(Docker)**  
+  - 애플리케이션을 컨테이너라는 가볍고 독립적인 환경에서 실행할 수 있도록 도와주는 오픈소스 가상화 플랫폼  
+  - 외부 환경과 격리된 상태에서 애플리케이션이 환경에 영향을 받지 않고 실행될 수 있도록 하는 소프트웨어  
+  - 컨테이너를 생성하고 관리하는 데 필요한 엔진과 명령줄 도구(CLI)로 구성됨  
 
 ---
 
-# 챕터의 포인트
-- 데이터의 시대와 엔지니어링  
-- 데이터 사이언스와 엔지니어링  
-- 데이터 파이프라인  
+## 컨테이너의 의미
+- 컨테이너(Container)는 어떤 물체나 데이터를 외부와 분리된 공간에 담아두는 것  
+- 물체를 격리하는 공간과 비슷한 의미  
 
 ---
 
-# 데이터의 시대와 엔지니어링
+## 컨테이너의 필요성
+- **환경 차이 없이 어디서든 실행 가능**
+  - 예: 개발 PC, 테스트 서버, 클라우드에서도 동일하게 동작  
+- **설치·설정 충돌 방지**
+  - 여러 앱이 공존할 수 있는 안전한 격리 공간 제공  
+- **빠른 실행과 이식성**
+  - 가상머신보다 훨씬 빠르게 실행되고 리소스도 적게 사용  
 
 ---
 
-## 데이터의 시대
-### 데이터?
-정보 vs 데이터  
-- 과거에는 정리되고 유의미하게 도움이 되는 ‘정보’만이 중요했음  
-- 그러나 현재는 원시적인 자료인 ‘데이터’의 중요성이 강조됨  
+## 컨테이너의 개념
 
-**정보**
-- 1970~2000년대를 대표하는 키워드  
-- 실제 도움이 되는 데이터  
-- 유의미함  
+# 컨테이너 기술과 도커 개요
 
-**데이터**
-- 2010년대 이후를 대표하는 키워드  
-- 단순 수집된 원시 자료  
-- 의미나 목적을 포함하지 않음  
+## 도커의 핵심 구성 요소
 
----
+### 도커 엔진 (Docker Engine)
+- Docker의 중심이 되는 실행 시스템  
+- 컨테이너를 실제로 생성하고 실행하는 역할을 맡음  
+- dockerd라는 데몬(서버)이 Docker API 요청을 받아 처리  
+- 예를 들어, "컨테이너를 하나 만들어줘", "이 이미지를 실행해줘" 같은 명령이 여기에 전달되어 실행  
 
-## 데이터의 중요성
-### 데이터가 중요해진 이유?
-- 빅데이터: 데이터의 양(Volume), 다양성(Variety), 증가 속도(Velocity) 향상  
-- 데이터를 수집, 가공, 활용할 수 있는 기술의 대두  
-
-모바일 데이터  
-사물 인터넷  
-
-**그래프**  
-Annual Size of the Global Datasphere  
-(Data Age 2025, sponsored by Seagate with data from IDC Global DataSphere Nov 2018)  
+### 도커 클라이언트 (Docker Client)
+- 우리가 터미널에서 입력하는 docker 명령어가 여기에 해당  
+- 사용자가 입력한 명령은 내부적으로 Docker Engine에 전달  
+- 실제로 작업을 수행하는 것은 엔진이고, 클라이언트는 이를 요청하는 창구 역할을 함  
+- 예: docker run, docker ps, docker build 등  
 
 ---
 
-## 데이터의 중요성
-### 데이터가 중요해진 이유?
-- 빅데이터: 데이터의 양(Volume), 다양성(Variety), 증가 속도(Velocity) 향상  
-- 데이터를 수집, 가공, 활용할 수 있는 기술의 대두 → **데이터 파이프라인**  
+## 도커의 구성 요소 (객체 중심)
 
-**데이터 수집**  
-**AI / ML**  
-**가공 / 시각화**
+### 도커 객체 (Docker Objects)
+- Docker에서 다루는 주요 구성 단위  
+- Image (이미지): 컨테이너를 만들기 위한 설계도 역할  
+- Container (컨테이너): 이미지를 실제로 실행한 실체  
+- Service (서비스): 여러 개의 컨테이너를 묶어 하나의 서비스처럼 운영하는 단위  
+- 이러한 객체들을 조합해 하나의 시스템을 구성  
 
----
-
-## 데이터의 중요성
-### 데이터가 중요해진 이유?
-- 빅데이터: 데이터의 양(Volume), 다양성(Variety), 증가 속도(Velocity) 향상  
-- 데이터를 수집, 가공, 활용할 수 있는 기술의 대두  
-
-> “데이터는 미래 경쟁력을 좌우하는 21세기의 원유”  
-> — 미국 시장조사 기관 ‘가트너’
+### 도커 레지스트리 (Docker Registry)
+- 이미지를 저장하고 공유할 수 있는 중앙 저장소  
+- 가장 대표적인 예는 Docker Hub  
+- 사용자는 `docker pull`로 이미지를 내려받고, `docker push`로 자신이 만든 이미지를 업로드할 수 있음  
 
 ---
 
-## 데이터의 중요성
-### 데이터는 어디에 쓰일까?
-- 비즈니스 리더들의 의사 결정  
-- 데이터를 통한 서비스/제품 강화  
+# Dockerfile, Docker Image, Docker Container의 관계
 
-의사 결정  
-서비스/제품 강화  
+## 도커 파일 (Dockerfile)
+- Dockerfile은 이미지를 만들기 위한 설계도  
+- 우리가 원하는 환경과 명령들을 스크립트 형식으로 작성  
+- 예) 어떤 OS를 쓸지, 어떤 파일을 복사할지, 어떤 명령어를 실행할지를 기록  
 
----
-
-# 데이터 엔지니어의 주요 활동
-
-## 주요 역할
-- 데이터를 안정적으로 수집하고 가공하여 전달  
-- 분석과 모델링이 가능하도록 데이터 흐름을 자동화  
-- 신뢰성 있고 재사용 가능한 파이프라인 구축  
-
-## 주요 하는 일
-- 다양한 시스템에서 데이터 수집  
-- 정제 및 변환 (ETL/ELT 설계)
-
-> “좋은 모델은 좋은 파이프라인에서 나온다”  
-데이터 엔지니어는 모델의 품질을 받쳐주는 기반을 설계합니다.
-
-# 데이터 파이프라인
-
----
-
-## 데이터 파이프라인 개요
-
-### 데이터 파이프라인이란?
-- 데이터를 추출하고 정제하고 저장, 분석, 시각화하는 일련의 자동화 과정
-
-**구성 단계**
-- **데이터 추출**
-- **데이터 가공**
-- **데이터 저장**
-
----
-
-## OLAP와 OLTP
-
-### OLTP (Online Transaction Processing)
-- 운영 데이터 처리 시스템  
-- 실시간 트랜잭션(주문, 결제, 예약 등) 처리  
-- 행(Row) 단위 저장 구조  
-- 빠른 입력, 수정, 삭제에 최적화  
-
-### OLAP (Online Analytical Processing)
-- 분석 데이터 처리 시스템  
-- OLTP에서 수집된 데이터를 기반으로 통계·리포트 분석  
-- 열(Column) 단위 저장 구조  
-- 집계, 요약, 예측 분석에 최적화  
-
----
-
-## ETL의 구조
-
-### ETL이란?
-- 데이터를 가공한 후 저장. 전통적인 방식  
-- **추출 → 가공 → 저장**
-
-**ETL 단계**
-- **데이터 추출**
-- **데이터 가공**
-- **데이터 저장**
-
----
-
-### ETL (Extract, Transform, Load)
-- **Extract**: 데이터 수집  
-- **Transform**: 데이터 가공  
-- **Load**: 데이터 저장  
-
----
-
-## ELT의 구조
-
-### ELT란?
-- 데이터를 저장한 후 가공. 클라우드 시대의 방식  
-- **추출 → 저장 → 가공**
-
-**ELT 단계**
-- **데이터 추출**
-- **데이터 저장**
-- **데이터 가공**
-
----
-
-### ELT (Extract, Load, Transform)
-- **Extract**: 데이터 수집  
-- **Load**: 데이터 저장  
-- **Transform**: 데이터 가공  
-
----
-
-## ETL과 ELT의 차이
-
-| 항목 | ETL (전통 방식) | ELT (클라우드 중심) |
-|------|------------------|---------------------|
-| 순서 | 추출 → 가공 → 저장 | 추출 → 저장 → 가공 |
-| 환경 | 온프레미스 DW | 클라우드, 데이터 레이크 |
-| 장점 | 정제된 데이터 보장 | 연한 가공, 확장성 우수 |
-| 단점 | 느림, 유연성 부족 | 처리 비용 증가 가능성 |
-
-> “ETL은 정제 우선, ELT는 속도와 유연성 중심”  
-> 환경에 따라 적합한 방식 선택
-
----
-
-## 데이터 처리 방식 - 배치와 스트리밍
-
-### 배치 처리 방식 (Batch Processing)
-- 데이터를 모아서 한 번에 처리하는 방식  
-- 주로 하루 1회, 또는 일정 시간 단위로 처리가 이뤄진다.
-- 정확성과 대량 처리에 적합함
-
-**Process**
-- Data → Batch Storage → Processing → Results
-
----
-
-### 데이터 스트리밍 처리 방식 (Data Stream Processing)
-- 데이터가 들어오는 즉시 실시간 처리하는 방식
-- 빠르게 변화하는 데이터에 즉시 반응 가능  
-- 실시간 분석과 대응 가능  
-
-**Process**
-- Real time events → Continuous data processing → Live results
-
-# 데이터 파이프라인 기본 개념
-
-## 데이터 처리 방식 - 배치와 스트리밍
-``` 
-| 항목 | 배치 처리 | 스트리밍 처리 |
-|------|-------------|----------------|
-| 처리 방식 | 일정 주기로 대량 처리 | 실시간으로 지속 처리 |
-| 예시 | 하루 1회 통계 리포트 | 실시간 사용자 클릭 분석 |
-| 장점 | 안정적, 대규모 처리 적합 | 즉시 대응, 실시간 분석 가능 |
-| 단점 | 지연 발생 가능 | 복잡한 설계 필요 |
+```dockerfile
+# [Dockerfile]
+FROM node:10.16.3
+WORKDIR /app
+ADD . /app
+RUN npm install
+CMD ["npm", "start"]
 ```
 
-> “배치는 정확성과 안정성 중심, 스트리밍은 실시간성과 즉시성 중심”  
-> 데이터의 속도·목표에 따라 적절한 방식을 선택해야 합니다.
+## 도커 이미지 (Docker Image)
+- 이미지는 하나의 정적인 파일로, 실행할 준비가 된 상태의 환경
+- docker build 명령을 통해 Dockerfile로부터 이미지를 생성
+- 내부에는 다음과 같은 정보가 포함
+  - OS(기반 계층, ex: Ubuntu)
+  - 소스코드, 의존성, 환경변수, 실행 명령어 등
 
----
+## 도커 컨테이너 (Docker Container)
+- 컨테이너는 이미지의 복사본이 메모리에서 실행 중인 상태
+- 이미지를 docker run하면 컨테이너가 생성
+- 내부에서는 실제 애플리케이션이 돌아감
+- 각 컨테이너는 자신만의 파일시스템과 프로세스를 가짐 (다른 컨테이너와 격리)
 
-## 데이터 파이프라인의 기본 구조
-- 자동화된 데이터 흐름
-- 데이터 소스 → 수집 → 가공 → 저장 → 분석/제공
+## 도커 관련 주요 도구
+- 도커 컴포즈 (Docker Compose)
+  - 여러 개의 컨테이너를 한 번에 실행하고 관리할 수 있는 도구
+  - docker-compose.yml 파일에 컨테이너 구성과 관계를 정의
+  - 서로 다른 종류의 서버를 하나의 시스템처럼 묶어서 실행 가능
 
-**단계 구성**
-- 데이터 소스  
-- 데이터 수집  
-- 데이터 가공  
+# Docker Desktop 설치
 
----
+## Docker Desktop 설치 링크
+- https://www.docker.com/products/docker-desktop/  
+- https://desktop.docker.com/win/main/amd64/Docker%20Desktop%20Installer.exe  
 
-## 데이터 파이프라인의 기본 구조 (계속)
-- 자동화된 데이터 흐름
-- 데이터 소스 → 수집 → 가공 → 저장 → 분석/제공
+## Configuration 설정
+- Use WSL 2 instead of Hyper-V (recommended)  
+  - 필수. Hyper-V보다 WSL2가 유연하고 안정적이다. (Windows Home에서도 가능)
+- Allow Windows Containers to be used with this installation  
+  - Windows 컨테이너를 쓸 경우에는 필수. 그 외에는 필요 없다.
+- Add shortcut to desktop  
+  - 바탕화면 아이콘 설정  
 
-**단계 구성**
-- 데이터 저장  
-- 데이터 분석 & 제공  
+# Docker Desktop 설치
+- Accept (회사에서의 이용 여부를 묻는 부분)
 
----
+- Docker Desktop
 
-# 데이터 저장소 개요
+- 해당 화면에서 회원가입 진행
 
-## 데이터 저장소의 중요성
-- 저장소는 분석을 위한 인프라
-- 데이터를 단순히 저장하는 것이 아니라 분석·활용을 위한 설계가 필요
-- 저장소에 따라 처리 방식과 유연성이 달라짐
-- 파이프라인에서 중요한 핵심 축
+- Docker Desktop 설치
 
----
+# Docker 환경 설정
 
-## 데이터 저장소
-- 데이터 저장소의 종류
-  - 데이터 웨어하우스 : 정형 데이터를 저장하는 구조, 기본 저장구조
-  - 데이터 레이크 : 원본 데이터를 저장하는 구조, 수집 후 재가공하여 활용
-  - 데이터 마트 : 특정한 목적을 위해 데이터 웨어하우스의 내용을 다시 추출하여 저장
+## Docker Desktop과 Ubuntu 연동 재설정
+- 도커 정상 작동 테스트 하기 위해 명령어 실행
+- docker run hello-world
 
----
+## 실습 디렉토리 준비하기
+- python-docker-env 디렉토리를 만들어서 실습 진행 준비
 
-# 데이터 파이프라인 개요
+# Docker 환경설정 실습
 
-## 데이터 웨어하우스의 구성
-- 데이터 웨어하우스
-  - 정형 데이터 중심  
-  - 스키마 사전 정의  
-  - ETL 기반의 처리 방식  
-  - OLAP(Online Analytical Processing) 중심의 구조  
+## requirements.txt 구성
+- Python 활용 시 자주 활용하는 라이브러리를 미리 requirements.txt에 구성
 
-**처리 단계**
-- 원천 데이터 → 장기보관 데이터 → 분석용 데이터  
+## Dockerfile 작성
+```python
+# python-docker-env/Dockerfile
 
----
+FROM python:3.10-slim
 
-## 데이터 레이크의 구성
-- 데이터 레이크
-  - DW의 구조적 질서에 유연성을 결합  
-  - 분석, 모델링, BI 모두 대응하는 형태  
-  - OLAP(Online Analytical Processing) 확장 구조  
-    (정형 + 비정형 데이터 모두 대응)  
+WORKDIR /workspace
 
-**처리 단계**
-- 원천 데이터 → 원천 데이터 그대로 → 분석용 데이터  
+COPY requirements.txt .
+RUN pip install --upgrade pip && pip install -r requirements.txt
 
----
+COPY app.py .
 
-# 데이터 저장소 개요
-
-## 데이터 저장소의 종류
-``` 
-| 항목 | 데이터 레이크 (Data Lake) | 데이터 웨어하우스 (Data Warehouse) |
-|------|----------------------------|-------------------------------------|
-| 주요 목적 | 다양한 원천 데이터를 원형 그대로 저장<br>추후 분석·활용을 위한 유연한 데이터 저장소 | 비즈니스 의사결정을 위한 정제된 데이터 저장소<br>리포팅과 분석 업무 최적화 |
-| 데이터 형태 | 정형, 반정형, 비정형 데이터 모두 수용 가능<br>(예: 로그, 이미지, 오디오, JSON 등) | 정형 데이터 위주 (관계형 테이블 기반, 스키마 존재) |
-| 사용 대상 | 데이터 사이언티스트, 분석가, 기술적 역량이 있는 일반 사용자 | 분석가, 관리자, 경영진 등 특정 목적 중심 사용자 |
-| 데이터 적재 시점 | 가공 없이 원본 데이터 그대로 저장<br>스키마 적용 없이 유연하게 수용 | 사전 정의된 스키마에 맞춰 가공 후 저장 |
-| 스키마 적용 시점 | Schema-on-Read: 조회 시점에 스키마 적용<br>다양한 데이터 활용 가능 | Schema-on-Write: 적재 시점에 스키마 적용<br>정형화된 구조 필수 |
+CMD ["python", "app.py"]
 ```
 
----
+## 자주 쓰이는 Dockerfile 문법
+- 키워드 / 용도 / 예시
 
-## 데이터 저장소의 종류 (계속)
-``` 
-| 항목 | 데이터 레이크 (Data Lake) | 데이터 웨어하우스 (Data Warehouse) |
-|------|----------------------------|-------------------------------------|
-| 데이터 적재 방식 | ELT: 추출 → 적재 → 변환<br>대량 원본 수용 후 필요에 따라 처리 | ETL: 추출 → 변환 → 적재<br>품질 정제 후 스키마에 맞춰 적재 |
-| 데이터 품질 요구 | 품질 보장보다 유연성과 포괄성 중시<br>노이즈 포함 가능성 존재 | 정합성·신뢰성 중요<br>높은 품질 기준 충족 필요 |
-| 비용 및 확장성 | 상대적으로 저렴하고 확장성 높음<br>(HDFS, S3 등 파일 기반 저장소 사용) | 저장 비용이 상대적으로 높음<br>(고가의 RDBMS, 분석 엔진 활용) |
-| 분석 방식 | 머신러닝, AI, 통계 분석 등 고급 분석에 활용<br>탐색적 분석 중심 | 표준화된 리포트 및 대시보드 중심<br>운영 보고서, 경영 분석 등 |
-| 운영 및 거버넌스 | 데이터 거버넌스 체계 수립 필요<br>메타데이터 관리 및 품질 통제 체계 중요 | 엄격한 데이터 품질관리 체계<br>보안·접근 제어 체계 정비 |
-```
+| 키워드 | 용도 | 예시 |
+|--------|------|------|
+| FROM | 베이스 이미지 지정 (반드시 첫 줄) | FROM python:3.10-slim |
+| RUN | 이미지 빌드 시 명령 실행 | RUN apt-get update |
+| COPY | 로컬 파일/디렉토리 → 컨테이너 복사 | COPY . /app |
+| WORKDIR | 작업 디렉토리 설정 | WORKDIR /app |
+| ENV | 환경 변수 설정 | ENV APP_ENV=prod |
+| EXPOSE | 컨테이너가 사용하는 포트 명시 | EXPOSE 8000 |
+| CMD | 컨테이너 실행 시 기본 실행 명령어 | CMD ````["python", "app.py"]```` |
 
----
+## Dockerfile 작성
+- Python 환경을 도커 안에서 독립적으로 구성
+  - 분석 환경 통일
+  - 한 줄 실행 가능
 
-# 데이터 파이프라인 개요
+## Docker 이미지 빌드
+- docker build -t python-lab .
+  - docker build # 도커 이미지를 빌드하는 명령어
+  - -t python-lab # 생성할 이미지에 'python-lab'이라는 tag를 붙인다.
+  - . # 현재 디렉토리의 Dockerfile과 관련 파일을 기반으로 이미지를 제작
 
-## 데이터 레이크
-- 데이터 웨어하우스와의 차이
-  - 데이터 웨어하우스는 최종 사용자가 보고싶은 관점별 데이터 구성을 위해 원천 DB로부터 데이터를 수집  
-  - 스키마 관리와 품질 관리를 통해 리포트를 제공하는 시스템  
-  - DW는 데이터 구조가 이미 결정되어 엄격한 스키마 관리가 필요하고 한 번 구축 시 변경이 어려움
+## Docker Container 실행
+- docker run -it --name pycheck python-lab
+  - docker run # 도커 컨테이너를 실행하는 명령어
+  - -it # 인터렉티브 모드 + 터미널 연결 (터미널로 명령 입력 가능)
+  - --name pycheck # pycheck로 이름 설정
+- docker ps -a # 실행 했던 컨테이너까지 다 보여주는 명령 (-a)
 
-# 데이터 파이프라인 설계
+## Docker Container 삭제
+- docker stop pycheck # pycheck 컨테이너가 실행중이라면 멈추는 명령어
+- Docker rm pycheck # pycheck 컨테이너 삭제하는 명령어
 
-## 파이프라인 설계
-- 람다 아키텍처 & 카파 아키텍처  
-  - 실시간 수집이 필요한 경우 참조할 수 있는 아키텍처가 존재한다.  
-  - 대표적으로 람다(Lambda) 아키텍처와 카파(Kappa) 아키텍처가 존재  
+## 로컬 도커 이미지 확인
+- docker images # 도커 이미지 확인
 
-**설계 구분**
-- 배치 Only  
-- 배치 + 스트림 or 스트림  
-  → 람다 아키텍처, 카파 아키텍처  
+## 로컬 레포지토리 비우기
+- docker rmi {yourdockerid}/hello-docker:{version} # 로컬 이미지 삭제
+  - docker rmi {yourdockerid}/hello-docker:v1
+  - docker rmi {yourdockerid}/hello-docker:latest
 
----
+# Docker 기본 명령어
 
-## 파이프라인 설계
-- 람다 아키텍처  
-  - 2011년에 제시된 아키텍처  
-  - 실시간 수집이 필요한 경우 배치 처리와 스트림 처리를 모두 이용 가능  
+## 이미지 관련 명령어
+- 명령어 / 설명
 
-**구성 예시**
-- Client → Queue → Batch Layers / Stream Layers → Serving Layers → Query  
-- Raw Data → Process Data  
+| 명령어 | 설명 |
+|--------|------|
+| docker search [이름] | Docker Hub에서 이미지 검색 |
+| docker pull [이미지명] | 이미지 다운로드 |
+| docker images 또는 docker image ls | 로컬 이미지 목록 확인 |
+| docker rmi [이미지ID/이름] | 이미지 삭제 |
+| docker tag [기존이름] [새이름] | 이미지에 별칭(tag) 붙이기 |
 
----
+## 컨테이너 실행 & 관리 명령어
+| 명령어 | 설명 |
+|--------|------|
+| docker run [이미지] | 컨테이너 실행 |
+| docker run -it [이미지] | 대화형 실행 (터미널 접근) |
+| docker run -d [이미지] | 백그라운드 실행 (detached mode) |
+| docker run --name [이름] [이미지] | 컨테이너에 이름 부여 후 실행 |
+| docker ps | 실행 중인 컨테이너 목록 |
+| docker ps -a | 모든 컨테이너 목록 (종료 포함) |
+| docker stop [이름/ID] | 컨테이너 정지 |
+| docker restart [이름/ID] | 컨테이너 재시작 |
+| docker rm [이름/ID] | 컨테이너 삭제 |
 
-# 데이터 파이프라인 개요
+## 컨테이너 내부 다루기 & 이미지 빌드 명령어
+| 명령어 | 설명 |
+|--------|------|
+| docker exec [이름] [명령] | 실행 중 컨테이너에 명령 실행 |
+| docker exec -it [이름] bash | 접속 |
+| docker cp [파일] [컨테이너]:[경로] | 컨테이너에 파일 복사 |
+| docker container stats [이름] | 컨테이너 리소스 사용량 확인 |
 
-## 데이터 수집 도구
-- **Kafka**
-  - 분산 메시지 큐 시스템  
-  - 대용량 데이터를 빠르고 안정적으로 전달  
-  - 실시간 스트리밍 수집에 강점  
+| 명령어 | 설명 |
+|--------|------|
+| docker build -t [이미지이름] . | 현재 디렉토리에서 Dockerfile로 이미지 생성 |
 
----
+## Docker Compose 명령어
+| 명령어 | 설명 |
+|--------|------|
+| docker-compose up -d | 여러 컨테이너 실행 |
+| docker-compose ps | 실행 상태 확인 |
+| docker-compose stop | 실행 중지 |
+| docker-compose down | 컨테이너 및 네트워크 삭제 |
 
-## 데이터 처리(가공) 도구
-- **Spark**
-  - 대규모 배치 처리 프레임워크  
-  - ETL/머신러닝 통합 가능  
-  - DAG 기반 처리로 안정성과 확장성 확보  
+# Docker Compose 실습
 
-- **Flink**
-  - 스트리밍 처리 전문 프레임워크  
-  - 이벤트 기반 실시간 분석에 최적화  
-  - 상태 기반 연산 및 복잡한 처리 가능  
 
----
+## Docker Compose 개요  
+### | Docker Compose란?
 
-## 데이터 저장 도구
-- **RDBMS (PostgreSQL, Oracle, 등)**
-  - 고급 기능을 지원하는 오픈소스 관계형 데이터베이스  
-  - 정형 데이터 저장에 적합  
-
-- **Elasticsearch**
-  - 실시간 검색과 분석에 강력한 NoSQL DB  
-  - 로그, 텍스트 분석, 모니터링 등 다양한 사용처  
-
-- **Hadoop (Data Lake)**
-  - 대용량 비정형 데이터 저장용 HDFS 기반 저장소  
-  - 정형·비정형 데이터 통합 저장 가능  
-
----
-
-## 데이터 모니터링 및 워크플로우 관리 도구
-- **Airflow**
-  - 워크플로우 스케줄러 (DAG 기반)  
-  - 파이프라인의 각 단계를 자동화 및 모니터링  
-
-- **Grafana**
-  - 실시간 시각화 대시보드  
-  - 다양한 데이터 소스와 연결 가능 (Prometheus, Elasticsearch 등)  
-
-- **Prometheus**
-  - 시계열 기반 모니터링 도구  
-  - 지표 수집, 알림, 시각화 연동 기능 제공  
-
----
-
-## 데이터 레이크 분석 도구
-- **BI (Business Intelligence) / OLAP (Online Analytical Processing)**
-  - 데이터를 시각적으로 분석하거나 리포트를 만들기 위한 도구  
-  - 엑셀의 Pivot 기능 또는 시각화 기능과 같은 기능을 좀 더 전문적으로 다루는 도구  
-  - 원래 데이터 웨어하우스의 등장과 함께 같이 쓰이는 도구였으나,  
-    데이터 레이크도 연결 가능  
-  - 라이선스 비용이 높은 편  
-
-**예시 도구:** Power BI, Tableau  
+- Docker Compose는 여러 컨테이너를 하나의 프로젝트처럼 관리할 수 있게 해주는 도구  
+- `docker-compose.yml` 파일에 정의된 내용을 바탕으로 한 번에 컨테이너들을 실행
 
 ---
 
-## 데이터 레이크하우스
-- **데이터 레이크하우스의 구성**
-  - 정형 + 비정형 데이터 모두 저장  
-  - 스키마는 나중에 적용 (schema-on-read)  
-  - 대용량 로그/센서 데이터 수용 가능  
+## docker-compose.yml 구조
+
+- services: 컨테이너 목록  
+- image: 사용할 도커 이미지  
+- ports: 호스트와 컨테이너의 포트 매핑
 
 ---
 
-# 데이터 파이프라인 설계
-
-## 아키텍처 설계
-- 데이터 엔지니어 관점에서 데이터 아키텍처 주 관심사는 파이프라인 설계  
-- 데이터 수집부터 분석/시각화 환경까지 데이터를 견고하게 전달할 수 있는  
-  아키텍처 설계를 목표로 함  
-
----
-
-## 파이프라인 설계
-- 파이프라인 설계는 환경마다 다르기에 정답은 없다.  
-  - (온프레미스 vs 클라우드)  
-- 요구사항에 따라 각양각색으로 구현 가능하나,  
-  실시간 수집이 필요한지 여부에 따라 파이프라인 설계 구분 가능  
-
-**설계 구분**
-- 배치 Only → 수집 데이터 배치 처리  
-- 배치 + 스트림 or 스트림 → 데이터 실시간 처리
-
-# 데이터 파이프라인 개요
-
----
-
-## 데이터 수집 도구
-
-### | Kafka
-
-- 분산 메시지 큐 시스템  
-- 대용량 데이터를 빠르고 안정적으로 전달  
-- **실시간 스트리밍 수집**에 강점
-
----
-
-## 데이터 처리(가공) 도구
-
-### | Spark
-
-- 대규모 **배치 처리 프레임워크**  
-- ETL / 머신러닝 통합 가능  
-- **DAG 기반 처리**로 안정성과 확장성 확보
-
-### | Flink
-
-- **스트리밍 처리 전문 프레임워크**  
-- 이벤트 기반 실시간 분석에 최적화  
-- 상태 기반 연산 및 **복잡한 처리** 가능
-
----
-
-## 데이터 저장 도구
-
-### | RDBMS (예: PostgreSQL, Oracle 등)
-
-- 고급 기능을 지원하는 **오픈소스 관계형 데이터베이스**  
-- **정형 데이터 저장**에 적합
-
----
-
-### | Elasticsearch
-
-- **실시간 검색과 분석**에 강력한 NoSQL DB  
-- **로그, 텍스트 분석, 모니터링** 등 다양한 사용처
-
----
-
-### | Hadoop (Data Lake)
-
-- 대용량 **비정형 데이터 저장용** HDFS 기반 저장소  
-- **정형·비정형 데이터 통합 저장** 가능
-
----
-
-## 데이터 모니터링 및 워크플로우 관리 도구
-
-### | Airflow
-
-- **워크플로우 스케줄러 (DAG 기반)**  
-- 파이프라인의 각 단계를 **자동화 및 모니터링** 가능
-
----
-
-### | Grafana
-
-- **실시간 시각화 대시보드**  
-- 다양한 데이터 소스와 연결 가능 (예: Prometheus, Elasticsearch 등)
-
----
-
-### | Prometheus
-
-- **시계열 기반 모니터링 도구**  
-- **지표 수집, 알림, 시각화 연동 기능** 제공
-
----
-
-## 데이터 레이크 분석 도구
-
-### | BI (Business Intelligence) / OLAP (Online Analytical Processing)
-
-- 데이터를 **시각적으로 분석**하거나 **리포트를 생성**하기 위한 도구  
-- 엑셀의 **피벗 테이블** 기능 또는 **차트 시각화** 기능을  
-  → 좀 더 **전문적으로 다룰 수 있는 도구**
-
-- 원래는 **데이터 웨어하우스**와 함께 사용되었지만  
-  → 최근에는 **데이터 레이크**에도 연결 가능
-
-- 단점: **라이선스 비용이 높은 편**
-
-
----
-
-## 데이터 레이크하우스
-
-### | 데이터 레이크하우스의 구성
-
-- **정형 + 비정형 데이터** 모두 저장 가능  
-- **스키마는 나중에 적용 (schema-on-read)**  
-- **대용량 로그 / 센서 데이터** 수용 가능
-
----
-
-## 아키텍처 설계
-
-- 데이터 엔지니어 관점에서 **데이터 아키텍처의 주요 관심사**는 **파이프라인 설계**  
-- 데이터 **수집 → 저장 → 처리 → 분석/시각화 환경**까지  
-  → 데이터를 **견고하게 전달**할 수 있는 아키텍처 설계를 목표로 함
-
----
-
-## 파이프라인 설계
-
-- **파이프라인 설계는 환경마다 다르기 때문에 정답은 없다**  
-  - 예: **온프레미스 vs 클라우드**
-
-- 요구사항에 따라 다양한 방식으로 구현 가능  
-  → 특히, **실시간 수집이 필요한지 여부**에 따라  
-    **파이프라인 설계를 구분**할 수 있음
-
----
-
-## 파이프라인 설계  
-### | 람다 아키텍처 & 카파 아키텍처
-
-- **실시간 수집이 필요한 경우** 참조할 수 있는 대표적인 아키텍처 존재  
-- 대표적으로:  
-  - **람다 (Lambda) 아키텍처**  
-  - **카파 (Kappa) 아키텍처**
-
-
----
-
-## 파이프라인 설계  
-### | 람다 아키텍처 (Lambda Architecture)
-
-- **2011년에 제시된 아키텍처**  
-- **실시간 수집이 필요한 경우**,  
-  → **배치 처리 + 스트림 처리**를 **모두 활용**할 수 있는 구조
-
----
-
-## 파이프라인 설계  
-### | Serving Layer
-
-- **배치 Layer에 저장된 데이터**를 **빠르게 보여주기 위한 서비스 계층**  
-- 사용자가 직접 **쿼리할 수 있도록 지원**  
-- 필요에 따라 **스피드 Layer**에 있는 데이터와 **결합**하기도 함
-
-
----
-
-## 파이프라인 설계  
-### | 배치 Layer & 스트림 Layer
-
-- **배치 Layer**에 저장된 데이터는 **기준 데이터** 역할  
-- **스피드 Layer**에는 **당일 데이터**를 저장 및 정제하는 공간  
-- 배치 Layer의 테이블 갱신이 완료되면  
-  → 스피드 Layer는 그 **이후 데이터부터 저장 및 정제**  
-
-- **람다 아키텍처는 개념적 컨셉만 제공** (구체 구현은 다양함)
-
----
-
-## 파이프라인 설계  
-### | 카파 아키텍처 (Kappa Architecture)
-
-- **배치 Layer를 제거**하고,  
-  → 배치 Layer에서 수행하던 모든 작업을 **스피드 Layer에서 처리**하는 구조  
-  (전처리 후 필요한 테이블로 재구성)
-
----
-
-- 데이터 소스는 주로 **메시지 큐(Message Queue)** 를 의미  
-- 메시지 큐에는 여러 솔루션이 존재하지만,  
-  **Kafka를 개발한 Jay Kreps**가 만든 카파 아키텍처에서는  
-  → 데이터 소스 = **Kafka 클러스터**를 의미  
-
-- 즉, **카파 아키텍처에서는 모든 데이터가 Kafka로 수집**됨을 전제  
-
-- ⚠️ 그러나 **실제 환경에서는 배치 파이프라인도 여전히 많이 활용**
-
----
-
-## 파이프라인 설계  
-### | 람다 아키텍처나 카파 아키텍처만 가능한가?
-
-- 구조화된 아키텍처는 **참고용 개념**일 뿐,  
-  → 모든 데이터를 해당 아키텍처 기반의 파이프라인으로 구성할 필요는 없음  
-
-- **아키텍처 수용 여부**는  
-  → **각 파이프라인의 데이터 활용 요건**에 따라 결정됨  
-
-- 따라서,  
-  1. **데이터 활용 요건을 분석**한 후  
-  2. 어떤 아키텍처를 따를지, 어떤 **데이터 뷰**를 사용할지 결정
-
----
-
-## 데이터 파이프라인 전체 구조  
-### | 상품 전략 예시로 알아보자
-
-- 당신은 **종합 인터넷 쇼핑몰의 사장**이다.
-
----
-
-## 데이터 파이프라인 전체 구조  
-### | 데이터 소스
-
-- 데이터가 유입되는 소스(Source)
-
----
-
-## 데이터 수집 및 변환  
-- 데이터 소스에서 내용을 추출하고  
-저장에 적절한 형태로 변환
-
-## 데이터 파이프라인 전체 구조  
-- 과거 데이터 분석  
-  - 과거 데이터를 활용한 분석 단계  
-  - 주목할 만한 제품은?  
-  - 금주 인기 제품: 3, 7, 22, 17  
-  - 실시간 인기 제품: 33, 5529
-
-- 예측 분석  
-  - 데이터를 바탕으로 머신러닝 및 예측을 하는 단계  
-  - 유저별 추천 제품  
-    - User A: 99, 17, 33  
-    - User B: 111, 26, 54
-
-- 데이터 분석 결과를 시각적으로 표현하거나 시스템에 제공
-
-### 출력
-- 데이터 분석 결과를 시각적으로 표현하거나 시스템에 제공
-- User A : 99, 17, 33  
-  금주 인기 제품 : 3, 7, 22, 17  
-  실시간 인기 제품 : 33, 55, 29  
-- User B : 111, 26, 54
-
-### 지원 시스템
-- 데이터 파이프라인을 관리하고 보완 및 모니터링 하는 시스템
-
-# 리눅스의 개념
-
-## 유닉스(UNIX)
-- 리눅스가 탄생하기 이전 운영체제(OS)
-- 지금도 많이 사용되는 운영체제 중 하나이지만 높은 비용 지불 필요
-- IBM의 AIX, HP의 HP/UX, 오라클의 Solaris, DEC의 Digital Unix, SCO의 SCO Unix 등
-
-## 리눅스(Linux)
-- 무료(Free) 유닉스 개념
-- 유닉스와 거의 동일한 운영체제이면서 무료, 어떤 면에서는 유닉스보다 뛰어남
-
-# 리눅스의 구성
-
-## 커널(Kernel)
-- 운영체제의 핵심 구성 요소로, 하드웨어와 응용 프로그램 사이를 중재하는 역할을 한다.
-
-## 리눅스 커널의 역사
-- 리누스 토르발스(Linus Torvalds)가 1991년, 리눅스 커널 0.01 버전을 개발
-- 1992년, 0.02 버전 소스를 공개하며 오픈소스 운동 본격화 → 리눅스의 시작
-- 리눅스 배포판은 토르발스가 만든 커널 + 다양한 오픈소스 프로그램으로 구성
-
-# 리눅스의 장점
-
-## 무료 & 오픈소스 (Free & Open Source)
-- 누구나 자유롭게 사용, 수정, 배포 가능
-- 라이선스 비용 부담 없이 교육/개발에 적합
-
-## 가볍고 빠른 성능
-- 구형 하드웨어에서도 작동 가능
-- 불필요한 GUI 없이 CLI 중심 운영 가능
-
-## 서버로서의 점유율
-- 전 세계 웹 서버의 70% 이상이 리눅스 기반
-- 클라우드, 데이터센터, 웹 호스팅에서 필수 OS
-
-## 개발 환경
-- Git, Docker, Python, Node.js 등 대부분 리눅스 친화적
-- 패키지 설치, 자동화, 백엔드 개발에 최적
-
-# 우분투 리눅스
-
-## 우분투 리눅스(Ubuntu Linux)
-- 데비안 기반 배포판, 다양한 플랫폼(Desktop, Server, IoT 등)
-- 릴리스 주기: 일반 버전(6개월), LTS 버전(2년)
-
-# WSL (Windows Subsystem for Linux)
-
-## WSL이란 무엇일까?
-- Windows 환경에서 리눅스를 실행할 수 있도록 도와주는 도구
-- 윈도우에서 리눅스를 가상 머신 없이 실행
-- 명령어, 파일 시스템, 리눅스 도구 사용 가능
-
-### WSL의 장점
-- 별도 리눅스 컴퓨터가 없어도 Windows에서 바로 리눅스 사용 가능
-- Docker, Python, Git 등 리눅스 친화 도구 활용이 쉬움
-- VM 대비 가볍고 빠르며, 설치가 간편함 (재부팅 없이 가능)
-
-## WSL 버전 별 차이점
-
-| 항목 | WSL 1 | WSL 2 |
-|------|-------|-------|
-| 핵심 구조 | Windows 커널 위 리눅스 API 구현 | 가상화된 리눅스 커널 내장 |
-| 성능 | 빠른 파일 접근 | 높은 시스템 호환성 |
-| Docker 사용 | 불가능 | 가능 |
-| 네트워크 | 윈도우와 동일 | 분리된 IP 사용 (WSL 네트워크) |
-
-> Docker를 이용하려면 꼭 WSL 2여야 합니다!
-
-# WSL 설치 방법
-
-## WSL 설치하기
-
-- 운영체제
-  - Windows 10 (빌드 1903 이상) 또는 Windows 11 필요
-
-- 필수 Windows 기능 활성화 (WSL1 핵심 구성요소 설치 / 가상화 기반 플랫폼 활성화하기)
-```
-dism.exe /online /enable-feature /featurename:Microsoft-Windows-Subsystem-Linux /all /norestart
-dism.exe /online /enable-feature /featurename:VirtualMachinePlatform /all /norestart
-```
-
-- Microsoft Store를 통해 직접 설치 후 진행
-  - https://apps.microsoft.com/detail/9p9tqf7mrm4r?hl=ko-KR&gl=KR
-
-- (docker 사용 및 최신 호환을 위해) WSL2로 설정하기
-```
-wsl --set-default-version 2
-```
-
-- 현재 설치된 wsl 목록 확인하기
-```
-wsl --list --verbose
-```
-- 만약 다른 버전이 있을 경우 (예시 : Ubuntu-24.04)
-
-(bash)
-```
-wsl --terminate Ubuntu-24.04
-wsl --unregister Ubuntu-24.04
-```
-
-(powershell)
-```
-Get-AppxPackage *Ubuntu* | Remove-AppxPackage
-```
-
-- Microsoft Store를 통해 “Ubuntu 22.04.5 LTS” 다운로드
-
-- Ubuntu 최초 실행 후 설정
-```
-ID : ssafy
-PW : ssafy
-```
-
-- 전체 설치 완료 후 기본 배포판으로 설정
-```
-wsl --set-default Ubuntu-22.04
-```
-
-- VS Code 실행 후 extension 확인
-
-- WSL install 하기
-
-- Ctrl+Shift+P -> 'WSL'입력
-- WSL: Connect to WSL in New Window
-
-- 우분투 환경 다운로드 후 연결
-
-- 폴더 경로가 우분투 환경과 동기화 된 것을 확인 가능
-
-# 리눅스 기본 명령어
-
-## 시작과 종료
-- Ubuntu 22.04를 통해 실행 가능. (VS code를 통해서도 가능)
-
-### 사용 불가 명령어
-- poweroff  
-- reboot  
-- shutdown  
-
-> WSL 특성상 자체적 부팅 구조가 아니기 때문에 해당 명령어는 무시됨.
-
-### WSL 종료
-- exit
-
-## root 사용자란?
-- 최고 권한(Superuser)을 가진 계정  
-  - 시스템의 모든 파일, 설정, 사용자 계정 등에 제약 없이 접근 가능  
-  - Windows의 Administrator에 대응되는 개념  
-
-| 작업 | 일반 사용자 | root 사용자 |
-|------|--------------|--------------|
-| 시스템 파일 수정 | X | O |
-| 새로운 프로그램 설치 | X | O |
-| 다른 사용자 계정 관리 | X | O |
-| 커널 모듈 수정 | X | O |
-
-### root 권한 이용 시 주의점
-- 실수로 중요한 시스템 파일 삭제 가능  
-- 잘못된 명령어로 OS 자체를 망가뜨릴 위험  
-- 외부 공격자가 root 권한을 얻으면 시스템 전체를 장악 가능  
-- 보통은 sudo 명령어로 필요한 작업만 root 권한을 임시로 위임받아 실행
-
-## root 사용자 권한 전환
-```
-sudo -i
-```
-- 현재 계정에서의 비밀번호 입력
-
-### 권한 확인 후 기존 계정으로 복귀
-```
-exit
-```
-
-## CLI 환경 관련 유용 명령
-| 명령어 | 설명 | 예시 | 비고 | 약자 의미 |
-|--------|------|------|------|------------|
-| clear | 터미널 화면 초기화 | clear | 화면 정리용 | **Clear** |
-| man | 매뉴얼 보기 | man grep, q로 종료 | 대부분 명령어 지원 | **Manual** |
-
----
-
-## 파일 및 디렉토리 관리
-| 명령어 | 설명 | 예시 | 비고 | 약자 의미 |
-|--------|------|------|------|------------|
-| pwd | 현재 디렉토리 경로 확인 | pwd | 터미널 기준 작업 위치 파악 | **Print Working Directory** |
-| ls | 현재 디렉토리 목록 보기 | ls -l, ls -a | -l: 자세히, -a: 숨김 포함 | **List** |
-| cd | 디렉토리 이동 | cd ~/Downloads, cd .. | ..: 상위 디렉토리 | **Change Directory** |
-| mkdir | 새 폴더 생성 | mkdir my_folder | 여러 개도 가능: mkdir a b c | **Make Directory** |
-| rmdir | 빈 폴더 삭제 | rmdir my_folder | 폴더가 비어 있어야 함 | **Remove Directory** |
-| rm -r | 폴더 포함 삭제 | rm -r my_folder | 실수 방지 주의 필요 | **Remove (recursive)** |
-
----
-
-## 파일 생성, 편집, 복사, 삭제
-| 명령어 | 설명 | 예시 | 비고 | 약자 의미 |
-|--------|------|------|------|------------|
-| touch | 빈 파일 생성 | touch test.txt | 수정 시간 갱신용으로도 사용됨 | (접촉하다 - 변경 시각 "touch") |
-| echo | 문자열 출력/파일에 저장 | echo "Hello" >> hi.txt | >>: 이어쓰기 | (echo - 메아리처럼 출력) |
-| cat | 파일 내용 출력 | cat file.txt | 대용량 파일은 less, more 추천 | **Concatenate** |
-| head, tail | 처음/끝 일부 출력 | head -n 3 file.txt | 로그 확인에 유용 | **Head/Tail (머리/꼬리)** |
-| cp | 파일/폴더 복사 | cp a.txt b.txt, cp -r dir1 dir2 | 디렉토리 전체 복사 | **Copy** |
-| mv | 이동 또는 이름 변경 | mv a.txt new.txt | 파일 위치 이동에도 사용 | **Move** |
-| rm | 파일 삭제 | rm test.txt | rm -rf: 위험! | **Remove** |
-
----
-
-## 검색과 필터링
-| 명령어 | 설명 | 예시 | 비고 | 약자 의미 |
-|--------|------|------|------|------------|
-| grep | 특정 문자열 검색 | grep "ERROR" log.txt | 로그 분석에서 필수 | **Global Regular Expression Print** |
-| find | 파일 검색 | find . -name "*.txt" | 위치별 조건 검색 | **Find** |
-| history | 명령어 기록 확인 | history | 이전 명령 복기 | **History** |
-
----
-
-## 시스템 정보 및 프로세스
-| 명령어 | 설명 | 예시 | 비고 | 약자 의미 |
-|--------|------|------|------|------------|
-| ps aux | 전체 프로세스 확인 | ps aux, ps aux grep python | 자원 소비 확인 | PS - process status<br>A - All users<br>U - User-oriented format<br>X - No controlling terminal |
-| kill | 프로세스 종료 | kill 1234 | -9 옵션은 강제 종료 | **Kill** |
-| top | 실시간 자원 모니터링 | top, q로 종료 | htop은 GUI 버전 | **Top of processes** |
-| uptime | 시스템 가동 시간 | uptime | 부팅 이후 시간 확인 | **Up Time** |
-| whoami | 현재 사용자 확인 | whoami | 스크립트에서 유용 | **Who am I** |
-| hostname | 호스트명 확인 | hostname | 네트워크 확인에 사용 | **Host Name** |
-
----
-
-## 사용자 권한 및 보안
-| 명령어 | 설명 | 예시 | 비고 | 약자 의미 |
-|--------|------|------|------|------------|
-| sudo | 관리자 권한 명령 | sudo apt update | root 권한 필요 시 | **Superuser Do** |
-| sudo -i | root 전환 | sudo -i, su - root | 환경 유지하며 root 전환<br>su - root는 root pw 지정 후 이용 | **Interactive shell** |
-| chmod | 파일 권한 변경 | chmod 755 run.sh | 실행 권한 등 설정<br>조심해서 사용 | **Change Mode** |
-| chown | 파일 소유자 변경 | sudo chown user file.txt | 조심해서 사용 | **Change Owner** |
-
----
-
-## chmod (Change Mode)
-
-### 리눅스 권한 구조
-- 리눅스에서는 각 파일/디렉토리에 대해 다음 3가지 주체에 대한 권한을 따로 설정할 수 있다.
-
-#### 주체
-- u(user): 파일의 소유자  
-- g(group): 파일이 속한 그룹  
-- o(other): 그 외 사용자
-
-#### 권한
-- r(read): read (내용 보기 가능)  
-- w(write): write (수정, 삭제 가능)  
-- x(execute): execute (실행 가능, 디렉토리 접근 포함)
-
----
-
-## chmod (Change Mode) 실습
-
-### 샘플 sh 파일 만들고 간단하게 확인
-```
-touch sample.sh
-echo 'echo "Hello, Linux!"' > sample.sh
-cat sample.sh
-```
-
----
-
-## chmod (Change Mode) 권한 확인
-
-| U | G | O |
-|---|---|---|
-| r w x | r w x | r w x |
-| r w - | r - - | r - - |
-| 4 2 0 | 4 0 0 | 4 0 0 |
-
-- `sample.sh`는 **644**의 권한을 가지고 있다.  
-  - 사용자는 읽기 + 쓰기  
-  - 그룹은 읽기 전용  
-  - 기타 사용자도 읽기 전용
-
----
-
-## chmod (Change Mode) 권한 변경
-
-| U | G | O |
-|---|---|---|
-| r w x | r w x | r w x |
-| r w x | r - x | r - x |
-| 4 2 1 | 4 0 1 | 4 0 1 |
-
-```
-chmod +x sample.sh
-```
-
-- 사용자는 `sample.sh`에 실행 권한을 추가해서 **755**의 권한을 주게 됨.
-
-## CLI 환경 관련 유용 명령
-
-| 명령어 | 설명 | 예시 | 비고 | 약자 의미 |
-|--------|------|------|------|------------|
-| clear | 터미널 화면 초기화 | clear | 화면 정리용 | **Clear** |
-| man | 매뉴얼 보기 | man grep, q로 종료 | 대부분 명령어 지원 | **Manual** |
-
-# 리눅스 명령어 사용 실습
-
-## 간이 로그 확인 실습
-
-### 작업 디렉토리 만들기
-```bash
-ls                      # 현재 디렉토리 상태 확인
-pwd                     # 현재 디렉토리 위치 확인
-mkdir my_ssafy_project  # my_ssafy_project 폴더 생성
-cd my_ssafy_project     # my_ssafy_project 디렉토리로 이동
-# ※ tab키를 활용하면 디렉토리 전체 입력 안 해도 된다.
-```
-
----
-
-### 더미 로그 파일 생성
-```bash
-touch system.log                                      # 빈 파일 생성
-echo "INFO: 시스템 시작" >> system.log                 # echo 명령으로 로그 생성
-echo "ERROR: 데이터베이스 연결 실패" >> system.log
-echo "INFO: 유저 로그인" >> system.log
-echo "WARNING: 디스크 공간 부족" >> system.log
-echo "ERROR: 서비스 중단" >> system.log
-```
-
----
-
-### 로그 파일 내용 확인
-```bash
-vi system.log   # 로그 파일 정상 생성 여부 확인
-Esc → :q        # vi 모드에서 나가기
-```
-
----
-
-### 로그 확인 및 분석
-```bash
-cat system.log          # 전체 보기
-head -n 3 system.log    # 처음 3줄
-tail -n 2 system.log    # 마지막 2줄
-grep ERROR system.log   # 에러만 추출
-```
-
----
-
-### 백업 및 파일 복사
-```bash
-cp system.log backup.log    # 백업 파일 생성(복사)
-mv backup.log old.log       # 이름 변경
-ls -l                       # 파일 목록 확인
-```
-
----
-
-### 파일 & 디렉토리 삭제
-```bash
-rm old.log                      # old.log 삭제
-mkdir archive                   # 새 폴더 생성
-mv system.log archive/          # 파일 이동
-rmdir archive                   # 삭제 불가 (내용 있음)
-rm archive/system.log           # 안의 파일 먼저 삭제
-rmdir archive                   # 이제 삭제 가능
-```
-
----
-
-### vi를 활용한 파일 만들기
-```bash
-i   # 입력모드
-
-[INFO] System initialized at 10:23:01   # LOG
-[WARNING] Disk space low                # LOG
-[ERROR] Failed to load configuration    # LOG
-
-:wq # 저장
-```
-
----
-
-### 파일 권한 & 프로세스 확인
-```bash
-ls -l system.log             # 현재 system.log 권한 확인
-chmod 700 system.log         # 권한 변경 (700)
-ls -l system.log             # 변경 후 권한 확인
-```
-
-```bash
-ps aux | grep bash           # bash 프로세스 확인
-kill [PID]                   # (원한다면) PID로 프로세스 종료
-# ※ 자기 셀 프로세스를 종료하면 로그아웃될 수 있음
-```
-
-### 기타 유용한 명령어
-
-```bash
-history             # 그동안 입력한 명령어 목록 확인
-```
-
----
-
-```bash
-history | grep vi   # grep을 통해 필터링 가능
-```
-
----
-
-```bash
-clear               # bash 터미널 창 정리
-```
-
-```bash
-man [명령어]        # 매뉴얼 설명서 확인
-예시: man grep
-```
+## Docker Compose 명령어
+
+- `docker compose up -d`  
+  - 백그라운드 실행  
+
+- `docker compose ps`  
+  - 실행 중인 서비스 확인  
+
+- `docker compose down`  
+  - 컨테이너, 네트워크 정리
+
+## Docker Compose 실습  
+- `mkdir compose-lab`  
+- `cd compose-lab`  
+- `touch docker-compose.yml`  
+- `touch index.html`
+
+## Docker Compose 실습 파일 구성
+- index.html
+  - docker container로 올릴 간단한 html 파일
+- docker-compose.yml
+  - 여러 컨테이너를 정의하고 한번에 실행하도록 도움
+
+## Docker Compose 컨테이너 실행
+- docker compose up -d
+  - docker compose
+    - docker compose 명령어 실행
+  - up
+    - 정의된 모든 서비스(컨테이너)를 생성하고 실행
+  - -d
+    - detached 모드로 실행 (백그라운드 실행)
+
+## Docker Compose 상태 확인
+- docker compose ps
+  - docker compose
+    - docker compose 명령어 실행
+  - ps
+    - 현재 Compose 프로젝트에서 실행 중인 컨테이너 목록을 표시함
+
+## Docker Compose 실행 확인
+- localhost:8080 을 통해서 정상적으로 작동하는 것을 확인할 수 있다.
+
+## Docker Compose 정리
+- docker compose down
+  - docker compose
+    - docker compose 명령어 실행
+  - down
+    - 정의된 모든 서비스(컨테이너)를 종료하고 정리
+
+- docker compose ps 명령어를 활용해서 정리된 것을 확인 가능
+
+- localhost:8080을 통해서도 접속이 되지 않는다.
+
+## 자주 쓰이는 docker-compose.yml 문법
+- 키워드 / 용도 / 예시
+
+| 키워드 | 용도 | 예시 |
+|--------|------|------|
+| services | 실행할 컨테이너(서비스)들을 정의하는 최상위 키. 각 서비스별로 이미지, 포트, 볼륨 등 설정 | services: web: .. |
+| image | 사용할 도커 이미지를 지정 | image: nginx:latest |
+| build | 로컬의 Dockerfile로 이미지를 직접 빌드할 때 사용 | build: ./app |
+| container_name | 컨테이너 이름을 직접 지정 (안 하면 자동 생성됨) | container_name: my_app |
+| ports | 호스트 ↔ 컨테이너 포트 연결. `"호스트:컨테이너"` 형식 | ports: - "8080:80" |
+| volumes | 데이터 공유/저장. 로컬 디렉토리를 컨테이너에 마운트하거나 볼륨 이름을 지정 | volumes: - ./data:/var/lib/mysql |
+
+## 자주 쓰이는 docker-compose.yml 문법 (추가)
+| 키워드 | 용도 | 예시 |
+|--------|------|------|
+| environment | 컨테이너 내부의 환경 변수 직접 지정 | environment: - MYSQL_ROOT_PASSWORD=1234 |
+| env_file | `.env` 파일에서 환경 변수 한꺼번에 가져오기 | env_file: - .env |
+| command | 컨테이너 시작 시 실행할 명령어 (Dockerfile의 CMD를 덮어씀) | command: python app.py |
+
+### 상위 레벨 키워드
+| 키워드 | 용도 | 예시 |
+|--------|------|------|
+| volumes | 여러 서비스가 공유하는 데이터 볼륨 정의 | volumes: db_data: |
+| networks | 사용자 정의 네트워크 생성 (컨테이너 간 별도 통신망 필요 시) | networks: my_network: |
+
+## 자주 쓰이는 Docker Compose 명령어
+| 명령어 | 용도 | 예시 |
+|--------|------|------|
+| docker compose up | docker-compose.yml에 정의된 컨테이너를 생성·시작 (`-d` 옵션: 백그라운드 실행) | docker compose up -d |
+| docker compose down | 실행 중인 모든 컨테이너, 네트워크, 볼륨 중단 및 삭제 | docker compose down |
+| docker compose ps | 현재 Compose로 실행 중인 컨테이너 상태 확인 | docker compose ps |
+| docker compose logs | 컨테이너 로그 출력 (`-f` 옵션: 실시간 로그) | docker compose logs -f |
+| docker compose stop | 컨테이너 중지 (삭제 X) | docker compose stop |
+| docker compose start | 중지된 컨테이너 재시작 | docker compose start |
+| docker compose restart | 컨테이너 재시작 | docker compose restart |
+| docker compose build | Dockerfile 기반으로 이미지 빌드 | docker compose build |
+| docker compose exec | 실행 중인 컨테이너에서 명령어 실행 | docker compose exec <서비스명> <명령> <br>예: docker compose exec web bash |
+| docker compose run | 새로운 일회성 컨테이너 실행 | docker compose run --rm web sh |
+
+## Docker Compose 네트워크
+### 같은 Compose 파일 내 네트워크
+- `docker compose up`을 실행하면 자동으로 프로젝트 이름 기반의 네트워크가 생성
+- 같은 `docker-compose.yml` 내 서비스들은 동일 네트워크를 공유하므로 통신 가능
+- **서비스명으로 접근 권장**
+  - Docker가 자동으로 DNS를 관리하므로, db 서비스 → IP보다 `db`라는 이름으로 접근하는 것이 일반적이고 안전함  
+    (IP는 컨테이너 재시작 시 바뀔 수 있음)
+
+### 다른 Compose 프로젝트 간 네트워크
+- 기본적으로 프로젝트 간 네트워크는 분리되어 서로 통신할 수 없음
+- 하지만 명시적으로 같은 사용자 정의 네트워크를 지정하면 서로 통신 가능
+- 두 개의 서로 다른 `docker-compose.yml`에서 동일한 미리 만든 외부 브리지 네트워크에  
+  `external: true` 옵션을 사용하면 IP/서비스명 공유 가능
