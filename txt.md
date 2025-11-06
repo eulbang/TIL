@@ -1,202 +1,761 @@
-# Kafka 프로듀서와 컨슈머  
-## 챕터의 포인트  
-- Kafka Producer  
-- Kafka Consumer
+# State Management
 
-# Kafka 구조 복습하기  
-## Kafka의 핵심 개념  
-- 주요 개념 요약  
-  - 생산자(Producer): 메시지를 브로커에 전송  
-  - 소비자(Consumer): 브로커에서 메시지를 소비
+# INDEX  
 
-## Kafka의 핵심 개념  
-- 주요 개념 요약  
-  - 토픽(Topic): 메시지를 저장하는 논리적 단위, 택배를 찾을 때 주소 같은 느낌  
-  - 파티션(Partition): 메시지를 병렬로 처리하기 위한 단위, 큐와 유사함, 택배 창고 같은 느낌  
-  - 브로커(Broker): 메시지를 관리하는 Kafka의 서버  
-  - 클러스터(Cluster): 함께 동작하는 Kafka 서버 집단
+## State Management  
+- State management library (Pinia)  
+- Pinia  
+- Pinia 구조  
+- Pinia 구성 요소 활용  
+- Local Storage  
 
-## Kafka 클러스터 구조  
-- Kafka의 클러스터  
-  - 컨트롤러(Controller): 클러스터 관리 및 장애 처리 역할 수행  
-  - 주키퍼(Zookeeper): 클러스터 관리에 필요한 데이터 관리 및 헬스체크, 컨트롤러 선정 수행  
-  - 레플리카(Replica): 파티션의 복제본을 여러 브로커에 저장하는 방식, 리더와 팔로워로 나뉨
+## Routing
 
-## Kafka Producer의 기본 개념  
-- Kafka Producer의 메시지 전송 과정  
-  - 메시지는 **직렬화 → 파티션 결정 → 압축**의 과정을 거쳐 완성됨  
-  - 그 후 **파티션별 버퍼**에 저장되어 있다가  
-    일정 조건(시간, 용량)을 만족하면 **전송 스레드에 의해 브로커로 전송**
+## Vue Router  
+- Basic Routing  
+- Named Routes  
+- Dynamic Route Matching  
+- Nested Routes  
+- Programmatic Navigation
 
-# Kafka Producer의 메시지 구조
-## Kafka Producer Record
-- **레코드(Record)**: 프로듀서가 데이터를 전송하는 기본 단위  
-- **Topic**, **Value**는 필수. 나머지는 선택
+## State Management
 
-| 항목 | 설명 |
-|------|------|
-| **Topic** | 전송될 Kafka 토픽 |
-| **Value** | 전송할 값 |
-| **Key** | 파티션을 지정할 키 값 |
-| **Partition** | 전송될 파티션 번호 |
-| **Headers** | 기타 포함할 정보 |
-| **Timestamp** | 생성 시간 |
+## 개요
 
-## 예시
+## State Management
+- 상태 관리
+---
+### Vue 컴포넌트는 이미 반응형 상태를 관리하고 있음
+> 상태 === 데이터
 
-| 항목 | 예시 값 |
-|------|----------|
-| **Topic** | `UserAction` |
-| **Value** | `"로그인 시도"` |
-| **Key** | `"User 003"` |
-| **Partition** | `3` |
-| **Headers** | `(데이터 소스: 게임 페이지)` |
-| **Timestamp** | `1728393847` |
+# 컴포넌트 구조의 단순화 (1/2)
 
-## Kafka Producer의 직렬화  
-- Kafka 직렬화 과정  
-  - 직렬화(Serialized): 문자열 같은 데이터를 단순한 Byte 형태로 바꾸는 작업  
-  - 역직렬화(Deserialized): Byte 형태의 데이터를 다시 고수준의 원본 형태로 바꾸는 작업
+## 상태 (State)
+- 앱 구동에 필요한 **기본 데이터**
 
-## Kafka Producer의 파티션 선택  
-- Kafka 파티션 선정 알고리즘  
-  - RR(Round Robin): 기본 파티셔너였음.  
-    파티션 지정이 없을 경우 **파티션별로 돌아가면서 저장**
+## 뷰 (View)
+- 상태를 **선언적으로 매핑하여 시각화**
 
-## Kafka Producer의 파티션 선택  
-- Kafka 파티션 선정 알고리즘  
-  - RR(Round Robin): 기본 파티셔너였음.  
-    파티션 지정이 없을 경우 **파티션별로 돌아가면서 저장**  
-  - Key Base: 키가 결정되어 있으면 **같은 키의 데이터끼리 묶어서 처리**
+## 기능 (Actions)
+- 뷰에서 **사용자 입력에 반응**하여  
+  상태를 변경할 수 있도록 정의된 동작
 
-## Kafka Producer의 파티션 선택  
-- Kafka 파티션 선정 알고리즘  
-  - RR(Round Robin): 기본 파티셔너였음.  
-    파티션 지정이 없을 경우 **파티션별로 돌아가면서 저장**  
-  - Key Base: 키가 결정되어 있으면 **같은 키의 데이터끼리 묶어서 처리**,  
-    사용 시 **파티션 수 변경 금지**
-  - 파티션 지정: **저장될 파티션을 직접 지정**하는 방식
-  - Sticky: 기본 파티셔너. 하나의 **목표 파티션을 빠르게 채우고**, 목표 파티션을 바꿈
+---
 
-## Kafka Producer의 압축  
-- Kafka 압축  
-  - 효율적인 데이터 전송 가능  
-  - 브로커에서 데이터 복사가 쉬움
+## 예시 코드
+```vue
+<template>
+  <!-- 뷰(View) -->
+  <div>{{ count }}</div>
+</template>
 
-## Kafka Producer의 버퍼  
-- Kafka RA와 버퍼  
-  - RA(Record Accumulator): 전송될 레코드를 모아두는 메모리 공간, 전송 효율을 높이는 버퍼의 역할  
-  - 배치(Batch): 한 번에 전송되는 레코드의 단위
+<script setup>
+import { ref } from 'vue'
 
-## Kafka RA와 버퍼  
-- PlggyBack: 조건을 만족하지 않은 배치가 만족한 배치와 같은 브로커를 향할 때 함께 보내는 최적화 기법
+// 상태(State)
+const count = ref(0)
 
-## Kafka Producer의 전송 스레드  
-- Kafka Sender Thread  
-  - 동기(Sync) 전송: 메시지(레코드)가 확실히 브로커에 전송될 때까지 메인 스레드가 대기  
-  - 비동기(Async) 전송: 메시지(레코드)가 전송될 때까지 기다리지 않고 작업을 넘어감
+// 기능(Actions)
+const increment = function () {
+  count.value++
+}
+</script>
+```
 
-## Kafka Producer의 전송 스레드  
-- Kafka Sender의 Acknowledge 옵션  
-  - Ack == 0: 브로커가 정상적으로 받았는지 확인하지 않음  
-  - Ack == 1: 리더가 받았으면 다음 메시지로 넘어감, 못 받았으면 재전송  
-  - Ack == -1(all): 리더가 받은 후 팔로워까지 모두 복제 완료되면 넘어감
+# 컴포넌트 구조의 단순화 (2/2)
 
-## Kafka Producer의 전송 스레드  
-- Kafka Sender Acknowledge  
-  - min.insync.replicas: 최소 몇 개의 파티션이 ISR이 됐는지를 보장하는 옵션  
-  - Ack == -1인 상태로 위 옵션을 적용하면 원하는 ISR을 정확히 설정할 수 있음
+## 상태 (State)
+- 앱 구동에 필요한 **기본 데이터**
 
-## Kafka Producer의 멱등성  
-- 멱등성 프로듀서(Idempotence Producer)  
-  - 멱등성 프로듀서: 데이터가 중복해서 전송되지 않게 하는 프로듀서 설정, 현재는 기본적으로 활성화  
-  - 기존 프로듀서는 **At-Least-Once** 규칙에 따라 전달되어, 브로커에 데이터가 중복 저장될 수 있음
+## 뷰 (View)
+- 상태를 **선언적으로 매핑하여 시각화**
 
-# Kafka Consumer
-## Kafka Consumer  
-- Kafka Consumer란?  
-  - 컨슈머(Consumer): Kafka Topic의 데이터를 읽는 역할을 수행하며, 이를 **구독(Subscribe)** 이라고도 함  
-  - 배치하게 ETL 과정을 통해 적재하거나, 실시간으로 데이터를 가져와 처리
+## 기능 (Actions)
+- 뷰에서 **사용자 입력에 반응**하여  
+  상태를 변경할 수 있도록 정의된 동작
 
-## Kafka Consumer 기본 용어  
-- Kafka Consumer 기본 용어  
-  - 컨슈머 랙(Consumer Lag): 프로듀서가 넣은 최신 메시지의 Offset과 컨슈머가 읽고 있는 Offset의 차이  
-  - record-lag-max: 가장 높은 파티션의 랙
+> "단방향 데이터 흐름"의 간단한 표현
 
-## Kafka Consumer의 용어  
-- Kafka Consumer 용어  
-  - 페치(Fetch): 컨슈머가 브로커로부터 레코드를 읽어오는 행위  
-  - 커밋(Commit): 특정 Offset까지 처리했다고 선언하는 행위
+## 상태 관리의 단순성이 무너지는 시점 (1/3)  
+- “여러 컴포넌트가 상태를 공유할 때”  
+  1. 여러 뷰가 동일한 상태에 종속되는 경우  
+  2. 서로 다른 뷰의 기능이 동일한 상태를 변경시켜야 하는 경우
 
-## Kafka Consumer의 Group Coordinator  
-- Kafka Consumer의 Group Coordinator  
-  - 코디네이터(Coordinator): Consumer 그룹을 관리하는 브로커, 컨슈머 그룹별로 지정됨  
-  - Heartbeat: 컨슈머 그룹들이 정상적으로 동작 중인지 확인 (Polling, Commit 때마다)  
-  - 리밸런싱(Rebalancing): 컨슈머 그룹의 변경이 있을 때 파티션을 다시 배정하는 것
+## 상태 관리의 단순성이 무너지는 시점 (2/3)  
+1. 여러 뷰가 동일한 상태에 종속되는 경우  
+  - 공유 상태를 공통 조상 컴포넌트로 **끌어올린 다음 props로 전달하는 것**  
+  - 하지만 **계층 구조가 깊어질 경우 비효율적, 관리가 어려워 짐**
 
-## Consumer Rebalance란?  
-- Consumer Rebalance 종류  
-  1. 새로운 Consumer 추가 → 기존 파티션을 일부 재할당  
-  2. Consumer 제거 → 남은 Consumer가 기존 Consumer의 파티션을 담당  
-  3. 파티션 개수 변경 → 전체 Consumer에 대한 Rebalance 발생
+## 상태 관리의 단순성이 무너지는 시점 (3/3)  
+2. 서로 다른 뷰의 기능이 동일한 상태를 변경시켜야 하는 경우  
+  - 발신(emit)된 이벤트를 통해 상태의 여러 복사본을 변경 및 동기화 하는 것
+  - 마찬가지로 **관리의 패턴이 깨지기 쉽고 유지 관리할 수 없는 코드**가 됨
 
-## Consumer Rebalance 과정  
-- Consumer Rebalance의 과정  
-  1. 그룹 코디네이터가 모든 컨슈머들의 소유권을 박탈하고 일시정지시킴
+## 해결책 (1/3)  
+- 각 컴포넌트의 **공유 상태를 추출**하여 전역에서 참조할 수 있는 **저장소(Store)** 에서 관리
 
-## Consumer Rebalance 과정  
-- Consumer Rebalance의 과정  
-  1. 그룹 코디네이터가 모든 컨슈머들의 소유권을 박탈하고 일시정지시킴  
-  2. JoinGroup 요청을 기다리고, 가장 빠르게 응답한 컨슈머를 리더로 선정  
-  3. 리더는 재조정한 결과를 코디네이터에게 알리고 컨슈머들에게 전달
+## 해결책 (2/3)  
+- 각 컴포넌트의 **공유 상태를 추출하여**, 전역에서 참조할 수 있는 **저장소(Store)** 에서 관리
 
-## Consumer Rebalance 과정  
-- Consumer Partitioning  
-  1. RangeAssignor: 토픽별로 순서대로 나누어줌 (과거 기본값)  
-  2. RoundRobinAssignor: 모든 파티션을 보고 하나씩 고르게 나누어줌  
-  3. StickyAssignor: 이전 할당 정보를 활용하여 최대한 비슷하게 (현재 기본값)
+## 해결책 (3/3)  
+- 컴포넌트 트리는 하나의 큰 **View**가 되고, 모든 컴포넌트는 트리 계층 구조에 관계없이 **상태에 접근하거나 기능을 사용할 수 있음**  
+> Vue의 공식 상태 관리 라이브러리 === **Pinia**
 
-## Kafka Transaction  
-- 트랜잭션 프로듀서(Transaction Producer)  
-  - 프로듀서와 컨슈머가 연계해서 **EOS(Exactly Once Semantics)** 를 지키는 방법  
-  - 일정 단위의 메시지를 ‘커밋’으로 묶어 하나의 트랜잭션으로 설정  
-  - 일정 시간 안에 트랜잭션 커밋이 오지 않으면 실패로 간주하고 처음부터 다시 메시지를 받음
+# State management library (Pinia)
 
-## Kafka에 메시지 전송하기  
-- 메시지 전송 기본 예제  
-  - kafka-python: 간단하게 Kafka를 조작할 수 있는 Python 프레임워크  
-  - kafka-python 설치  
-  - bootstrap_servers: Kafka Broker 주소  
-  - value_serializer: 인코딩 방식  
-  - 실제 메시지 전송 부분  
-  - 버퍼에 남아 있는 메시지를 완전히 보내고 프로듀서 종료
+## Pinia
+- Vue 공식 상태 관리 라이브러리
 
-  - 토픽명
-  - bootstrap_servers: Kafka Broker 주소 
-  - auto_offset_rest: 컨슈머 초기 데이터 시작 설정
-  - enable_auto_commit: 자동 커밋 설정
-  - value_serializer: 디코딩 방식
-  - 실제 메시지 수신부분
+## Pinia 설치
+- Vite 프로젝트 빌드 시 Pinia 라이브러리 추가
 
-## Kafka의 메시지 받기  
-- 메시지 수신 기본 예제  
-  - 정상 출력 시 아래와 같은 모습
+## Vue 프로젝트 구조 변화
+- stores 폴더 신규 생성
 
-## Kafka에 메시지 전송하기  
-- 메시지 전송 기본 예제  
-  - confluent-kafka: Kafka를 조작할 수 있는 Python 프레임워크
+# Pinia 구조
 
-## Kafka의 메시지 받기  
-- 메시지 수신 기본 예제  
-  - confluent-kafka: Kafka를 조작할 수 있는 Python 프레임워크  
-  - group.id가 필수
+## Pinia 구성 요소
+1. store
+2. state
+3. getters
+4. actions
+5. plugin
 
-## Kafka의 메시지 받기  
-- 메시지 수신 기본 예제  
-  - confluent-kafka: Kafka를 조작할 수 있는 Python 프레임워크  
-  - group.id가 필수 없으면 오류 발생
-  - Group을 없이 하는 방법도 있으나, Consumer가 하나뿐이어도 group.id를 지정해서 Consumer Group으로 구성
+## 1. Pinia 구성 요소 - 'store'
+- 중앙 저장소
+- 모든 컴포넌트가 공유하는 상태, 기능 등이 작성됨
+> defineStore()의 반환 값의 이름은 use와 store를 사용하는 것을 권장
+> defineStore()의 첫번째 인자는 애플리케이션 전체에 걸쳐 사용하는 store의 고유 ID
 
-## Kafka의 메시지 받기  
-- 메시지 수신 기본 예제  
-  - 정상 출력 시 아래와 같은 모습
+## 2. Pinia 구성 요소 - 'state'
+- 반응형 상태(데이터)
+- ref() === state
+
+## 3. Pinia 구성 요소 - 'getters'
+- 계산된 값
+- computed() === getters
+
+## 4. Pinia 구성 요소 - 'actions'
+- 메서드
+- function() === actions
+
+## Setup Stores의 반환 값
+- pinia의 상태들을 사용하려면 반드시 반환해야 함
+- store에서는 공유 하지 않는 private한 상태 속성을 가지지 않음
+
+## 5. Pinia 구성 요소 - 'plugin'
+- 애플리케이션의 상태 관리에 필요한 추가 기능을 제공하거나 확장하는 도구나 모듈
+- 애플리케이션의 상태 관리를 더욱 간편하고 유연하게 만들어주며 패키지 매니저로 설치 이후 별도 설정을 통해 추가 됨
+
+## Pinia 구성 요소 정리
+- Pinia는 store라는 저장소를 가짐
+- store는 state, getters, actions으로 이루어지며 각각 ref(), computed(), function()과 동일함
+
+# Pinia 구성 요소 활용
+
+## State
+- 각 컴포넌트 깊이에 관계없이 store 인스턴스로 state에 접근하여 직접 읽고 쓸 수 있음  
+- 만약 store에 state를 정의하지 않았다면 컴포넌트에서 새로 추가할 수 없음  
+
+```vue
+<!-- App.vue -->
+import { useCounterStore } from '@/stores/counter'
+
+const store = useCounterStore()
+
+// state 참조 및 변경
+console.log(store.count)
+const newNumber = store.count + 1
+```
+
+```vue
+<!-- App.vue -->
+<template>
+  <div>
+    <p>state : {{ store.count }}</p>
+  </div>
+</template>
+```
+
+---
+
+## Getters
+- store의 모든 getters 또한 state처럼 직접 접근할 수 있음  
+
+```vue
+<!-- App.vue -->
+// getters 참조
+console.log(store.doubleCount)
+```
+
+```vue
+<!-- App.vue -->
+<template>
+  <div>
+    <p>getters : {{ store.doubleCount }}</p>
+  </div>
+</template>
+```
+
+---
+
+## Actions
+- store의 모든 actions 또한 직접 접근 및 호출할 수 있음  
+- getters와 달리 state 조작, 비동기, API 호출이나 다른 로직을 진행할 수 있음  
+
+```vue
+<!-- App.vue -->
+// actions 호출
+store.increment()
+```
+
+```vue
+<!-- App.vue -->
+<template>
+  <div>
+    <button @click="store.increment()">+++</button>
+  </div>
+</template>
+```
+
+## Vue devtools로 Pinia 구성 요소 확인하기
+
+# Local Storage
+
+## Local Storage
+- 브라우저 내에 key-value 쌍을 저장하는 웹 스토리지 객체
+
+## Local Storage 특징
+- 페이지를 새로 고침하고 브라우저를 다시 실행해도 데이터가 유지
+- 쿠키와 다르게 네트워크 요청 시 서버로 전송되지 않음
+- 여러 탭이나 창 간에 데이터를 공유 할 수 있음
+
+## Local Storage 사용 목적
+- 웹 애플리케이션에서 사용자 설정, 상태 정보, 캐시 데이터 등을 클라이언트 측에서 보관하여 웹사이트의 성능을 향상시키고 사용자 경험을 개선하기 위함
+
+## pinia-plugin-persistedstate
+- Pinia의 플로그인(plugin) 중 하나
+- 웹 애플리케이션의 상태(state)를 브라우저의 local storage나 session storage에 영구적으로 저장하고 복원하는 기능을 제공
+- https://prazdevs.github.id/pinia-plugin-persistedstate/
+
+## pinia-plugin-persistedstate 설정 (1/4)
+- 설치 및 등록
+```
+$ npm i pinia-plugin-persistedstate
+```
+
+## pinia-plugin-persistedstate 설정 (2/4)
+- 설치 및 등록
+```
+// mins.js
+
+import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
+
+const app = createApp(App)
+const pinia = createPinia()
+
+pinia.use(piniaPluginPersistedstate)
+
+// app.use(createPinia())
+app.use(pinia)
+
+app.mount('#app')
+```
+
+## pinia-plugin-persistedstate 설정 (3/4)
+- 설치 및 등록
+  - defineStore()의 3번째 인자로 관련 객체 추가
+```
+// stores/counter.js
+
+export const useCounterStore = defineStore('counter', () => {
+  ...,
+  return { count, doubleCount, increment }
+}, { persist: true })
+
+## pinia-plugin-persistedstate 설정 (4/4)
+- 적용 결과 (개발자도구 -> Application -> Local Storage)
+  - 브라우저의 Local Storage에 저장되는 todos state 확인
+```
+
+# 참고
+
+## 이제 모든 데이터를 store에서 관리해야 할까?
+- Pinia를 사용한다고 해서 모든 데이터를 state에 넣어야 하는 것은 아님
+- pass props, emit event를 함께 사용하여 애플리케이션을 구성 해야 함
+- 상황에 따라 적절하게 사용하는 것이 필요
+
+## Pinia, 언제 사용해야 할까?
+- Pinia는 공유된 상태를 관리하는 데 유용하지만, 구조적인 개념에 대한 이해와 시작하는 비용이 큼
+- 애플리케이션이 단순하다면 Pinia가 없는 것이 더 효율적일 수 있음
+- 그러나 중대형 규모의 SPA를 구축하는 경우 Pinia는 자연스럽게 선택할 수 있는 단계가 오게 됨
+> 결과적으로 적절한 상황에서 활용 했을 때 Pinia 효용을 극대화 할 수 있음
+
+# Routing
+
+# 개요
+
+## Routing
+- 네트워크에서 경로를 선택하는 프로세스
+> 웹 애플리케이션에서 다른 페이지 간의 전환과 경로를 관리하는 기술
+
+## SSR에서의 Routing
+- SSR에서 routing은 서버 측에서 수행
+- 서버가 사용자가 방문한 URL 경로를 기반으로 응답을 전송
+- 링크를 클릭하면 브라우저는 서버로부터 HTML 응답을 수신하고 새 HTML로 전체 페이지를 다시 로드
+
+## CSR에서의 Routing
+- CSR에서 routing은 클라이언트 측에서 수행
+- 클라이언트 측 JavaScript가 새 데이터를 동적으로 가져와 전체 페이지를 다시 로드 하지 않음
+
+## SPA에서 Routing이 없다면
+- 유저가 URL을 통한 페이지의 변화를 감지할 수 없음
+- 페이지가 무엇을 렌더링 중인지에 대한 상태를 알 수 없음
+  - URL이 1개이기 때문에 새로 고침 시 처음 페이지로 되돌아감
+  - 링크를 공유할 시 첫 페이지만 공유 가능
+- 브라우저의 뒤로 가기 기능을 사용할 수 없음
+> 페이지는 1개이지만, 주소에 따라 여러 컴포넌트를 새로 렌더링하여 마치 여러 페이지를 사용하는 것처럼 보이도록 해야 함
+
+# Vue Router
+
+# 개요
+
+## Vue Router
+- Vue 공식 라우터 (The official Router for Vue.js)
+
+## 사전 준비 (1/2)
+- Vite로 프로젝트 생성 시 Router 추가
+
+## 사전 준비 (2/2)
+- 서버 실행 수 Router로 인한 프로젝트 변화 확인
+> Home, About 링크에 따라 변경되는 URL과 새로 렌더링 되는 화면
+
+## Vue 프로젝트 구조 변화
+1. App.vue 코드 변화
+2. router 폴더 신규 생성
+3. views 폴더 신규 생성
+
+## RouterLink
+- 페이지를 다시 로드 하지 않고 URL을 변경하여 URL 생성 및 관련 로직을 처리
+- HTML의 <a> 태그를 렌더링
+```
+<!-- App.vue -->
+
+<template>
+  <header>
+    <nav>
+      <RouterLink to="/">Home</RouterLink>
+      <RouterLink to="/about">About</RouterLink>
+    </nav>
+  </header>
+
+  <RouterView />
+</template>
+```
+
+## RouterView
+- RouterLink URL에 해당하는 컴포넌트를 표시
+- 원하는 곳에 배치하여 컴포넌트를 레이아웃에 표시 할 수 있음
+```
+<!-- App.vue -->
+
+<template>
+  <header>
+    <nav>
+      <RouterLink to="/">Home</RouterLink>
+      <RouterLink to="/about">About</RouterLink>
+    </nav>
+  </header>
+
+  <RouterView />
+</template>
+```
+
+## RouterLink와 RouterView
+
+## router/index.js
+- 라우팅에 관련된 정보 및 설정이 작성 되는 곳
+- router에 URL과 컴포넌트를 매핑
+
+## views
+- RouterView 위치에 렌더링 할 컴포넌트를 배치
+- 기존 components 폴더와 기능적으로 다른 것은 없으며 단순 분류의 의미로 구성됨
+- 일반 컴포넌트와 구분하기 위해 컴포넌트 이름을 View로 끝나도록 작성하는 것을 권장
+
+# Basic Routing
+
+## 라우팅 기본 (1/3)
+1. index.js에 라우터 관련 설정 작성(주소, 이름, 컴포넌트)
+```
+// index.js
+
+const router = createRouter({
+  routes: [
+    {
+      path: '/',
+      name: 'home',
+      component: HomeView
+    },
+    ...
+  ]
+})
+```
+
+## 라우팅 기본 (2/3)
+2. RouterLink의 'to' 속성으로 index.js에서 정의한 주소 값(path)을 사용
+```
+<!-- App.vue -->
+
+<RouterLink to="/">Home</RouterLink>
+<RouterLink to="/about">About</RouterLink>
+```
+
+## 라우팅 기본 (3/3)
+3. RouterLink 클릭 시 경로와 일치하는 컴포넌트가 RouterView에서 렌더링 됨
+```
+<!-- App.vue -->
+
+<RouterView />
+```
+
+# Named Routes
+
+## Named Routes
+- 경로에 이름을 지정하는 라우팅
+
+## Named Routes 예시
+- name 속성 값에 경로에 대한 이름을 지정
+- 경로에 연결하려면 RouterLink에 v-bind를 사용해 'to' props 객체로 전달
+```
+// index.js
+
+const router = createRouter({
+  routes: [
+    {
+      paht: '/',
+      name: 'home',
+      component: HomeView
+    },
+    ...
+  ]
+})
+```
+```
+<!-- App.vue -->
+
+<RouterLink :to="{ name: 'home' }">Home</RouterLink>
+<RouterLink :to="{ name: 'about' }">About</RouterLink>
+```
+
+## Named Routes 장점
+- 하드 코딩 된 URL을 사용하지 않아도 됨
+- URL 입력 시 오타 방지
+
+# Dynamic Route Matching
+
+## Dynamic Route Matching
+- URL의 일부를 변수로 사용하여 경로를 동적으로 매칭
+
+## 매개변수를 사용한 동적 경로 매칭
+- 주어진 패턴 경로를 동일한 컴포넌트에 매핑 해야 하는 경우 활용
+- 예를 들어 모든 사용자의 ID를 활용하여 프로필 페이지 URL을 설계 한다면?
+  - user/1
+  - user/2
+  - user/3
+  > 일정한 패턴의 URL 작성을 반복해야 함
+
+## 매개변수를 사용한 동적 경로 매칭 활용 (1/5)
+- views 폴더 내 UserView 컴포넌트 작성
+```
+<!-- UserView.vue -->
+
+<template>
+  <div>
+    <h1>UserView</h1>
+  </div>
+</template>
+```
+
+## 매개변수를 사용한 동적 경로 매칭 활용 (2/5)
+- 매개변수는 콜론(":")으로 표기
+> UserView 컴포넌트 라우트 등록
+```
+// index.js
+
+import UserView from '../views/UserView.vue'
+
+const router = createRouter({
+  routes: [
+    {
+      path: '/user/:id',
+      name: 'user',
+      component: UserView
+    },
+  ]
+})
+```
+
+## 매개변수를 사용한 동적 경로 매칭 활용 (3/5)
+- 매개변수는 객체의 params 속성의 객체 타입으로 전달  
+- 단, 객체의 key 이름과 index.js에서 지정한 매개변수 이름이 같아야 함  
+> UserView 컴포넌트로 이동하기 위한 RouterLink 작성  
+
+```vue
+<!-- App.vue -->
+import { ref } from 'vue'
+
+const userId = ref(1)
+```
+
+```vue
+<!-- App.vue -->
+<RouterLink :to="{ name: 'user', params: { 'id': userId } }">User</RouterLink>
+```
+
+---
+
+## 매개변수를 사용한 동적 경로 매칭 활용 (4/5)
+- 경로가 일치하면 라우트의 매개변수는 컴포넌트에서 `$route.params`로 참조 가능  
+> 현재 사용자의 id를 출력하기  
+
+```vue
+<!-- UserView.vue -->
+<template>
+  <div>
+    <h1>UserView</h1>
+    <h2>{{ $route.params.id }}번 User 페이지</h2>
+  </div>
+</template>
+```
+
+---
+
+## 매개변수를 사용한 동적 경로 매칭 활용 (5/5)
+- useRoute() 함수를 사용해 스크립트 내에서 반응형 변수에 할당 후 템플릿에 출력하는 것을 권장  
+- 템플릿에서 $route를 사용하는 것과 동일  
+
+```vue
+<!-- UserView.vue -->
+import { ref } from 'vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+const userId = ref(route.params.id)
+```
+
+```vue
+<!-- UserView.vue -->
+<template>
+  <div>
+    <h1>UserView</h1>
+    <h2>{{ userId }}번 User 페이지</h2>
+  </div>
+</template>
+```
+
+# Programmatic Navigation
+
+## Programmatic Navigation
+- RouterLink 대신 JavaScript를 사용해 페이지를 이동하는 것
+
+## 프로그래밍 방식 네이게이션
+- 프로그래밍으로 URL 이동하기
+- router의 인스턴스 메서드를 사용해 RouterLink로 <a> 태그를 만드는 것처럼 프로그래밍으로 네비게이션 관련 작업을 수행할 수 있음
+
+## router의 메서드
+1. 다른 위치로 이동하기
+  - router.push()
+2. 현재 위치 바꾸기
+  - router.replace()
+
+## router.push()
+- 다른 위치로 이동하기 (Navigate to a different location)
+
+## router.push()
+
+- 다른 URL로 이동하는 메서드  
+- 새 항목을 history stack에 push하므로 사용자가 브라우저 뒤로 가기 버튼을 클릭하면 이전 URL로 이동할 수 있음  
+- RouterLink를 클릭했을 때 내부적으로 호출되는 메서드이므로  
+  RouterLink를 클릭하는 것은 router.push()를 호출하는 것과 같음  
+
+| 선언적 표현 | 프로그래밍적 표현 |
+|-------------|------------------|
+| `<RouterLink :to="...">` | `router.push(...)` |
+
+---
+
+## router.push 활용 (1/2)
+- UserView 컴포넌트에서 HomeView 컴포넌트로 이동하는 버튼 만들기  
+
+```vue
+<!-- UserView.vue -->
+<template>
+  <div>
+    <h1>UserView</h1>
+    <h2>1번 User 페이지</h2>
+    <button @click="goHome">홈으로!</button>
+  </div>
+</template>
+```
+
+---
+
+## router.push 활용 (2/2)
+- UserView 컴포넌트에서 HomeView 컴포넌트로 이동하는 버튼 만들기  
+
+```vue
+<!-- UserView.vue -->
+import { useRoute, useRouter } from 'vue-router'
+
+const router = useRouter()
+
+const goHome = function() {
+  router.push({ name: 'home' })
+}
+```
+
+```vue
+<!-- UserView.vue -->
+<button @click="goHome">홈으로!</button>
+```
+
+---
+
+## [참고] router.push의 인자 활용
+- https://router.vuejs.org/guide/essentials/navigation.html  
+
+```javascript
+// literal string path
+router.push('/users/1')
+
+// object with path
+router.push({ path: '/users/2' })
+
+// named route with params to let the router build the url
+router.push({ name: 'user', params: { id: '3' } })
+
+// with query, resulting in /register?plan=private
+router.push({ path: '/register', query: { plan: 'private' } })
+```
+
+# 참고
+
+# Nested Routes
+
+## Nested Routes
+- 중첩된 라우팅
+
+- 애플리케이션의 UI는 여러 레벨 깊이로 중첩된 컴포넌트로 구성되기도 함
+- 이 경우 URL을 중첩된 컴포넌트의 구조에 따라 변경되도록 이 관계를 표현할 수 있음
+
+## children 옵션
+- children 옵션은 배열 형태로 필요한 만큼 중첩 관계를 표현할 수 있음
+
+## 중첩된 라우팅 활용 (1/4)
+- 중첩된 Named Routes를 다룰 때는 일반적으로 “하위 경로에만 이름을 지정”  
+- 이렇게 하면 `/user/:id`로 이동했을 때 항상 중첩된 경로가 표시됨  
+
+```javascript
+// index.js
+import UserHome from '@/components/UserHome.vue'
+
+{
+  path: '/user/:id',
+  component: UserView,
+  children: [
+    { path: '', name: 'user', component: UserHome },
+    { path: 'profile', name: 'user-profile', component: UserProfile },
+    { path: 'posts', name: 'user-posts', component: UserPosts }
+  ]
+}
+```
+
+---
+
+## 중첩된 라우팅 활용 (2/4)
+- 두 컴포넌트에 대한 RouterLink 및 RouterView 작성  
+
+```vue
+<!-- UserView.vue -->
+<template>
+  <div>
+    <RouterLink :to="{ name: 'user-profile' }">Profile</RouterLink>
+    <RouterLink :to="{ name: 'user-posts' }">Posts</RouterLink>
+
+    <h1>UserView</h1>
+    <h2>{{ userId }}번 User 페이지</h2>
+    <hr>
+    <RouterView />
+  </div>
+</template>
+```
+
+## 중첩된 라우팅 활용 (3/4)
+- 이제 `/user/:id` 접속 시 중첩된 경로가 표시됨  
+
+예시:  
+```
+UserView  
+1번 User 페이지  
+UserHome  
+```
+
+---
+
+## 중첩된 라우팅 활용 (4/4)
+- `Profile`과 `Posts` 링크를 클릭해서 렌더링 결과 확인  
+
+| 링크 | 렌더링 결과 | 경로 |
+|------|--------------|------|
+| Profile | UserProfile | /user/1/profile |
+| Posts | UserPosts | /user/1/posts |
+
+---
+
+## ※주의※ 중첩된 라우팅
+- 컴포넌트 간 부모-자식 관계 관점이 아님  
+- **URL에서의 중첩된 관계를 표현하는 관점**으로 바라보기
+
+# Navigation Guard
+
+## Navigation Guard
+- Vue router를 통해 특정 URL에 접근할 때 다른 URL로 redirect를 하거나 취소하여 내비게이션을 보호  
+> 라우트 전환 전/후 자동으로 실행되는 Hook  
+
+참고: https://router.vuejs.org/guide/advanced/navigation-guards.html
+
+---
+
+## Navigation Guard 종류
+1. Globally (전역 가드)  
+   - 애플리케이션 전역에서 모든 라우트 전환에 적용되는 가드  
+2. Per-route (라우터 가드)  
+   - 특정 라우트에만 적용되는 가드  
+3. In-component (컴포넌트 가드)  
+   - 컴포넌트 내에서만 적용되는 가드  
+
+---
+
+# 참고
+
+## Lazy Loading Routes
+```javascript
+// index.js
+{
+  path: '/about',
+  name: 'about',
+  // route level code-splitting
+  // this generates a separate chunk (About.[hash].js) for this route
+  // which is lazy-loaded when the route is visited.
+  component: () => import('../views/AboutView.vue')
+}
+```
+
+- Vue 애플리케이션 첫 빌드 시 해당 컴포넌트를 로드하지 않고,  
+  “해당 경로를 처음으로 방문할 때 컴포넌트를 로드” 하는 것  
+  > 앱을 빌드할 때 처음부터 모든 컴포넌트를 준비하면  
+    컴포넌트의 크기에 따라 페이지 로드 시간이 길어질 수 있기 때문
+
+
+11/10~ : 소원, 승수, 은수, 은주, 동훈, 선영, 희수, 준형, 가영, 사랑, 선영
+11/17~ : 주연, 가희
